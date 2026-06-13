@@ -1,0 +1,36 @@
+<view class="container">
+
+  <view class="topbar">
+    <view class="brand"><text class="brand-red">FIT</text> IGNYTE</view>
+  </view>
+
+  <scroll-view class="scroll" scroll-y>
+
+    <view class="hero">
+      <view class="hero-icon">✅</view>
+      <text class="hero-title">You're all set! 🔥</text>
+      <text class="hero-sub">Welcome to FIT IGNYTE, {{order.name}}!</text>
+    </view>
+
+    <!-- First delivery -->
+    <view class="card">
+      <text class="card-label">First delivery</text>
+      <view class="row row-border">
+        <text class="row-key">Monday</text>
+        <text class="row-val">{{firstDeliveryTime}}</text>
+      </view>
+      <text class="first-meals">{{firstMeals}}</text>
+    </view>
+
+    <!-- What happens next -->
+    <view class="card">
+      <text class="card-label">What happens next</text>
+      <text class="next-list">📋  Friday — choose next week's meals{{'\\n'}}🔔  Monday — delivery notification{{'\\n'}}🔄  Renewal reminder 2 days before</text>
+    </view>
+
+    <button class="btn-primary" bindtap="goToPayment">Complete payment →</button>
+    <button class="btn-secondary" bindtap="contactUs">💬  Contact FIT IGNYTE</button>
+
+  </scroll-view>
+
+</view>

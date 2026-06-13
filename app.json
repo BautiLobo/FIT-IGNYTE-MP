@@ -1,0 +1,33 @@
+{
+  "pages": [
+    "pages/discovery/index",
+    "pages/loading/index",
+    "pages/tiers/index",
+    "pages/plans/index",
+    "pages/register/index",
+    "pages/meal-select/index",
+    "pages/start-date/index",
+    "pages/order-summary/index",
+    "pages/under-review/index",
+    "pages/approved/index",
+    "pages/rejected/index",
+    "pages/payment/index",
+    "pages/pay-processing/index",
+    "pages/welcome/index",
+    "pages/home/index",
+    "pages/renewal/index",
+    "pages/edit-profile/index",
+    "pages/admin-home/index",
+    "pages/admin-orders/index",
+    "pages/admin-notify/index"
+  ],
+  "window": {
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#111111",
+    "navigationBarTitleText": "FIT IGNYTE",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#0d0d0d"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

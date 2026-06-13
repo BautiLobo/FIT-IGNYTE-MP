@@ -1,0 +1,127 @@
+<view class="container">
+
+  <!-- Top Bar -->
+  <view class="topbar">
+    <view class="back-btn" bindtap="goBack"><text class="back-arrow">‹</text></view>
+    <text class="topbar-title">Choose your meals</text>
+    <view style="width:60rpx;"></view>
+  </view>
+
+  <!-- Day Tabs -->
+  <scroll-view class="day-tabs" scroll-x>
+    <view
+      wx:for="{{days}}"
+      wx:key="key"
+      class="day-tab {{currentDay === item.key ? 'day-tab-active' : ''}}"
+      bindtap="switchDay"
+      data-day="{{item.key}}"
+    >
+      <text class="day-tab-short">{{item.short}}</text>
+      <text class="day-tab-sub {{currentDay === item.key ? 'day-tab-sub-active' : ''}}">{{item.done ? '✓' : 'Meal 1'}}</text>
+    </view>
+  </scroll-view>
+
+  <scroll-view class="scroll" scroll-y>
+
+    <block wx:if="{{loading}}">
+      <view class="loading-wrap"><view class="spinner"></view></view>
+    </block>
+
+    <block wx:else>
+
+      <!-- Plan Badge -->
+      <view class="plan-badge" wx:if="{{!fromHome}}">
+        <text class="plan-badge-text">{{selectedPlan.name}} — {{selectedPlan.meals}} meal(s)/day</text>
+        <text class="plan-badge-change" bindtap="goBack">Change plan</text>
+      </view>
+
+      <!-- Section label -->
+      <text class="section-label">{{currentDayLabel | upperCase}} MENU — choose {{selectedPlan.meals}} meal(s)</text>
+
+      <!-- Photo preview — shows last selected meal photo -->
+      <view wx:if="{{selectedMealIds.length > 0 && lastSelectedPhoto}}" class="photo-preview-wrap">
+        <image class="photo-preview-img" src="{{lastSelectedPhoto}}" mode="aspectFill" />
+        <view class="photo-preview-overlay">
+          <text class="photo-preview-name">{{lastSelectedName}}</text>
+        </view>
+      </view>
+
+      <!-- Meal List -->
+      <view class="meal-list">
+        <view
+          wx:for="{{menuMeals}}"
+          wx:key="id"
+          class="meal-row {{item.selected ? 'meal-row-selected' : ''}}"
+          bindtap="toggleMeal"
+          data-meal="{{item}}"
+        >
+          <view class="meal-thumb-wrap">
+            <image wx:if="{{item.photo_url}}" class="meal-thumb" src="{{item.photo_url}}" mode="aspectFill" />
+            <view wx:else class="meal-thumb-placeholder">
+              <text class="meal-thumb-label">{{item.name.substring(0,4).toUpperCase()}}</text>
+            </view>
+          </view>
+          <view class="meal-info">
+            <text class="meal-name {{item.selected ? 'meal-name-active' : ''}}">{{item.name}}</text>
+            <text class="meal-desc">{{item.sauce}} · {{item.kcal}} kcal</text>
+          </view>
+          <view class="meal-check {{item.selected ? 'meal-check-on' : ''}}">
+            <text wx:if="{{item.selected}}" class="meal-check-num">{{item.selectedIndex}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- Snack + Time + Notes + Confirm — show when all meals selected -->
+      <block wx:if="{{selectedMealIds.length >= selectedPlan.meals}}">
+
+        <!-- Snack -->
+        <view wx:if="{{snackOfDay}}" class="snack-wrap">
+          <view class="snack-inner {{snackAdded ? 'snack-inner-added' : ''}}" bindtap="toggleSnack">
+            <text class="snack-name">{{snackOfDay}}</text>
+            <view class="snack-badge {{snackAdded ? 'snack-badge-added' : ''}}">
+              <text>{{snackAdded ? 'Added' : '+ Add snack'}}</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- Time picker -->
+        <view class="time-picker">
+          <text class="time-picker-label">DELIVERY TIME</text>
+          <picker mode="time" value="{{selectedTime}}" start="07:00" end="20:00" bindchange="onTimeChange">
+            <view class="time-picker-display">
+              <text class="time-picker-value">{{selectedTime}}</text>
+              <text class="time-picker-tap">Tap to change</text>
+            </view>
+          </picker>
+        </view>
+
+        <!-- Notes -->
+        <view class="notes-wrap">
+          <text class="notes-label">Notes (optional)</text>
+          <textarea class="notes-input" placeholder="e.g. no onion, extra sauce..." value="{{currentNotes}}" bindinput="onNotesInput" auto-height />
+        </view>
+
+        <!-- Confirm day button -->
+        <button class="btn-confirm" bindtap="confirmDay">
+          Save {{currentDayLabel}} · {{selectedTime}}
+        </button>
+
+      </block>
+
+      <!-- Next day / Continue -->
+      <view class="bottom-actions" wx:if="{{canGoNext}}">
+        <button class="btn-next" bindtap="goNext">
+          {{isLastDay ? (fromHome ? 'Save changes' : 'Continue') : 'Next day'}} →
+        </button>
+      </view>
+
+      <!-- Contact -->
+      <view class="contact-wrap">
+        <button class="btn-contact" bindtap="contactUs">Contact FIT IGNYTE</button>
+      </view>
+
+    </block>
+
+  </scroll-view>
+
+</view>

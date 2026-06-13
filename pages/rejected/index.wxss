@@ -1,0 +1,20 @@
+/* pages/rejected/index.wxss */
+.container { display:flex; flex-direction:column; height:100vh; background:#0d0d0d; }
+.topbar { background:#111; padding:40rpx 28rpx 20rpx; border-bottom:1rpx solid #1a1a1a; flex-shrink:0; }
+.brand { font-size:32rpx; font-weight:800; letter-spacing:4rpx; color:#fff; }
+.brand-red { color:#E8342A; }
+.scroll { flex:1; padding:24rpx 28rpx; }
+.hero { text-align:center; padding:40rpx 0 24rpx; display:flex; flex-direction:column; align-items:center; gap:16rpx; }
+.hero-icon { width:120rpx; height:120rpx; background:#450a0a; border:4rpx solid #7f1d1d; border-radius:50%; font-size:52rpx; display:flex; align-items:center; justify-content:center; margin-bottom:8rpx; }
+.hero-title { font-size:32rpx; font-weight:800; color:#fff; }
+.hero-sub { font-size:24rpx; color:#666; line-height:1.6; }
+.card { background:#111; border:1rpx solid #1e1e1e; border-radius:20rpx; padding:24rpx; margin-bottom:18rpx; }
+.card-label { font-size:20rpx; color:#555; text-transform:uppercase; letter-spacing:2rpx; font-weight:700; display:block; margin-bottom:16rpx; }
+.card-red { background:#450a0a; border-color:#7f1d1d; }
+.card-red-label { font-size:24rpx; color:#f87171; font-weight:700; display:block; margin-bottom:6rpx; }
+.card-red-sub { font-size:22rpx; color:#f87171; display:block; }
+.phone-display { background:#1a1a1a; border:1rpx solid #2a2a2a; border-radius:14rpx; padding:18rpx 22rpx; margin-bottom:16rpx; }
+.phone-text { font-size:26rpx; color:#fff; }
+.btn-notify { background:#E8342A; border:none; color:#fff; border-radius:16rpx; padding:22rpx; font-size:28rpx; font-weight:700; width:100%; }
+.message-text { font-size:24rpx; color:#bbb; line-height:1.6; display:block; }
+.btn-secondary { background:#111; border:1rpx solid #1e1e1e; color:#666; border-radius:20rpx; padding:22rpx; font-size:26rpx; width:100%; margin-bottom:60rpx; }

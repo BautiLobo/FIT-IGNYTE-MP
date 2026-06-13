@@ -1,0 +1,47 @@
+<view class="container">
+
+  <view class="topbar">
+    <view class="back-btn" bindtap="goBack"><text class="back-arrow">‹</text></view>
+    <text class="topbar-title">Choose your plan</text>
+    <view style="width:60rpx;"></view>
+  </view>
+
+  <view class="delivery-note">
+    
+    <text class="delivery-text">All include Mon-Fri delivery</text>
+  </view>
+
+  <scroll-view class="scroll" scroll-y>
+
+    <block wx:if="{{loading}}">
+      <view class="loading-wrap"><view class="spinner"></view></view>
+    </block>
+
+    <block wx:else>
+      <view wx:for="{{plans}}" wx:key="id" class="plan-wrap">
+        <view class="popular-badge" wx:if="{{item.is_popular}}">
+          <text>MOST POPULAR</text>
+        </view>
+        <view
+          class="plan-card {{item.is_popular ? 'plan-card-popular' : ''}}"
+          bindtap="selectPlan"
+          data-plan="{{item}}"
+          style="border-left-color:{{item.color}};"
+        >
+          <view class="plan-left">
+            <text class="plan-category" style="color:{{item.color}};">{{item.tier}}</text>
+            <text class="plan-name">{{item.name}}</text>
+            <text class="plan-meals">{{item.meals}} meal(s) / day</text>
+          </view>
+          <view class="plan-right">
+            <text class="plan-price" style="color:{{item.color}};">¥{{item.price}}</text>
+            <text class="plan-period">/wk</text>
+          </view>
+        </view>
+      </view>
+      <text class="hint">Tap a plan to continue</text>
+    </block>
+
+  </scroll-view>
+
+</view>

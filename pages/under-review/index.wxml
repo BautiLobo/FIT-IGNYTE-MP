@@ -1,0 +1,58 @@
+<view class="container">
+
+  <!-- Top Bar -->
+  <view class="topbar">
+    <view class="brand"><text class="brand-red">FIT</text> IGNYTE</view>
+  </view>
+
+  <scroll-view class="scroll" scroll-y>
+
+    <!-- Hero -->
+    <view class="hero">
+      <view class="hero-icon">⏳</view>
+      <text class="hero-title">We're reviewing your order</text>
+      <text class="hero-sub">Checking delivery coverage for your area.{{'\n'}}We'll notify you on WeChat shortly!</text>
+    </view>
+
+    <!-- Order Summary -->
+    <view class="card">
+      <text class="card-label">Order summary</text>
+      <view class="summary-row summary-row-border">
+        <text class="summary-key">Plan</text>
+        <text class="summary-val">{{order.plan_name}} · ¥{{plan_price}}/wk</text>
+      </view>
+      <view class="summary-row summary-row-border">
+        <text class="summary-key">Address</text>
+        <text class="summary-val summary-val-sm">{{order.address}}</text>
+      </view>
+      <view class="summary-row">
+        <text class="summary-key">District</text>
+        <text class="summary-val">{{order.district}}</text>
+      </view>
+    </view>
+
+    <!-- Status Steps -->
+    <view class="card">
+      <view class="step-row">
+        <text class="step-icon">✅</text>
+        <text class="step-label step-done">Order received</text>
+      </view>
+      <view class="step-row">
+        <text class="step-icon">⏳</text>
+        <text class="step-label step-pending">Area check in progress</text>
+      </view>
+      <view class="step-row">
+        <text class="step-icon">⬜</text>
+        <text class="step-label step-inactive">Payment — pending</text>
+      </view>
+    </view>
+
+    <!-- Contact Button -->
+    <button class="btn-contact" bindtap="contactUs">
+      💬  Contact FIT IGNYTE while you wait
+    </button>
+    <text class="hint">Usually reviewed within 1 hour</text>
+
+  </scroll-view>
+
+</view>

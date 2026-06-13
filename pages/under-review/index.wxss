@@ -1,0 +1,108 @@
+/* pages/under-review/index.wxss */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #0d0d0d;
+}
+
+/* Top Bar */
+.topbar {
+  background: #111;
+  padding: 40rpx 28rpx 20rpx;
+  border-bottom: 1rpx solid #1a1a1a;
+  flex-shrink: 0;
+}
+.brand { font-size: 32rpx; font-weight: 800; letter-spacing: 4rpx; color: #fff; }
+.brand-red { color: #E8342A; }
+
+/* Scroll */
+.scroll { flex: 1; padding: 24rpx 28rpx; }
+
+/* Hero */
+.hero {
+  text-align: center;
+  padding: 40rpx 0 24rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16rpx;
+}
+.hero-icon {
+  width: 120rpx;
+  height: 120rpx;
+  background: #1a1500;
+  border: 4rpx solid #f59e0b;
+  border-radius: 50%;
+  font-size: 52rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8rpx;
+}
+.hero-title { font-size: 34rpx; font-weight: 800; color: #fff; }
+.hero-sub { font-size: 24rpx; color: #666; line-height: 1.6; }
+
+/* Card */
+.card {
+  background: #111;
+  border: 1rpx solid #1e1e1e;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  margin-bottom: 18rpx;
+}
+.card-label {
+  font-size: 20rpx;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 2rpx;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+/* Summary Rows */
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10rpx 0;
+}
+.summary-row-border { border-bottom: 1rpx solid #161616; }
+.summary-key { font-size: 24rpx; color: #666; }
+.summary-val { font-size: 24rpx; color: #fff; font-weight: 600; }
+.summary-val-sm { font-size: 22rpx; color: #ccc; text-align: right; max-width: 300rpx; }
+
+/* Steps */
+.step-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 12rpx 0;
+}
+.step-icon { font-size: 28rpx; }
+.step-label { font-size: 24rpx; font-weight: 600; }
+.step-done { color: #4ade80; }
+.step-pending { color: #f59e0b; }
+.step-inactive { color: #444; }
+
+/* Buttons */
+.btn-contact {
+  background: #E8342A;
+  border: none;
+  color: #fff;
+  border-radius: 20rpx;
+  padding: 26rpx;
+  font-size: 28rpx;
+  font-weight: 700;
+  width: 100%;
+  margin-bottom: 14rpx;
+}
+.hint {
+  font-size: 20rpx;
+  color: #444;
+  text-align: center;
+  display: block;
+  padding-bottom: 60rpx;
+}

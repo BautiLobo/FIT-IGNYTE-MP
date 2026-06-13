@@ -1,0 +1,17 @@
+/* pages/edit-profile/index.wxss */
+.container { display:flex; flex-direction:column; height:100vh; background:#0d0d0d; }
+.topbar { background:#111; padding:40rpx 28rpx 20rpx; border-bottom:1rpx solid #1a1a1a; flex-shrink:0; display:flex; align-items:center; }
+.back-btn { width:60rpx; }
+.back-arrow { font-size:48rpx; color:#E8342A; font-weight:300; }
+.topbar-center { flex:1; text-align:center; }
+.topbar-title { font-size:32rpx; font-weight:800; color:#fff; display:block; }
+.save-btn { font-size:26rpx; color:#E8342A; font-weight:700; width:80rpx; text-align:right; }
+.save-btn-disabled { color:#555; }
+.scroll { flex:1; padding:24rpx 28rpx; }
+.field { margin-bottom:28rpx; }
+.field-label { font-size:20rpx; color:#888; font-weight:600; letter-spacing:1rpx; display:block; margin-bottom:10rpx; text-transform:uppercase; }
+.field-input { background:#111; border:1rpx solid #1e1e1e; border-radius:14rpx; padding:22rpx 24rpx; font-size:28rpx; color:#fff; width:100%; box-sizing:border-box; }
+.field-input-warning { border-color:#3a1a1a; color:#f59e0b; }
+.field-textarea { background:#111; border:1rpx solid #1e1e1e; border-radius:14rpx; padding:22rpx 24rpx; font-size:28rpx; color:#fff; width:100%; box-sizing:border-box; min-height:100rpx; }
+.btn-primary { background:#E8342A; border:none; color:#fff; border-radius:20rpx; padding:26rpx; font-size:30rpx; font-weight:800; width:100%; margin-bottom:16rpx; }
+.btn-logout { background:transparent; border:1rpx solid #2a2a2a; color:#555; border-radius:20rpx; padding:22rpx; font-size:26rpx; width:100%; margin-bottom:60rpx; }

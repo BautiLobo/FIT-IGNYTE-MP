@@ -1,0 +1,97 @@
+<view class="container">
+
+  <!-- Top Bar -->
+  <view class="topbar">
+    <view class="back-btn" bindtap="goBack">
+      <text class="back-arrow">‹</text>
+    </view>
+    <view class="topbar-center">
+      <text class="topbar-title">Send Notification</text>
+    </view>
+    <view class="topbar-right"></view>
+  </view>
+
+  <scroll-view class="scroll" scroll-y>
+
+    <!-- To: selector -->
+    <text class="section-label">Send to</text>
+    <view class="recipient-tabs">
+      <view
+        class="recipient-tab {{recipientType === 'all' ? 'recipient-tab-active' : ''}}"
+        bindtap="setRecipientType"
+        data-type="all"
+      >
+        <text>All clients</text>
+        <text class="recipient-count">({{clientCount}})</text>
+      </view>
+      <view
+        class="recipient-tab {{recipientType === 'one' ? 'recipient-tab-active' : ''}}"
+        bindtap="setRecipientType"
+        data-type="one"
+      >
+        <text>One client</text>
+      </view>
+    </view>
+
+    <!-- Client picker — only when "one" selected -->
+    <view wx:if="{{recipientType === 'one'}}" class="client-list">
+      <view
+        wx:for="{{clients}}"
+        wx:key="id"
+        class="client-row {{selectedClientId === item.id ? 'client-row-selected' : ''}}"
+        bindtap="selectClient"
+        data-id="{{item.id}}"
+        data-name="{{item.name}}"
+      >
+        <view class="client-info">
+          <text class="client-name">{{item.name}}</text>
+          <text class="client-plan">{{item.plan_name}}</text>
+        </view>
+        <view wx:if="{{selectedClientId === item.id}}" class="client-check">✓</view>
+      </view>
+    </view>
+
+    <!-- Title -->
+    <text class="section-label">Title</text>
+    <input
+      class="field-input"
+      placeholder="e.g. Menu update, Delivery change..."
+      value="{{title}}"
+      bindinput="onTitleInput"
+    />
+
+    <!-- Message -->
+    <text class="section-label">Message</text>
+    <textarea
+      class="field-textarea"
+      placeholder="Write your message here..."
+      value="{{message}}"
+      bindinput="onMessageInput"
+      auto-height
+    />
+
+    <!-- Send Button -->
+    <button
+      class="btn-send {{canSend ? '' : 'btn-send-disabled'}}"
+      bindtap="send"
+      disabled="{{!canSend || sending}}"
+    >
+      {{sending ? 'Sending...' : '🔔  Send notification'}}
+    </button>
+
+    <!-- Recent notifications -->
+    <text class="section-label" wx:if="{{recent.length > 0}}">Recently sent</text>
+    <view wx:for="{{recent}}" wx:key="id" class="recent-row">
+      <view class="recent-info">
+        <text class="recent-title">{{item.title}}</text>
+        <text class="recent-msg">{{item.message}}</text>
+      </view>
+      <view class="recent-meta">
+        <text class="recent-to">{{item.client_id ? item.client_name : 'All'}}</text>
+        <text class="recent-date">{{item.created_at_formatted}}</text>
+      </view>
+    </view>
+
+  </scroll-view>
+
+</view>

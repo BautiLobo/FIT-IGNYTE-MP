@@ -1,0 +1,102 @@
+<view class="container">
+
+  <!-- Top Bar -->
+  <view class="topbar">
+    <view class="back-btn" bindtap="goBack">
+      <text class="back-arrow">‹</text>
+    </view>
+    <view class="topbar-center">
+      <text class="topbar-title">Review Orders</text>
+    </view>
+    <view class="topbar-right"></view>
+  </view>
+
+  <!-- Filter Tabs -->
+  <view class="filter-tabs">
+    <view class="filter-tab {{filter === 'pending' ? 'filter-tab-active' : ''}}" bindtap="setFilter" data-filter="pending">
+      <text>Pending</text>
+      <view wx:if="{{pendingCount > 0}}" class="filter-badge">{{pendingCount}}</view>
+    </view>
+    <view class="filter-tab {{filter === 'approved' ? 'filter-tab-active' : ''}}" bindtap="setFilter" data-filter="approved">
+      <text>Approved</text>
+    </view>
+    <view class="filter-tab {{filter === 'rejected' ? 'filter-tab-active' : ''}}" bindtap="setFilter" data-filter="rejected">
+      <text>Rejected</text>
+    </view>
+  </view>
+
+  <scroll-view class="scroll" scroll-y>
+
+    <block wx:if="{{loading}}">
+      <view class="loading-wrap"><view class="spinner"></view></view>
+    </block>
+
+    <block wx:elif="{{orders.length === 0}}">
+      <view class="empty-wrap">
+        <text class="empty-icon">📭</text>
+        <text class="empty-text">No {{filter === 'pending' ? 'pending' : filter.toLowerCase()}} orders</text>
+      </view>
+    </block>
+
+    <block wx:else>
+      <view wx:for="{{orders}}" wx:key="id" class="order-card" bindtap="openOrder" data-order="{{item}}">
+
+        <view class="order-header">
+          <view>
+            <text class="order-name">{{item.name}}</text>
+            <text class="order-plan">{{item.plan_name}}</text>
+          </view>
+          <view class="order-status-badge order-status-{{item.status === 'pending' ? 'pending' : item.status === 'Approved' ? 'approved' : 'rejected'}}">
+            <text>{{item.status === 'pending' ? 'Pending' : item.status}}</text>
+          </view>
+        </view>
+
+        <view class="order-divider"></view>
+
+        <view class="order-info-row">
+          <text class="order-info-label">📍  Address</text>
+          <text class="order-info-val">{{item.address}}</text>
+        </view>
+        <view class="order-info-row">
+          <text class="order-info-label">📱  Phone</text>
+          <text class="order-info-val">{{item.phone}}</text>
+        </view>
+        <view class="order-info-row" wx:if="{{item.allergies}}">
+          <text class="order-info-label">⚠️  Allergies</text>
+          <text class="order-info-val order-info-warning">{{item.allergies}}</text>
+        </view>
+        <view class="order-info-row">
+          <text class="order-info-label">🕐  Submitted</text>
+          <text class="order-info-val">{{item.created_at_formatted}}</text>
+        </view>
+
+        <!-- Approve / Reject buttons — only for pending -->
+        <view wx:if="{{item.status === 'pending'}}" class="order-actions">
+          <button class="btn-reject" catchtap="rejectOrder" data-id="{{item.id}}">✗  Reject</button>
+          <button class="btn-approve" catchtap="approveOrder" data-id="{{item.id}}">✓  Approve</button>
+        </view>
+
+      </view>
+    </block>
+
+  </scroll-view>
+
+  <!-- Rejection Note Modal -->
+  <view class="modal-overlay {{showRejectModal ? 'modal-visible' : ''}}" bindtap="closeModal">
+    <view class="modal" catchtap="noop">
+      <text class="modal-title">Reason for rejection</text>
+      <textarea
+        class="modal-input"
+        placeholder="e.g. Outside delivery area, will expand soon..."
+        value="{{rejectionNote}}"
+        bindinput="onRejectNoteInput"
+        auto-height
+      />
+      <view class="modal-actions">
+        <button class="modal-btn-cancel" bindtap="closeModal">Cancel</button>
+        <button class="modal-btn-confirm" bindtap="confirmReject">Send rejection</button>
+      </view>
+    </view>
+  </view>
+
+</view>

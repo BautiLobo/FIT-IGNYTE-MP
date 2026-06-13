@@ -1,0 +1,56 @@
+<view class="container">
+
+  <view class="topbar">
+    <view class="topbar-title-wrap">
+      <text class="topbar-title">Complete Payment</text>
+    </view>
+  </view>
+
+  <scroll-view class="scroll" scroll-y>
+
+    <!-- Order Summary -->
+    <view class="card">
+      <text class="card-label">Order summary</text>
+      <view class="row row-border">
+        <text class="row-key">Plan</text>
+        <text class="row-val">{{order.plan_name}} · {{selectedPlan.meals}} meals/day</text>
+      </view>
+      <view class="row row-border">
+        <text class="row-key">Delivery</text>
+        <text class="row-val-sm">{{order.address}}</text>
+      </view>
+      <view class="row row-border">
+        <text class="row-key">Plan fee</text>
+        <text class="row-val">¥{{selectedPlan.price}}</text>
+      </view>
+      <view class="row row-border">
+        <text class="row-key">Delivery fee</text>
+        <text class="row-val">¥35</text>
+      </view>
+      <view class="row">
+        <text class="row-total-key">Total</text>
+        <text class="row-total-val">¥{{total}}</text>
+      </view>
+    </view>
+
+    <!-- WeChat Pay Button -->
+    <view class="wechat-pay-btn" bindtap="payNow">
+      <view class="wechat-pay-left">
+        <text class="wechat-pay-icon">💚</text>
+        <view>
+          <text class="wechat-pay-title">WeChat Pay</text>
+          <text class="wechat-pay-sub">Tap to pay securely</text>
+        </view>
+      </view>
+      <text class="wechat-pay-amount">¥{{total}}</text>
+    </view>
+    <text class="pay-hint">Weekly auto-renewal · Cancel before Sunday midnight</text>
+
+    <!-- Contact -->
+    <view class="contact-box" bindtap="contactUs">
+      <text class="contact-text">💬  Questions? Contact us first</text>
+    </view>
+
+  </scroll-view>
+
+</view>

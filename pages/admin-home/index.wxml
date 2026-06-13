@@ -1,0 +1,65 @@
+<view class="container">
+
+  <!-- Top Bar -->
+  <view class="topbar">
+    <view class="brand"><text class="brand-red">FIT</text> IGNYTE</view>
+    <view class="admin-badge"><text>ADMIN</text></view>
+  </view>
+
+  <scroll-view class="scroll" scroll-y>
+
+    <block wx:if="{{loading}}">
+      <view class="loading-wrap"><view class="spinner"></view></view>
+    </block>
+
+    <block wx:else>
+
+      <!-- Greeting -->
+      <view class="greeting">
+        <text class="greeting-name">Good {{timeOfDay}}, {{adminName}} 👋</text>
+        <text class="greeting-sub">{{todayLabel}}</text>
+      </view>
+
+      <!-- Stats -->
+      <view class="stats-row">
+        <view class="stat-card">
+          <text class="stat-label">Pending</text>
+          <text class="stat-num stat-red">{{pendingCount}}</text>
+        </view>
+        <view class="stat-card">
+          <text class="stat-label">Active clients</text>
+          <text class="stat-num">{{activeCount}}</text>
+        </view>
+      </view>
+
+      <!-- Actions -->
+      <view class="action-btn" bindtap="goToOrders">
+        <view class="action-icon" style="background:#1a0808;">
+          <text>📋</text>
+        </view>
+        <view class="action-text">
+          <text class="action-title">Review orders</text>
+          <text class="action-sub">Approve or reject new requests</text>
+        </view>
+        <view wx:if="{{pendingCount > 0}}" class="badge-red">
+          <text>{{pendingCount}}</text>
+        </view>
+        <text wx:else class="action-arrow">›</text>
+      </view>
+
+      <view class="action-btn" bindtap="goToNotify">
+        <view class="action-icon" style="background:#0d0d1a;">
+          <text>🔔</text>
+        </view>
+        <view class="action-text">
+          <text class="action-title">Send notification</text>
+          <text class="action-sub">Broadcast to all or one client</text>
+        </view>
+        <text class="action-arrow">›</text>
+      </view>
+
+    </block>
+
+  </scroll-view>
+
+</view>

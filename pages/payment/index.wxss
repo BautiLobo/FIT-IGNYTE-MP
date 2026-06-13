@@ -1,0 +1,23 @@
+/* pages/payment/index.wxss */
+.container { display:flex; flex-direction:column; height:100vh; background:#0d0d0d; }
+.topbar { background:#111; padding:40rpx 28rpx 20rpx; border-bottom:1rpx solid #1a1a1a; flex-shrink:0; }
+.topbar-title { font-size:32rpx; font-weight:800; color:#fff; }
+.scroll { flex:1; padding:24rpx 28rpx; }
+.card { background:#111; border:1rpx solid #1e1e1e; border-radius:20rpx; padding:24rpx; margin-bottom:18rpx; }
+.card-label { font-size:20rpx; color:#555; text-transform:uppercase; letter-spacing:2rpx; font-weight:700; display:block; margin-bottom:16rpx; }
+.row { display:flex; justify-content:space-between; align-items:center; padding:10rpx 0; }
+.row-border { border-bottom:1rpx solid #161616; }
+.row-key { font-size:24rpx; color:#777; }
+.row-val { font-size:24rpx; color:#fff; font-weight:600; }
+.row-val-sm { font-size:22rpx; color:#ccc; text-align:right; max-width:280rpx; }
+.row-total-key { font-size:28rpx; font-weight:800; color:#fff; }
+.row-total-val { font-size:40rpx; font-weight:800; color:#E8342A; }
+.wechat-pay-btn { background:#07C160; border-radius:24rpx; padding:32rpx; display:flex; align-items:center; justify-content:space-between; margin-bottom:14rpx; }
+.wechat-pay-left { display:flex; align-items:center; gap:20rpx; }
+.wechat-pay-icon { font-size:44rpx; }
+.wechat-pay-title { font-size:32rpx; font-weight:800; color:#fff; display:block; }
+.wechat-pay-sub { font-size:20rpx; color:rgba(255,255,255,0.8); display:block; margin-top:4rpx; }
+.wechat-pay-amount { font-size:40rpx; font-weight:800; color:#fff; }
+.pay-hint { font-size:20rpx; color:#444; text-align:center; display:block; margin-bottom:20rpx; }
+.contact-box { background:#111; border:1rpx solid #1e1e1e; border-radius:18rpx; padding:22rpx; text-align:center; margin-bottom:60rpx; }
+.contact-text { font-size:24rpx; color:#666; }

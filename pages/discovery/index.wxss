@@ -1,0 +1,98 @@
+/* pages/discovery/index.wxss */
+
+.container {
+  height: 100vh;
+  background: #0b0b0c;
+  display: flex;
+  flex-direction: column;
+}
+
+.top-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 40rpx;
+  gap: 32rpx;
+}
+
+.logo {
+  width: 560rpx;
+  height: 180rpx;
+}
+
+.tagline-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tagline {
+  font-size: 72rpx;
+  font-weight: 800;
+  font-style: italic;
+  color: #f3f3f4;
+  line-height: 1.2;
+  display: block;
+  text-align: center;
+}
+
+.sub-tagline {
+  font-size: 22rpx;
+  color: #5d5d65;
+  letter-spacing: 5rpx;
+  font-weight: 600;
+  text-align: center;
+  margin-top: 8rpx;
+}
+
+.btn-wrap {
+  padding: 0 28rpx 80rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  background: #0b0b0c;
+}
+
+.btn-start {
+  display: block;
+  background: #e8342a;
+  color: #fff;
+  border: none;
+  border-radius: 100rpx;
+  padding: 34rpx 0;
+  font-size: 34rpx;
+  font-weight: 800;
+  text-align: center;
+  width: 100%;
+}
+
+.btn-plans {
+  display: block;
+  background: transparent;
+  color: #e8342a;
+  border: 2rpx solid #e8342a;
+  border-radius: 100rpx;
+  padding: 28rpx 0;
+  font-size: 30rpx;
+  font-weight: 700;
+  text-align: center;
+  width: 100%;
+}
+
+.discount-badge {
+  background: #1a0808;
+  border: 1rpx solid #e8342a;
+  border-radius: 100rpx;
+  padding: 14rpx 28rpx;
+  margin-bottom: 16rpx;
+  text-align: center;
+}
+
+.discount-text {
+  font-size: 26rpx;
+  color: #e8342a;
+  font-weight: 700;
+  letter-spacing: 1rpx;
+}

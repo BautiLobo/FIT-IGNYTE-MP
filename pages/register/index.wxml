@@ -1,0 +1,62 @@
+<view class="container">
+
+  <view class="topbar">
+    <view class="back-btn" bindtap="goBack"><text class="back-arrow">‹</text></view>
+    <view class="topbar-center">
+      <text class="topbar-title">Your details</text>
+    </view>
+    <view style="width:60rpx;"></view>
+  </view>
+
+  <view class="plan-badge" wx:if="{{selectedPlan}}">
+    <text class="plan-badge-text">{{selectedPlan.name}} · ¥{{selectedPlan.price}}/week</text>
+    <text class="plan-badge-change" bindtap="goBack">Change</text>
+  </view>
+
+  <scroll-view class="scroll" scroll-y>
+
+    <view class="field">
+      <text class="field-label">Full name</text>
+      <input class="field-input" placeholder="Your name" value="{{form.name}}" bindinput="onInput" data-field="name" />
+    </view>
+
+    <view class="field">
+      <text class="field-label">Phone / WeChat ID</text>
+      <input class="field-input" placeholder="+86 xxx xxxx xxxx" value="{{form.phone}}" bindinput="onInput" data-field="phone" type="number" />
+    </view>
+
+    <view class="field">
+      <text class="field-label">District / Area</text>
+      <input class="field-input" placeholder="e.g. Jing'an, Xuhui..." value="{{form.district}}" bindinput="onInput" data-field="district" />
+    </view>
+
+    <view class="field">
+      <text class="field-label">Delivery address</text>
+      <textarea class="field-textarea" placeholder="Full address + building number" value="{{form.address}}" bindinput="onInput" data-field="address" auto-height />
+    </view>
+
+    <view class="field">
+      <text class="field-label">Building access</text>
+      <input class="field-input" placeholder="e.g. Leave at door, call on arrival" value="{{form.access}}" bindinput="onInput" data-field="access" />
+    </view>
+
+    <view class="field">
+      <text class="field-label">Allergies / restrictions</text>
+      <input class="field-input field-input-warning" placeholder="⚠ e.g. No nuts, gluten-free" value="{{form.allergies}}" bindinput="onInput" data-field="allergies" />
+    </view>
+
+    <view class="field">
+      <text class="field-label">Fitness goal</text>
+      <input class="field-input" placeholder="e.g. Lose weight, build muscle" value="{{form.goal}}" bindinput="onInput" data-field="goal" />
+    </view>
+
+    <view class="btn-wrap">
+      <button class="btn-primary {{submitting ? 'btn-disabled' : ''}}" bindtap="submit" disabled="{{submitting}}">
+        {{submitting ? 'Submitting...' : 'Next →'}}
+      </button>
+      <text class="btn-hint">We'll verify your delivery area before payment</text>
+    </view>
+
+  </scroll-view>
+
+</view>

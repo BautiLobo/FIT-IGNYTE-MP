@@ -1,0 +1,29 @@
+<view class="container">
+
+  <view class="topbar">
+    <view class="brand"><text class="brand-red">FIT</text> IGNYTE</view>
+  </view>
+
+  <view class="content">
+
+    <!-- Animated circle -->
+    <view class="circle-wrap">
+      <view class="circle-outer"></view>
+      <view class="circle-inner">
+        <text class="circle-icon">{{done ? '✓' : '💳'}}</text>
+      </view>
+    </view>
+
+    <text class="title">{{done ? 'Payment confirmed!' : 'Processing payment...'}}</text>
+    <text class="sub">{{done ? 'Welcome to FIT IGNYTE 🔥' : 'Please don\'t close this screen'}}</text>
+
+    <!-- Animated dots -->
+    <view class="dots" wx:if="{{!done}}">
+      <view class="dot dot-1"></view>
+      <view class="dot dot-2"></view>
+      <view class="dot dot-3"></view>
+    </view>
+
+  </view>
+
+</view>

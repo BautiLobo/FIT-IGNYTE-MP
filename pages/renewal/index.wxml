@@ -1,0 +1,36 @@
+<view class="container">
+
+  <view class="topbar">
+    <view class="back-btn" bindtap="goBack">
+      <text class="back-arrow">‹</text>
+    </view>
+    <view class="topbar-center">
+      <text class="topbar-title">Renew Your Plan</text>
+    </view>
+    <view class="topbar-right"></view>
+  </view>
+
+  <scroll-view class="scroll" scroll-y>
+
+    <!-- Alert -->
+    <view class="alert-box">
+      <text class="alert-label">{{expired ? '⚠️ Your plan has expired' : '⏰ Your plan expires Friday'}}</text>
+      <text class="alert-text">{{expired ? 'Renew to start receiving meals again' : 'Renew to keep your meals coming next week'}}</text>
+    </view>
+
+    <!-- Current Plan -->
+    <view class="current-plan-card">
+      <view class="current-plan-info">
+        <text class="current-plan-tag">CURRENT PLAN</text>
+        <text class="current-plan-name">{{client.plan_name}}</text>
+        <text class="current-plan-desc">¥{{currentPlanPrice}}/week</text>
+      </view>
+    </view>
+
+    <!-- Buttons -->
+    <button class="btn-primary" bindtap="renewSamePlan">Renew this plan</button>
+    <button class="btn-outline" bindtap="changePlan">Choose a different plan</button>
+
+  </scroll-view>
+
+</view>

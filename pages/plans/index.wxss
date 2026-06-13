@@ -1,0 +1,89 @@
+/* pages/plans/index.wxss */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #0b0b0c;
+}
+
+.topbar {
+  background: #0b0b0c;
+  padding: 40rpx 28rpx 20rpx;
+  border-bottom: 1rpx solid #1a1a22;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.back-btn {
+  width: 60rpx;
+  height: 60rpx;
+  background: #1a1a22;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-arrow { font-size: 36rpx; color: #f3f3f4; font-weight: 300; }
+.topbar-title { flex: 1; text-align: center; font-size: 32rpx; font-weight: 800; color: #f3f3f4; }
+
+.delivery-note {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  padding: 16rpx 28rpx;
+  border-bottom: 1rpx solid #1a1a22;
+  flex-shrink: 0;
+}
+
+.delivery-icon { font-size: 24rpx; }
+.delivery-text { font-size: 24rpx; color: #5d5d65; }
+
+.scroll { flex: 1; padding: 20rpx 24rpx; }
+
+.loading-wrap { display: flex; justify-content: center; padding: 80rpx 0; }
+.spinner { width: 48rpx; height: 48rpx; border: 4rpx solid #2a2a33; border-top-color: #e8342a; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.plan-wrap { margin-bottom: 16rpx; }
+
+.popular-badge {
+  background: #1a0a2a;
+  color: #A78BFA;
+  font-size: 18rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 8rpx;
+  display: inline-block;
+  margin-bottom: 6rpx;
+}
+
+.plan-card {
+  background: #13131a;
+  border: 1rpx solid #2a2a33;
+  border-left: 4rpx solid;
+  border-radius: 20rpx;
+  padding: 28rpx 28rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.plan-card-popular {
+  border-color: #A78BFA;
+  border-left-color: #A78BFA;
+}
+
+.plan-left { display: flex; flex-direction: column; gap: 4rpx; }
+.plan-category { font-size: 20rpx; font-weight: 700; letter-spacing: 2rpx; text-transform: uppercase; }
+.plan-name { font-size: 36rpx; font-weight: 800; color: #f3f3f4; }
+.plan-meals { font-size: 24rpx; color: #5d5d65; }
+
+.plan-right { display: flex; flex-direction: column; align-items: flex-end; }
+.plan-price { font-size: 48rpx; font-weight: 800; }
+.plan-period { font-size: 22rpx; color: #5d5d65; }
+
+.hint { font-size: 22rpx; color: #3a3a3a; text-align: center; display: block; padding: 20rpx 0 40rpx; }

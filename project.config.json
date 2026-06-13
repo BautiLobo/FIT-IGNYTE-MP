@@ -1,0 +1,23 @@
+{
+  "compileType": "miniprogram",
+  "libVersion": "3.4.3",
+  "packOptions": { "ignore": [], "include": [] },
+  "setting": {
+    "coverView": true,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "typeCheck": false,
+    "uploadWithSourceMap": true,
+    "useIsolateContext": true,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    }
+  },
+  "condition": {},
+  "editorSetting": { "tabIndent": "insertSpaces", "tabSize": 2 },
+  "appid": "wx93aa63af1f20dbb1"
+}

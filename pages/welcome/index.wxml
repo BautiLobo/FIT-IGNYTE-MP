@@ -1,0 +1,28 @@
+<view class="container">
+
+  <view class="topbar">
+    <view class="brand"><text class="brand-red">FIT</text> IGNYTE</view>
+  </view>
+
+  <view class="content">
+
+    <view class="hero">
+      <view class="hero-icon">✅</view>
+      <text class="hero-title">You're all set! 🔥</text>
+      <text class="hero-sub">Welcome to FIT IGNYTE, {{firstName}}!</text>
+    </view>
+
+    <view class="card">
+      <text class="card-label">First delivery</text>
+      <view class="row row-border">
+        <text class="row-key">Monday</text>
+        <text class="row-val">{{firstTime}}</text>
+      </view>
+      <text class="first-meals">{{firstMeals}}</text>
+    </view>
+
+    <button class="btn-primary" bindtap="goToHome">Go to home  →</button>
+
+  </view>
+
+</view>
