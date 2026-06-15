@@ -53,10 +53,6 @@ Page({
       wx.showToast({ title: 'Please enter your full delivery address', icon: 'none' });
       return false;
     }
-    if (!goal.trim() || goal.trim().length < 3) {
-      wx.showToast({ title: 'Please enter your fitness goal', icon: 'none' });
-      return false;
-    }
     return true;
   },
 

@@ -2,26 +2,97 @@
 
 .container { display:flex; flex-direction:column; height:100vh; background:#0b0b0c; }
 
-.topbar { background:#0b0b0c; padding:40rpx 28rpx 20rpx; border-bottom:1rpx solid #1a1a22; flex-shrink:0; display:flex; align-items:center; }
+.topbar { background:#0b0b0c; padding:80rpx 28rpx 20rpx; border-bottom:1rpx solid #1a1a22; flex-shrink:0; display:flex; align-items:center; }
 .back-btn { width:56rpx; height:56rpx; background:#1a1a22; border-radius:50%; display:flex; align-items:center; justify-content:center; }
 .back-arrow { font-size:32rpx; color:#f3f3f4; }
 .topbar-title { flex:1; text-align:center; font-size:32rpx; font-weight:800; color:#f3f3f4; }
 
-.content { flex:1; padding:32rpx 28rpx; display:flex; flex-direction:column; gap:20rpx; }
+.content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 60rpx;
+  padding: 0 28rpx;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
 
-.info-card { background:#13131a; border:1rpx solid #2a2a33; border-radius:20rpx; padding:28rpx; }
-.info-title { font-size:30rpx; font-weight:800; color:#f3f3f4; display:block; margin-bottom:8rpx; }
-.info-sub { font-size:24rpx; color:#5d5d65; line-height:1.5; display:block; }
+.center-block {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
 
-.date-display { background:#13131a; border:2rpx solid #e8342a; border-radius:20rpx; padding:28rpx; display:flex; align-items:center; justify-content:space-between; }
-.date-left { display:flex; flex-direction:column; gap:6rpx; }
-.date-label { font-size:20rpx; color:#5d5d65; font-weight:700; letter-spacing:2rpx; text-transform:uppercase; }
-.date-value { font-size:36rpx; font-weight:800; color:#f3f3f4; }
-.date-arrow { font-size:48rpx; color:#e8342a; font-weight:300; }
+/* ── HEADING ── */
+.heading-wrap {
+  margin-bottom: 8rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 2rpx;
+}
 
-.expiry-card { background:#0a1a0a; border:1rpx solid #166534; border-radius:20rpx; padding:24rpx; display:flex; flex-direction:column; gap:6rpx; }
-.expiry-label { font-size:20rpx; color:#4ade80; font-weight:700; letter-spacing:2rpx; }
-.expiry-value { font-size:32rpx; font-weight:800; color:#4ade80; }
-.expiry-sub { font-size:22rpx; color:#5d5d65; }
+.heading {
+  font-size: 56rpx;
+  font-weight: 900;
+  font-style: italic;
+  color: #f3f3f4;
+  line-height: 1.15;
+  display: block;
+}
 
-.btn-primary { display:block; background:#e8342a; border:none; color:#fff; border-radius:100rpx; padding:34rpx 0; font-size:34rpx; font-weight:800; text-align:center; width:100%; margin-top:auto; }
+.heading-sub {
+  font-size: 24rpx;
+  color: #a0a0aa;
+  line-height: 1.5;
+  display: block;
+  margin-top: 12rpx;
+}
+
+/* ── DATE PICKER ── */
+.date-display {
+  background: #13131a;
+  border: 1rpx solid #2a2a33;
+  border-radius: 20rpx;
+  padding: 32rpx 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.date-left { display:flex; flex-direction:column; gap:8rpx; }
+.date-label { font-size:20rpx; color:#5d5d65; font-weight:700; letter-spacing:3rpx; }
+.date-value { font-size:40rpx; font-weight:800; color:#f3f3f4; }
+.date-arrow { font-size:52rpx; color:#e8342a; font-weight:300; }
+
+/* ── EXPIRY CARD ── */
+.expiry-card {
+  background: #0a1a0a;
+  border: 1rpx solid #166534;
+  border-radius: 20rpx;
+  padding: 28rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.expiry-label { font-size:20rpx; color:#4ade80; font-weight:700; letter-spacing:3rpx; display:block; }
+.expiry-value { font-size:40rpx; font-weight:800; color:#4ade80; display:block; }
+.expiry-sub { font-size:22rpx; color:#5d5d65; display:block; }
+
+/* ── BUTTON ── */
+.btn-primary {
+  display: block;
+  background: #e8342a;
+  border: none;
+  color: #fff;
+  border-radius: 20rpx;
+  padding: 36rpx 0;
+  font-size: 34rpx;
+  font-weight: 800;
+  text-align: center;
+  width: 100%;
+  margin-top: 12rpx;
+  box-sizing: border-box;
+}

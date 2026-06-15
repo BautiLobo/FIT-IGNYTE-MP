@@ -1,40 +1,35 @@
 <view class="container">
 
   <view class="topbar">
-    <view class="brand"><text class="brand-red">FIT</text> IGNYTE</view>
+    <image class="topbar-logo" src="/images/mark.png" mode="aspectFit" />
   </view>
 
-  <scroll-view class="scroll" scroll-y>
+  <view class="content">
 
+    <!-- Hero -->
     <view class="hero">
-      <view class="hero-icon">😔</view>
-      <text class="hero-title">Not available in your area yet</text>
-      <text class="hero-sub">We don't deliver to your location yet,{{'\\n'}}but we're expanding soon!</text>
-    </view>
-
-    <!-- Address info -->
-    <view class="card card-red">
-      <text class="card-red-label">📍  Your address: {{order.address}}</text>
-      <text class="card-red-sub">Outside our current delivery radius</text>
-    </view>
-
-    <!-- Notify me -->
-    <view class="card">
-      <text class="card-label">Get notified when we expand</text>
-      <view class="phone-display">
-        <text class="phone-text">{{order.phone}}</text>
+      <view class="hero-circle">
+        <text class="hero-glyph">📍</text>
       </view>
-      <button class="btn-notify" bindtap="requestNotify">Notify me when available</button>
+      <text class="hero-title">We're not in your area yet</text>
+      <text class="hero-sub">We don't deliver to your location yet, but we're growing fast!</text>
     </view>
 
-    <!-- Message from admin -->
-    <view class="card" wx:if="{{order.rejection_note}}">
-      <text class="card-label">Message from FIT IGNYTE</text>
-      <text class="message-text">"{{order.rejection_note}}"</text>
+    <!-- Outside radius info -->
+    <view class="info-card">
+      <text class="info-icon">⚠</text>
+      <text class="info-text">Outside our current delivery radius</text>
     </view>
 
+    <!-- Notify card -->
+    <view class="notify-card">
+      <text class="notify-label">NOTIFY ME WHEN YOU ARRIVE</text>
+      <button class="btn-notify" bindtap="requestNotify">🔔  Notify me when available</button>
+    </view>
+
+    <!-- Contact -->
     <button class="btn-secondary" bindtap="contactUs">💬  Contact us anyway</button>
 
-  </scroll-view>
+  </view>
 
 </view>

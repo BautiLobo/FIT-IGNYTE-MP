@@ -5,11 +5,12 @@
   flex-direction: column;
   height: 100vh;
   background: #0b0b0c;
+  overflow: hidden;
 }
 
 .topbar {
   background: #0b0b0c;
-  padding: 40rpx 28rpx 20rpx;
+  padding: 80rpx 28rpx 20rpx;
   border-bottom: 1rpx solid #1a1a22;
   display: flex;
   align-items: center;
@@ -29,24 +30,35 @@
 .back-arrow { font-size: 36rpx; color: #f3f3f4; font-weight: 300; }
 .topbar-title { flex: 1; text-align: center; font-size: 32rpx; font-weight: 800; color: #f3f3f4; }
 
-.delivery-note {
-  display: flex;
-  align-items: center;
-  gap: 10rpx;
-  padding: 16rpx 28rpx;
-  border-bottom: 1rpx solid #1a1a22;
-  flex-shrink: 0;
-}
-
-.delivery-icon { font-size: 24rpx; }
-.delivery-text { font-size: 24rpx; color: #5d5d65; }
-
-.scroll { flex: 1; padding: 20rpx 24rpx; }
+.scroll { flex: 1; padding: 20rpx 24rpx; box-sizing: border-box; overflow-x: hidden; }
 
 .loading-wrap { display: flex; justify-content: center; padding: 80rpx 0; }
 .spinner { width: 48rpx; height: 48rpx; border: 4rpx solid #2a2a33; border-top-color: #e8342a; border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* ── LIST HEADER ── */
+.list-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+  margin-bottom: 24rpx;
+  padding: 4rpx 0;
+}
+
+.list-title {
+  font-size: 32rpx;
+  font-weight: 800;
+  color: #f3f3f4;
+  display: block;
+}
+
+.list-sub {
+  font-size: 22rpx;
+  color: #5d5d65;
+  display: block;
+}
+
+/* ── PLAN CARDS ── */
 .plan-wrap { margin-bottom: 16rpx; }
 
 .popular-badge {
@@ -66,10 +78,12 @@
   border: 1rpx solid #2a2a33;
   border-left: 4rpx solid;
   border-radius: 20rpx;
-  padding: 28rpx 28rpx;
+  padding: 28rpx 24rpx;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .plan-card-popular {
@@ -77,13 +91,34 @@
   border-left-color: #A78BFA;
 }
 
-.plan-left { display: flex; flex-direction: column; gap: 4rpx; }
+.plan-left { display: flex; flex-direction: column; gap: 4rpx; flex: 1; overflow: hidden; }
 .plan-category { font-size: 20rpx; font-weight: 700; letter-spacing: 2rpx; text-transform: uppercase; }
 .plan-name { font-size: 36rpx; font-weight: 800; color: #f3f3f4; }
 .plan-meals { font-size: 24rpx; color: #5d5d65; }
 
-.plan-right { display: flex; flex-direction: column; align-items: flex-end; }
+.plan-right { display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; }
 .plan-price { font-size: 48rpx; font-weight: 800; }
 .plan-period { font-size: 22rpx; color: #5d5d65; }
 
-.hint { font-size: 22rpx; color: #3a3a3a; text-align: center; display: block; padding: 20rpx 0 40rpx; }
+/* ── HINT ── */
+.hint-wrap {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 32rpx 4rpx 60rpx;
+}
+
+.hint-line {
+  flex: 1;
+  height: 1rpx;
+  background: #2a2a33;
+  display: block;
+}
+
+.hint {
+  font-size: 22rpx;
+  color: #6a6a75;
+  white-space: nowrap;
+}
+
+.plan-kcal { font-size: 20rpx; color: #5d5d65; display: block; margin-top: 2rpx; }

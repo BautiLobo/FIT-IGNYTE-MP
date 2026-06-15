@@ -12,7 +12,6 @@ const DAYS = [
 Page({
   data: {
     loading: true,
-    fromHome: false,
     fromRenewal: false,
     selectedPlan: null,
     days: [],
@@ -41,7 +40,6 @@ Page({
   },
 
   async onLoad(options) {
-    const fromHome = options.from === 'home';
     const fromRenewal = options.from === 'renewal';
     const selectedPlan = wx.getStorageSync('selectedPlan');
 
@@ -51,7 +49,7 @@ Page({
     }
 
     let allSelections = {};
-    if (fromHome || fromRenewal) {
+    if (fromRenewal) {
       const clientId = wx.getStorageSync('clientId');
       try {
         const data = await app.supabase('GET', 'meal_selections', null, `client_id=eq.${clientId}&order=day.asc,slot.asc`);
@@ -74,7 +72,7 @@ Page({
     }
 
     const days = DAYS.map(d => ({ ...d, done: false }));
-    this.setData({ fromHome, fromRenewal, selectedPlan, days, allSelections });
+    this.setData({ fromRenewal, selectedPlan, days, allSelections });
     await this.loadMenu('mon');
   },
 
@@ -219,6 +217,33 @@ Page({
     this.setData({ snackAdded: !this.data.snackAdded });
   },
 
+  saveAndNext() {
+    const { selectedMealIds, selectedTime, currentNotes, snackAdded, snackId, currentDay, allSelections, selectedPlan, currentDayLabel } = this.data;
+
+    if (selectedMealIds.length < selectedPlan.meals) {
+      wx.showToast({ title: `Select ${selectedPlan.meals} meal(s) first`, icon: 'none' });
+      return;
+    }
+
+    const updatedSelections = {
+      ...allSelections,
+      [currentDay]: {
+        meal_ids: selectedMealIds,
+        snack_id: snackAdded ? snackId : null,
+        time: selectedTime,
+        notes: currentNotes,
+      }
+    };
+
+    const days = this.data.days.map(d =>
+      d.key === currentDay ? { ...d, done: true } : d
+    );
+
+    this.setData({ allSelections: updatedSelections, days, canGoNext: true }, () => {
+      this.goNext();
+    });
+  },
+
   confirmDay() {
     const { selectedMealIds, selectedMealNames, selectedTime, currentNotes, snackAdded, snackId, currentDay, allSelections, selectedPlan } = this.data;
 
@@ -253,21 +278,10 @@ Page({
 
   async goNext() {
     if (!this.data.canGoNext) return;
-    const { currentDay, isLastDay, allSelections, fromHome, fromRenewal } = this.data;
+    const { currentDay, isLastDay, allSelections, fromRenewal } = this.data;
 
     if (isLastDay) {
-      if (fromHome) {
-        const clientId = wx.getStorageSync('clientId');
-        try {
-          // Save each day to meal_selections table
-          await this.saveMealSelections(clientId, allSelections);
-          wx.showToast({ title: 'Meals updated', icon: 'none' });
-          setTimeout(() => wx.navigateBack(), 800);
-        } catch (err) {
-          console.error('Save error:', err);
-          wx.showToast({ title: 'Failed to save', icon: 'none' });
-        }
-      } else if (fromRenewal) {
+      if (fromRenewal) {
         wx.setStorageSync('mealSelections', allSelections);
         wx.navigateTo({ url: '/pages/payment/index?from=renewal' });
       } else {

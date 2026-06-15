@@ -1,9 +1,12 @@
 <view class="container">
 
-  <!-- Top Bar -->
+  <!-- Topbar -->
   <view class="topbar">
-    <view class="brand"><text class="brand-red">FIT</text> IGNYTE</view>
-    <view class="admin-badge"><text>ADMIN</text></view>
+    <image class="topbar-logo" src="/images/logo.png" mode="aspectFit" />
+    <view class="admin-badge">
+      <text class="admin-badge-icon">🔒</text>
+      <text class="admin-badge-text">ADMIN</text>
+    </view>
   </view>
 
   <scroll-view class="scroll" scroll-y>
@@ -16,44 +19,55 @@
 
       <!-- Greeting -->
       <view class="greeting">
-        <text class="greeting-name">Good {{timeOfDay}}, {{adminName}} 👋</text>
+        <text class="greeting-name">Good {{timeOfDay}}, {{adminName}}</text>
         <text class="greeting-sub">{{todayLabel}}</text>
       </view>
 
       <!-- Stats -->
       <view class="stats-row">
         <view class="stat-card">
-          <text class="stat-label">Pending</text>
+          <text class="stat-label">PENDING</text>
           <text class="stat-num stat-red">{{pendingCount}}</text>
         </view>
         <view class="stat-card">
-          <text class="stat-label">Active clients</text>
+          <text class="stat-label">ACTIVE CLIENTS</text>
           <text class="stat-num">{{activeCount}}</text>
         </view>
       </view>
 
       <!-- Actions -->
-      <view class="action-btn" bindtap="goToOrders">
-        <view class="action-icon" style="background:#1a0808;">
-          <text>📋</text>
+      <view class="action-card" bindtap="goToOrders">
+        <view class="action-icon-wrap action-icon-red">
+          <text class="action-icon-glyph">≡</text>
         </view>
-        <view class="action-text">
+        <view class="action-body">
           <text class="action-title">Review orders</text>
           <text class="action-sub">Approve or reject new requests</text>
         </view>
-        <view wx:if="{{pendingCount > 0}}" class="badge-red">
-          <text>{{pendingCount}}</text>
+        <view wx:if="{{pendingCount > 0}}" class="pending-badge">
+          <text class="pending-badge-text">{{pendingCount}}</text>
         </view>
         <text wx:else class="action-arrow">›</text>
       </view>
 
-      <view class="action-btn" bindtap="goToNotify">
-        <view class="action-icon" style="background:#0d0d1a;">
-          <text>🔔</text>
+      <view class="action-card" bindtap="goToNotify">
+        <view class="action-icon-wrap action-icon-dark">
+          <text class="action-icon-glyph">🔔</text>
         </view>
-        <view class="action-text">
+        <view class="action-body">
           <text class="action-title">Send notification</text>
-          <text class="action-sub">Broadcast to all or one client</text>
+          <text class="action-sub">To everyone or one client</text>
+        </view>
+        <text class="action-arrow">›</text>
+      </view>
+
+      <view class="action-card" bindtap="goToClients">
+        <view class="action-icon-wrap action-icon-dark">
+          <text class="action-icon-glyph">👤</text>
+        </view>
+        <view class="action-body">
+          <text class="action-title">Clients</text>
+          <text class="action-sub">View and manage subscriptions</text>
         </view>
         <text class="action-arrow">›</text>
       </view>

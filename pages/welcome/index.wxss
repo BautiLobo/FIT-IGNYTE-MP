@@ -1,18 +1,117 @@
 /* pages/welcome/index.wxss */
-.container { display:flex; flex-direction:column; height:100vh; background:#0d0d0d; }
-.topbar { background:#111; padding:40rpx 28rpx 20rpx; border-bottom:1rpx solid #1a1a1a; flex-shrink:0; }
-.brand { font-size:32rpx; font-weight:800; letter-spacing:4rpx; color:#fff; }
-.brand-red { color:#E8342A; }
-.content { flex:1; display:flex; flex-direction:column; padding:40rpx 28rpx; gap:24rpx; }
-.hero { display:flex; flex-direction:column; align-items:center; text-align:center; padding:20rpx 0; gap:16rpx; }
-.hero-icon { width:130rpx; height:130rpx; background:#052e16; border:4rpx solid #166534; border-radius:50%; font-size:56rpx; display:flex; align-items:center; justify-content:center; }
-.hero-title { font-size:40rpx; font-weight:800; color:#fff; }
-.hero-sub { font-size:24rpx; color:#666; }
-.card { background:#111; border:1rpx solid #1e1e1e; border-radius:20rpx; padding:24rpx; }
-.card-label { font-size:20rpx; color:#555; text-transform:uppercase; letter-spacing:2rpx; font-weight:700; display:block; margin-bottom:16rpx; }
-.row { display:flex; justify-content:space-between; padding:10rpx 0; }
-.row-border { border-bottom:1rpx solid #161616; }
-.row-key { font-size:24rpx; color:#666; }
-.row-val { font-size:24rpx; color:#fff; font-weight:700; }
-.first-meals { font-size:22rpx; color:#bbb; display:block; padding-top:12rpx; }
-.btn-primary { background:#E8342A; border:none; color:#fff; border-radius:20rpx; padding:26rpx; font-size:32rpx; font-weight:800; width:100%; margin-top:auto; }
+
+page { background: #0b0b0c; }
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #0b0b0c;
+  overflow: hidden;
+}
+
+/* ── HERO BG ── */
+.hero-bg {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50vh;
+  background: radial-gradient(ellipse at 50% 0%, #3a0808 0%, #0b0b0c 70%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top:300rpx;
+}
+.hero-logo { width: 120rpx; height: 420rpx; opacity: 0.9; }
+
+/* ── CONTENT ── */
+.content {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 28rpx 64rpx;
+  padding-top: 5vh;
+  box-sizing: border-box;
+  width: 100%;
+  gap: 24rpx;
+}
+
+/* ── TEXT ── */
+.text-block { text-align: center; display:flex; flex-direction:column; gap:16rpx; width:100%; }
+
+.hero-title {
+  font-size: 52rpx;
+  font-weight: 900;
+  font-style: italic;
+  color: #f3f3f4;
+  display: block;
+}
+
+.hero-sub {
+  font-size: 26rpx;
+  color: #6b6b75;
+  line-height: 1.7;
+  display: block;
+}
+
+.hero-sub-red { color: #e8342a; font-weight: 700; }
+
+/* ── DELIVERY CARD ── */
+.delivery-card {
+  width: 100%;
+  background: #13131a;
+  border: 1rpx solid #1a1a22;
+  border-radius: 24rpx;
+  padding: 28rpx;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.delivery-label { font-size: 20rpx; color: #5d5d65; font-weight: 700; letter-spacing: 3rpx; display: block; }
+
+.delivery-top-row { display: flex; align-items: center; gap: 20rpx; }
+
+.delivery-icon-wrap {
+  width: 68rpx; height: 68rpx;
+  background: #2a0808;
+  border-radius: 16rpx;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.delivery-icon { font-size: 30rpx; }
+
+.delivery-info { flex: 1; }
+.delivery-day { font-size: 32rpx; font-weight: 800; color: #f3f3f4; display: block; }
+
+.delivery-time-badge { background: #e8342a; border-radius: 100rpx; padding: 10rpx 22rpx; flex-shrink: 0; }
+.delivery-time-text { font-size: 24rpx; font-weight: 700; color: #fff; }
+
+.delivery-divider { height: 1rpx; background: #1a1a22; }
+
+.meals-row { display: flex; align-items: center; gap: 16rpx; }
+.meals-icon { font-size: 28rpx; flex-shrink: 0; }
+.meals-text { font-size: 26rpx; color: #a0a0aa; flex: 1; line-height: 1.5; }
+
+/* ── BUTTON ── */
+.btn-wrap { width: 100%; box-sizing: border-box; }
+
+button { margin: 0 !important; padding: 0 !important; background: transparent; border: none; }
+
+.btn-primary {
+  background: #e8342a !important;
+  border-radius: 24rpx !important;
+  height: 100rpx;
+  line-height: 100rpx;
+  font-size: 34rpx !important;
+  font-weight: 800 !important;
+  color: #fff !important;
+  width: 100% !important;
+  text-align: center;
+  box-sizing: border-box;
+  display: block;
+}

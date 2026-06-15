@@ -31,7 +31,10 @@ Page({
     else if (hour >= 18) timeOfDay = 'evening';
 
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const todayLabel = days[new Date().getDay()];
+    const now = new Date();
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+    const weekNum = Math.ceil(((now - startOfYear) / 86400000 + startOfYear.getDay() + 1) / 7);
+    const todayLabel = `${days[now.getDay()]} · WEEK ${weekNum}`;
 
     this.setData({ timeOfDay, todayLabel });
   },
@@ -60,5 +63,9 @@ Page({
 
   goToNotify() {
     wx.navigateTo({ url: '/pages/admin-notify/index' });
+  },
+
+  goToClients() {
+    wx.navigateTo({ url: '/pages/admin-orders/index' });
   },
 });

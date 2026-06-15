@@ -1,13 +1,13 @@
 /* pages/order-summary/index.wxss */
 
-.container { display:flex; flex-direction:column; height:100vh; background:#0b0b0c; }
+.container { display:flex; flex-direction:column; height:100vh; background:#0b0b0c; overflow:hidden; }
 
-.topbar { background:#0b0b0c; padding:40rpx 28rpx 20rpx; border-bottom:1rpx solid #1a1a22; flex-shrink:0; display:flex; align-items:center; }
+.topbar { background:#0b0b0c; padding:80rpx 28rpx 20rpx; border-bottom:1rpx solid #1a1a22; flex-shrink:0; display:flex; align-items:center; }
 .back-btn { width:56rpx; height:56rpx; background:#1a1a22; border-radius:50%; display:flex; align-items:center; justify-content:center; }
 .back-arrow { font-size:32rpx; color:#f3f3f4; }
 .topbar-title { flex:1; text-align:center; font-size:32rpx; font-weight:800; color:#f3f3f4; }
 
-.scroll { flex:1; padding:20rpx 24rpx; }
+.scroll { flex:1; padding:20rpx 24rpx; box-sizing:border-box; overflow-x:hidden; }
 
 .card { background:#13131a; border:1rpx solid #2a2a33; border-radius:20rpx; padding:24rpx; margin-bottom:16rpx; }
 
@@ -23,7 +23,7 @@
 .meal-row { display:flex; align-items:center; padding:6rpx 0; }
 .meal-slot { font-size:20rpx; color:#5d5d65; font-weight:700; width:40rpx; flex-shrink:0; }
 .snack-slot { font-size:20rpx; color:#4ade80; font-weight:700; width:52rpx; flex-shrink:0; }
-.meal-name { font-size:26rpx; color:#ccc; flex:1; }
+.meal-name { font-size:26rpx; color:#ccc; flex:1; overflow:hidden; }
 .meal-time { font-size:24rpx; color:#e8342a; font-weight:700; flex-shrink:0; }
 
 .address-card { display:flex; align-items:flex-start; gap:16rpx; }

@@ -1,27 +1,25 @@
 <view class="container">
 
-  <!-- Top Bar -->
+  <!-- Topbar -->
   <view class="topbar">
     <view class="back-btn" bindtap="goBack">
       <text class="back-arrow">‹</text>
     </view>
-    <view class="topbar-center">
-      <text class="topbar-title">Review Orders</text>
-    </view>
-    <view class="topbar-right"></view>
+    <text class="topbar-title">Review orders</text>
+    <view style="width:60rpx;"></view>
   </view>
 
   <!-- Filter Tabs -->
   <view class="filter-tabs">
     <view class="filter-tab {{filter === 'pending' ? 'filter-tab-active' : ''}}" bindtap="setFilter" data-filter="pending">
-      <text>Pending</text>
+      <text class="filter-tab-text {{filter === 'pending' ? 'filter-tab-text-active' : ''}}">Pending</text>
       <view wx:if="{{pendingCount > 0}}" class="filter-badge">{{pendingCount}}</view>
     </view>
     <view class="filter-tab {{filter === 'approved' ? 'filter-tab-active' : ''}}" bindtap="setFilter" data-filter="approved">
-      <text>Approved</text>
+      <text class="filter-tab-text {{filter === 'approved' ? 'filter-tab-text-active' : ''}}">Approved</text>
     </view>
     <view class="filter-tab {{filter === 'rejected' ? 'filter-tab-active' : ''}}" bindtap="setFilter" data-filter="rejected">
-      <text>Rejected</text>
+      <text class="filter-tab-text {{filter === 'rejected' ? 'filter-tab-text-active' : ''}}">Rejected</text>
     </view>
   </view>
 
@@ -33,47 +31,51 @@
 
     <block wx:elif="{{orders.length === 0}}">
       <view class="empty-wrap">
-        <text class="empty-icon">📭</text>
-        <text class="empty-text">No {{filter === 'pending' ? 'pending' : filter.toLowerCase()}} orders</text>
+        <text class="empty-text">No {{filter}} orders</text>
       </view>
     </block>
 
     <block wx:else>
-      <view wx:for="{{orders}}" wx:key="id" class="order-card" bindtap="openOrder" data-order="{{item}}">
+      <view wx:for="{{orders}}" wx:key="id" class="order-card">
 
+        <!-- Header: avatar + name + badge -->
         <view class="order-header">
-          <view>
+          <view class="avatar">
+            <text class="avatar-icon">👤</text>
+          </view>
+          <view class="order-header-body">
             <text class="order-name">{{item.name}}</text>
             <text class="order-plan">{{item.plan_name}}</text>
           </view>
-          <view class="order-status-badge order-status-{{item.status === 'pending' ? 'pending' : item.status === 'Approved' ? 'approved' : 'rejected'}}">
-            <text>{{item.status === 'pending' ? 'Pending' : item.status}}</text>
+          <view class="status-badge status-{{item.status}}">
+            <text class="status-text">{{item.status}}</text>
           </view>
         </view>
 
+        <!-- Info rows -->
         <view class="order-divider"></view>
 
-        <view class="order-info-row">
-          <text class="order-info-label">📍  Address</text>
-          <text class="order-info-val">{{item.address}}</text>
+        <view class="info-row">
+          <text class="info-icon">📍</text>
+          <text class="info-val">{{item.address}}, {{item.district}}</text>
         </view>
-        <view class="order-info-row">
-          <text class="order-info-label">📱  Phone</text>
-          <text class="order-info-val">{{item.phone}}</text>
+        <view class="info-row">
+          <text class="info-icon">📱</text>
+          <text class="info-val">{{item.phone}}</text>
         </view>
-        <view class="order-info-row" wx:if="{{item.allergies}}">
-          <text class="order-info-label">⚠️  Allergies</text>
-          <text class="order-info-val order-info-warning">{{item.allergies}}</text>
-        </view>
-        <view class="order-info-row">
-          <text class="order-info-label">🕐  Submitted</text>
-          <text class="order-info-val">{{item.created_at_formatted}}</text>
+        <view class="info-row" wx:if="{{item.allergies}}">
+          <text class="info-icon">⚠️</text>
+          <text class="info-val info-warning">{{item.allergies}}</text>
         </view>
 
-        <!-- Approve / Reject buttons — only for pending -->
+        <!-- Actions -->
         <view wx:if="{{item.status === 'pending'}}" class="order-actions">
-          <button class="btn-reject" catchtap="rejectOrder" data-id="{{item.id}}">✗  Reject</button>
-          <button class="btn-approve" catchtap="approveOrder" data-id="{{item.id}}">✓  Approve</button>
+          <button class="btn-reject" catchtap="rejectOrder" data-id="{{item.id}}">
+            <text>✕</text><text>  Reject</text>
+          </button>
+          <button class="btn-approve" catchtap="approveOrder" data-id="{{item.id}}">
+            <text>✓</text><text>  Approve</text>
+          </button>
         </view>
 
       </view>
@@ -81,7 +83,7 @@
 
   </scroll-view>
 
-  <!-- Rejection Note Modal -->
+  <!-- Rejection Modal -->
   <view class="modal-overlay {{showRejectModal ? 'modal-visible' : ''}}" bindtap="closeModal">
     <view class="modal" catchtap="noop">
       <text class="modal-title">Reason for rejection</text>

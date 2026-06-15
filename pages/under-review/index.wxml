@@ -1,29 +1,26 @@
 <view class="container">
 
-  <!-- Top Bar -->
+  <!-- Logo topbar -->
   <view class="topbar">
-    <view class="brand"><text class="brand-red">FIT</text> IGNYTE</view>
+    <image class="topbar-logo" src="/images/mark.png" mode="aspectFit" />
   </view>
 
   <scroll-view class="scroll" scroll-y>
 
-    <!-- Hero -->
+    <!-- Hero icon -->
     <view class="hero">
-      <view class="hero-icon">⏳</view>
-      <text class="hero-title">We're reviewing your order</text>
-      <text class="hero-sub">Checking delivery coverage for your area.{{'\n'}}We'll notify you on WeChat shortly!</text>
+      <view class="hero-circle">
+        <text class="hero-clock">◷</text>
+      </view>
+      <text class="hero-title">Reviewing your order</text>
+      <text class="hero-sub">We're checking delivery coverage in your area. We'll notify you on WeChat shortly.</text>
     </view>
 
-    <!-- Order Summary -->
+    <!-- Order summary -->
     <view class="card">
-      <text class="card-label">Order summary</text>
-      <view class="summary-row summary-row-border">
+      <view class="summary-row summary-border">
         <text class="summary-key">Plan</text>
-        <text class="summary-val">{{order.plan_name}} · ¥{{plan_price}}/wk</text>
-      </view>
-      <view class="summary-row summary-row-border">
-        <text class="summary-key">Address</text>
-        <text class="summary-val summary-val-sm">{{order.address}}</text>
+        <text class="summary-val">{{order.plan_name}} · ¥{{order.plan_price}}/wk</text>
       </view>
       <view class="summary-row">
         <text class="summary-key">District</text>
@@ -31,28 +28,34 @@
       </view>
     </view>
 
-    <!-- Status Steps -->
+    <!-- Status steps -->
     <view class="card">
       <view class="step-row">
-        <text class="step-icon">✅</text>
+        <view class="step-dot step-done-dot">
+          <text class="step-check">✓</text>
+        </view>
         <text class="step-label step-done">Order received</text>
       </view>
+      <view class="step-divider"></view>
       <view class="step-row">
-        <text class="step-icon">⏳</text>
-        <text class="step-label step-pending">Area check in progress</text>
+        <view class="step-dot step-active-dot">
+          <view class="step-inner-dot"></view>
+        </view>
+        <text class="step-label step-active">Checking area</text>
       </view>
+      <view class="step-divider"></view>
       <view class="step-row">
-        <text class="step-icon">⬜</text>
-        <text class="step-label step-inactive">Payment — pending</text>
+        <view class="step-dot step-idle-dot"></view>
+        <text class="step-label step-idle">Payment — pending</text>
       </view>
     </view>
 
-    <!-- Contact Button -->
-    <button class="btn-contact" bindtap="contactUs">
-      💬  Contact FIT IGNYTE while you wait
-    </button>
-    <text class="hint">Usually reviewed within 1 hour</text>
-
   </scroll-view>
+
+  <!-- Fixed bottom -->
+  <view class="bottom-bar">
+    <button class="btn-contact" bindtap="contactUs">Contact us while you wait</button>
+    <text class="hint">Usually reviewed in under 1 hour</text>
+  </view>
 
 </view>

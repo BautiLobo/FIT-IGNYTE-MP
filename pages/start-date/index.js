@@ -2,6 +2,7 @@
 
 Page({
   data: {
+    fromRenewal: false,
     selectedDate: '',
     selectedDateFormatted: '',
     expiryDateFormatted: '',
@@ -82,7 +83,12 @@ Page({
     const expiry = this.addBusinessDays(startDate, 4);
     wx.setStorageSync('expiryDate', this.toDateString(expiry));
 
-    wx.navigateTo({ url: '/pages/order-summary/index' });
+    const { fromRenewal } = this.data;
+    if (fromRenewal) {
+      wx.navigateTo({ url: '/pages/payment/index?from=renewal' });
+    } else {
+      wx.navigateTo({ url: '/pages/order-summary/index' });
+    }
   },
 
   goBack() {

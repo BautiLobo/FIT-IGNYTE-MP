@@ -66,6 +66,25 @@ Page({
       const today = new Date().getDay();
       const showRenewal = today === 5 || daysLeft <= 1;
 
+      // Plan label: "Small × 2"
+      const planLabel = client.plan_name
+        ? client.plan_name.replace('Lean Fit', 'Small').replace('Muscle', 'Big').replace('Vegetarian', 'Veg')
+        : '';
+
+      // Expiry formatted: "Friday, Jun 20"
+      let expiryFormatted = '';
+      if (client.expiry_date) {
+        const d = new Date(client.expiry_date);
+        expiryFormatted = d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+      }
+
+      // Plan price from plans table
+      let planPrice = 0;
+      if (client.plan_id) {
+        const pd = await app.supabase('GET', 'plans', null, `id=eq.${client.plan_id}`);
+        if (pd && pd.length > 0) planPrice = pd[0].price || 0;
+      }
+
       this.setData({
         client,
         firstName,
@@ -74,6 +93,9 @@ Page({
         todayDelivery,
         showRenewal,
         daysLeft,
+        planLabel,
+        planPrice,
+        expiryFormatted,
         loading: false,
       });
 
@@ -106,9 +128,10 @@ Page({
       const row = selections.find(s => s.day === dayLabel && s.slot === 1);
       const mealIds = row ? (row.meals_json || []) : [];
       const meal1 = mealIds.map(id => mealMap[id] ? mealMap[id].name : '').filter(Boolean).join(' + ');
+      const photo = mealIds.length > 0 && mealMap[mealIds[0]] ? mealMap[mealIds[0]].photo_url || '' : '';
       const time = row ? row.delivery_time : '';
       const isToday = dayIndexMap[d.key] === today;
-      return { day: d.full, dayShort: d.short, meal1, meal2: '', time, snack: null, isToday };
+      return { day: d.full, dayShort: d.short, meal1, meal2: '', time, snack: null, isToday, photo };
     });
   },
 
@@ -137,8 +160,11 @@ Page({
   },
 
   goToMealSelect() {
-    // Edit meals — comes back to home after saving
-    wx.navigateTo({ url: '/pages/meal-select/index?from=home' });
+    wx.showLoading({ title: 'Loading...' });
+    setTimeout(() => {
+      wx.hideLoading();
+      wx.navigateTo({ url: '/pages/edit-meals/index' });
+    }, 300);
   },
 
   goToRenewal() {

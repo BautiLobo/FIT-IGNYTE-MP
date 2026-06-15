@@ -6,6 +6,9 @@ Page({
     client: null,
     currentPlanPrice: 0,
     expired: false,
+    planTier: '',
+    planName: '',
+    planMeals: 0,
   },
 
   async onLoad() {
@@ -20,44 +23,36 @@ Page({
       const expired = !client.expiry_date || new Date(client.expiry_date) < new Date();
 
       // Load current plan price
-      let currentPlanPrice = 0;
+      let currentPlanPrice = 0, planTier = '', planName = '', planMeals = 0;
       if (client.plan_id) {
         const planData = await app.supabase('GET', 'plans', null, `id=eq.${client.plan_id}`);
         if (planData && planData.length > 0) {
-          currentPlanPrice = planData[0].price;
-          // Save full plan object for later use
-          wx.setStorageSync('selectedPlan', planData[0]);
+          const plan = planData[0];
+          currentPlanPrice = plan.price;
+          planTier = (plan.tier || '').toUpperCase();
+          planName = plan.name || '';
+          planMeals = plan.meals || 0;
+          wx.setStorageSync('selectedPlan', plan);
         }
       }
 
-      this.setData({ client, currentPlanPrice, expired });
+      this.setData({ client, currentPlanPrice, expired, planTier, planName, planMeals });
 
     } catch (err) {
       console.error('Load renewal error:', err);
     }
   },
 
-  renewSamePlan() {
-    // Ask if they want to repeat same meals
-    wx.showModal({
-      title: 'Same meals as last week?',
-      content: 'Do you want to keep the same meal selections or choose new ones?',
-      confirmText: 'Choose new',
-      cancelText: 'Keep same',
-      success: (res) => {
-        if (res.confirm) {
-          // Choose new meals
-          wx.navigateTo({ url: '/pages/meal-select/index?from=renewal' });
-        } else {
-          // Keep same meals — go straight to payment
-          wx.navigateTo({ url: '/pages/payment/index?from=renewal' });
-        }
-      }
-    });
+  keepSameMeals() {
+    wx.redirectTo({ url: '/pages/edit-meals/index?from=renewal' });
+  },
+
+  choosNewMeals() {
+    wx.redirectTo({ url: '/pages/meal-select/index?from=renewal' });
   },
 
   changePlan() {
-    wx.navigateTo({ url: '/pages/plans/index?from=renewal' });
+    wx.redirectTo({ url: '/pages/tiers/index?from=renewal' });
   },
 
   goBack() {

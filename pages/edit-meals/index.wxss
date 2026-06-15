@@ -1,6 +1,6 @@
 /* pages/meal-select/index.wxss */
 
-.container { display:flex; flex-direction:column; height:100vh; background:#0b0b0c; overflow:hidden; }
+.container { display:flex; flex-direction:column; height:100vh; background:#0b0b0c; padding-top:0; box-sizing:border-box; }
 
 /* Topbar */
 .topbar { background:#0b0b0c; padding:80rpx 28rpx 20rpx; border-bottom:1rpx solid #1a1a22; display:flex; align-items:center; flex-shrink:0; }
@@ -9,15 +9,15 @@
 .topbar-title { flex:1; text-align:center; font-size:32rpx; font-weight:800; color:#f3f3f4; }
 
 /* Day Tabs */
-.day-tabs { white-space:nowrap; padding:16rpx 20rpx; background:#0b0b0c; border-bottom:1rpx solid #1a1a22; flex-shrink:0; }
-.day-tab { display:inline-flex; flex-direction:column; align-items:center; gap:6rpx; background:#13131a; border:1rpx solid #2a2a33; color:#5d5d65; padding:16rpx 32rpx; border-radius:16rpx; margin-right:10rpx; min-width:110rpx; }
+.day-tabs { white-space:nowrap; padding:20rpx 24rpx; background:#0b0b0c; border-bottom:1rpx solid #1a1a22; flex-shrink:0; }
+.day-tab { display:inline-flex; flex-direction:column; align-items:center; gap:6rpx; background:#13131a; border:1rpx solid #2a2a33; color:#5d5d65; padding:18rpx 36rpx; border-radius:20rpx; margin-right:12rpx; min-width:120rpx; }
 .day-tab-active { background:#1a0808; border-color:#e8342a; color:#e8342a; }
-.day-tab-short { font-size:30rpx; font-weight:700; }
-.day-tab-sub { font-size:18rpx; color:#5d5d65; }
+.day-tab-short { font-size:28rpx; font-weight:800; }
+.day-tab-sub { font-size:20rpx; color:#5d5d65; }
 .day-tab-sub-active { color:#e8342a; }
 
 /* Scroll */
-.scroll { flex:1; padding:16rpx 24rpx; box-sizing:border-box; overflow-x:hidden; }
+.scroll { flex:1; padding:16rpx 24rpx; }
 
 /* Loading */
 .loading-wrap { display:flex; justify-content:center; padding:80rpx 0; }
@@ -95,13 +95,12 @@
   border: none;
   color: #fff;
   border-radius: 20rpx;
-  padding: 38rpx 0;
+  padding: 36rpx 0;
   font-size: 34rpx;
   font-weight: 800;
   text-align: center;
   width: 100%;
-  margin: 24rpx 0 48rpx;
-  box-sizing: border-box;
+  margin-bottom: 14rpx;
   letter-spacing: 0.5rpx;
 }
 

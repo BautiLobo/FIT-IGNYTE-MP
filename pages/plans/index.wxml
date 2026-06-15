@@ -6,11 +6,6 @@
     <view style="width:60rpx;"></view>
   </view>
 
-  <view class="delivery-note">
-    
-    <text class="delivery-text">All include Mon-Fri delivery</text>
-  </view>
-
   <scroll-view class="scroll" scroll-y>
 
     <block wx:if="{{loading}}">
@@ -18,6 +13,11 @@
     </block>
 
     <block wx:else>
+
+      <view class="list-header">
+        <text class="list-sub">All include Mon-Fri delivery</text>
+      </view>
+
       <view wx:for="{{plans}}" wx:key="id" class="plan-wrap">
         <view class="popular-badge" wx:if="{{item.is_popular}}">
           <text>MOST POPULAR</text>
@@ -32,6 +32,7 @@
             <text class="plan-category" style="color:{{item.color}};">{{item.tier}}</text>
             <text class="plan-name">{{item.name}}</text>
             <text class="plan-meals">{{item.meals}} meal(s) / day</text>
+            <text class="plan-kcal" wx:if="{{item.kcal}}">~{{item.kcal}} kcal/day</text>
           </view>
           <view class="plan-right">
             <text class="plan-price" style="color:{{item.color}};">¥{{item.price}}</text>
@@ -39,7 +40,13 @@
           </view>
         </view>
       </view>
-      <text class="hint">Tap a plan to continue</text>
+
+      <view class="hint-wrap">
+        <text class="hint-line"></text>
+        <text class="hint">Tap a plan to continue</text>
+        <text class="hint-line"></text>
+      </view>
+
     </block>
 
   </scroll-view>

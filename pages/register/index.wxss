@@ -2,7 +2,7 @@
 
 .container { display:flex; flex-direction:column; height:100vh; background:#0b0b0c; }
 
-.topbar { background:#0b0b0c; padding:40rpx 28rpx 20rpx; border-bottom:1rpx solid #1a1a22; flex-shrink:0; display:flex; align-items:center; }
+.topbar { background:#0b0b0c; padding:80rpx 28rpx 20rpx; border-bottom:1rpx solid #1a1a22; flex-shrink:0; display:flex; align-items:center; }
 .back-btn { width:60rpx; }
 .back-arrow { font-size:48rpx; color:#e8342a; font-weight:300; }
 .topbar-center { flex:1; text-align:center; }

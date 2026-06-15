@@ -2,7 +2,7 @@
 
   <view class="topbar">
     <view class="back-btn" bindtap="goBack"><text class="back-arrow">‹</text></view>
-    <text class="topbar-title">Choose your plan</text>
+    <text class="topbar-title">Choose your goal</text>
     <view style="width:60rpx;"></view>
   </view>
 
@@ -14,19 +14,30 @@
 
     <block wx:else>
 
-      <text class="section-label">What's your goal?</text>
-
-      <view wx:for="{{tiers}}" wx:key="name" class="tier-card" bindtap="selectTier" data-tier="{{item.name}}">
-        <view class="tier-left">
-          <text class="tier-name" style="color:{{item.color}};">{{item.name}}</text>
-          <text class="tier-sub">{{item.planCount}} plans available</text>
-        </view>
-        <text class="tier-arrow" style="color:{{item.color}};">›</text>
+      <view class="list-header">
+        <text class="list-title">What's your goal?</text>
+        <text class="list-sub">Choose a diet tier to see available plans</text>
       </view>
 
-      <!-- PDF Button -->
-      <view class="pdf-wrap">
-        <button class="btn-pdf" bindtap="openBrochure">View full menu PDF</button>
+      <view wx:for="{{tiers}}" wx:key="name" class="tier-wrap">
+        <view class="tier-card" bindtap="selectTier" data-tier="{{item.name}}" style="border-left-color:{{item.color}};">
+          <view class="tier-left">
+            <text class="tier-tag" style="color:{{item.color}};">{{item.tag}}</text>
+            <text class="tier-name">{{item.name}}</text>
+            <text class="tier-sub">{{item.planCount}} plans available</text>
+          </view>
+          <text class="tier-arrow" style="color:{{item.color}};">›</text>
+        </view>
+      </view>
+
+      <view class="hint-wrap">
+        <text class="hint-line"></text>
+        <text class="hint">Tap a goal to see plans</text>
+        <text class="hint-line"></text>
+      </view>
+
+      <view class="bottom-bar">
+        <button class="btn-pdf" bindtap="openBrochure">☰  View full menu PDF</button>
       </view>
 
     </block>

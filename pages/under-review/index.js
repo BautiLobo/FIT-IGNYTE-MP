@@ -19,10 +19,10 @@ Page({
     try {
       const data = await app.supabase('GET', 'new_orders', null, `id=eq.${pendingOrderId}`);
       if (data && data.length > 0) {
-        this.setData({
-          order: data[0],
-          plan_price: selectedPlan ? selectedPlan.price_weekly : 0,
-        });
+        const order = data[0];
+        order.plan_price = selectedPlan ? selectedPlan.price : 0;
+        order.plan_name = selectedPlan ? selectedPlan.name : (order.plan || '');
+        this.setData({ order });
       }
     } catch (err) {
       console.error('Load order error:', err);

@@ -19,10 +19,9 @@ Page({
     }
 
     const planPrice = selectedPlan.price || 0;
-    const discount = Math.round(planPrice * 0.25);
+    const discount = fromRenewal ? 0 : Math.round(planPrice * 0.25);
     const total = planPrice - discount + 35;
-    this.setData({ discount });
-    this.setData({ selectedPlan, total, fromRenewal, discount: Math.round((selectedPlan.price || 0) * 0.25) });
+    this.setData({ selectedPlan, total, fromRenewal, discount });
 
     try {
       if (fromRenewal) {
@@ -102,10 +101,15 @@ Page({
 
           if (clientData && clientData.length > 0) {
             const newClientId = clientData[0].id;
+
+            // Marcar order como paid
+            await app.supabase('PATCH', 'new_orders', { status: 'paid' }, `id=eq.${pendingOrderId}`);
+
+            // Activar cliente
             await app.supabase('PATCH', 'clients', {
               status: 'Active',
               expiry_date: nextFriday,
-            paid: true,
+              paid: true,
             }, `id=eq.${newClientId}`);
 
             wx.setStorageSync('clientId', newClientId);
@@ -121,6 +125,10 @@ Page({
       console.error('Payment success handler error:', err);
       wx.showToast({ title: 'Something went wrong', icon: 'none' });
     }
+  },
+
+  goBack() {
+    wx.navigateBack();
   },
 
   contactUs() {

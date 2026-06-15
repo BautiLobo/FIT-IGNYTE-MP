@@ -8,30 +8,35 @@
 
   <view class="content">
 
-    <view class="info-card">
-      <text class="info-title">Choose your start date</text>
-      <text class="info-sub">Your plan runs for 5 business days from the date you choose.</text>
-    </view>
+    <view class="center-block">
 
-    <!-- Date picker -->
-    <picker mode="date" value="{{selectedDate}}" start="{{minDate}}" bindchange="onDateChange">
-      <view class="date-display">
-        <view class="date-left">
-          <text class="date-label">START DATE</text>
-          <text class="date-value">{{selectedDateFormatted}}</text>
-        </view>
-        <text class="date-arrow">›</text>
+      <view class="heading-wrap">
+        <text class="heading">Choose your</text>
+        <text class="heading">start date</text>
+        <text class="heading-sub">Your plan runs for 5 business days from the date you choose.</text>
       </view>
-    </picker>
 
-    <!-- Expiry info -->
-    <view class="expiry-card" wx:if="{{expiryDateFormatted}}">
-      <text class="expiry-label">PLAN ENDS</text>
-      <text class="expiry-value">{{expiryDateFormatted}}</text>
-      <text class="expiry-sub">5 business days</text>
+      <!-- Date picker -->
+      <picker mode="date" value="{{selectedDate}}" start="{{minDate}}" bindchange="onDateChange">
+        <view class="date-display">
+          <view class="date-left">
+            <text class="date-label">START DATE</text>
+            <text class="date-value">{{selectedDateFormatted}}</text>
+          </view>
+          <text class="date-arrow">›</text>
+        </view>
+      </picker>
+
+      <!-- Expiry info -->
+      <view class="expiry-card" wx:if="{{expiryDateFormatted}}">
+        <text class="expiry-label">PLAN ENDS</text>
+        <text class="expiry-value">{{expiryDateFormatted}}</text>
+        <text class="expiry-sub">5 business days</text>
+      </view>
+
+      <button class="btn-primary" bindtap="goNext">Continue →</button>
+
     </view>
-
-    <button class="btn-primary" bindtap="goNext">Continue →</button>
 
   </view>
 

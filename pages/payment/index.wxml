@@ -1,42 +1,52 @@
 <view class="container">
 
   <view class="topbar">
-    <view class="topbar-title-wrap">
-      <text class="topbar-title">Complete Payment</text>
-    </view>
+    <view class="back-btn" bindtap="goBack"><text class="back-arrow">‹</text></view>
+    <text class="topbar-title">Complete payment</text>
+    <text class="topbar-lock">🔒</text>
   </view>
 
   <scroll-view class="scroll" scroll-y>
 
     <!-- Order Summary -->
     <view class="card">
-      <text class="card-label">Order summary</text>
+      <text class="card-label">ORDER SUMMARY</text>
+
       <view class="row row-border">
         <text class="row-key">Plan</text>
-        <text class="row-val">{{order.plan_name}} · {{selectedPlan.meals}} meals/day</text>
+        <text class="row-val">{{selectedPlan.name}} · {{selectedPlan.meals}} meals/day</text>
       </view>
+
+      <view class="row row-border">
+        <text class="row-key">Plan price</text>
+        <text class="row-val {{discount > 0 ? 'row-val-strike' : ''}}">¥{{selectedPlan.price}}</text>
+      </view>
+
+      <view class="row row-border" wx:if="{{discount > 0}}">
+        <text class="row-key row-key-green">First week 25% OFF</text>
+        <text class="row-val row-val-green">−¥{{discount}}</text>
+      </view>
+
       <view class="row row-border">
         <text class="row-key">Delivery</text>
-        <text class="row-val-sm">{{order.address}}</text>
-      </view>
-      <view class="row row-border">
-        <text class="row-key">Plan fee</text>
-        <text class="row-val">¥{{selectedPlan.price}}</text>
-      </view>
-      <view class="row row-border">
-        <text class="row-key">Delivery fee</text>
         <text class="row-val">¥35</text>
       </view>
+
       <view class="row">
         <text class="row-total-key">Total</text>
         <text class="row-total-val">¥{{total}}</text>
       </view>
     </view>
 
-    <!-- WeChat Pay Button -->
+    <!-- Payment method label -->
+    <text class="section-label">PAYMENT METHOD</text>
+
+    <!-- WeChat Pay -->
     <view class="wechat-pay-btn" bindtap="payNow">
       <view class="wechat-pay-left">
-        <text class="wechat-pay-icon">💚</text>
+        <view class="wechat-icon-wrap">
+          <text class="wechat-icon">💬</text>
+        </view>
         <view>
           <text class="wechat-pay-title">WeChat Pay</text>
           <text class="wechat-pay-sub">Tap to pay securely</text>
@@ -44,12 +54,8 @@
       </view>
       <text class="wechat-pay-amount">¥{{total}}</text>
     </view>
-    <text class="pay-hint">Weekly auto-renewal · Cancel before Sunday midnight</text>
 
-    <!-- Contact -->
-    <view class="contact-box" bindtap="contactUs">
-      <text class="contact-text">💬  Questions? Contact us first</text>
-    </view>
+    <text class="pay-hint">⏱  Weekly renewal · Cancel before Sunday</text>
 
   </scroll-view>
 
