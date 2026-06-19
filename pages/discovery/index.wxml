@@ -1,18 +1,27 @@
 <view class="container" wx:if="{{!checking}}">
 
+  <!-- Logo + tagline -->
   <view class="top-section">
+    <view class="logo-glow"></view>
     <image class="logo" src="/images/logo.png" mode="aspectFit" />
     <view class="tagline-wrap">
       <text class="tagline">Fitness meals,</text>
-      <text class="tagline">ready every day</text>
+      <text class="tagline">ready every morning</text>
     </view>
     <text class="sub-tagline">WEEKLY PLANS · MON-FRI</text>
   </view>
 
-  <view class="btn-wrap">
-    <view class="discount-badge">
-      <text class="discount-text">25% OFF your first week</text>
+  <!-- Discount banner -->
+  <view class="discount-wrap">
+    <view class="discount-banner">
+      <text class="discount-label">LIMITED OFFER</text>
+      <text class="discount-main">25% OFF</text>
+      <text class="discount-sub">your first week</text>
     </view>
+  </view>
+
+  <!-- Buttons -->
+  <view class="btn-wrap">
     <button class="btn-start" bindtap="goToTiers">Get started  →</button>
     <button class="btn-plans" bindtap="openBrochure">☰  See our plans</button>
   </view>

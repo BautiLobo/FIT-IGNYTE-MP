@@ -77,12 +77,10 @@ Page({
         const existing = await app.supabase('GET', 'clients', null, `phone=eq.${order.phone}`);
 
         if (existing && existing.length > 0) {
-          // Existing client — update plan and expiry
+          // Existing client — update plan, will be activated by payment page
           await app.supabase('PATCH', 'clients', {
-            status: 'Active',
+            status: 'Pending Payment',
             plan_id: order.plan_id,
-            plan_id: order.plan_id,
-            
             expiry_date: nextFriday,
           }, `id=eq.${existing[0].id}`);
         } else {
@@ -97,8 +95,6 @@ Page({
             allergies: order.allergies,
             goal: order.goal,
             plan_id: order.plan_id,
-            plan_id: order.plan_id,
-            
             status: 'Pending Payment',
             start_date: new Date().toISOString().split('T')[0],
             paid: false,

@@ -6,8 +6,7 @@ Page({
     clients: [],
     clientCount: 0,
     recipientType: 'all',
-    selectedClientId: null,
-    selectedClientName: '',
+    selectedClientIds: [],
     title: '',
     message: '',
     sending: false,
@@ -22,7 +21,7 @@ Page({
   async loadClients() {
     try {
       const data = await app.supabase('GET', 'clients', null, 'status=eq.Active&order=name.asc');
-      const clients = data || [];
+      const clients = (data || []).map(c => ({ ...c, selected: false }));
       this.setData({ clients, clientCount: clients.length });
     } catch (err) {
       console.error('Load clients error:', err);
@@ -50,13 +49,28 @@ Page({
 
   setRecipientType(e) {
     const type = e.currentTarget.dataset.type;
-    this.setData({ recipientType: type, selectedClientId: null, selectedClientName: '' });
+    const clearedClients = this.data.clients.map(c => ({ ...c, selected: false }));
+    this.setData({ recipientType: type, selectedClientIds: [], clients: clearedClients });
     this.updateCanSend();
   },
 
-  selectClient(e) {
-    const { id, name } = e.currentTarget.dataset;
-    this.setData({ selectedClientId: id, selectedClientName: name });
+  toggleClient(e) {
+    const id = String(e.currentTarget.dataset.id);
+    const { selectedClientIds, clients } = this.data;
+    const idx = selectedClientIds.indexOf(id);
+    let updatedIds;
+    if (idx > -1) {
+      updatedIds = selectedClientIds.filter(x => x !== id);
+    } else {
+      updatedIds = [...selectedClientIds, id];
+    }
+
+    const updatedClients = clients.map(c => ({
+      ...c,
+      selected: updatedIds.includes(String(c.id)),
+    }));
+
+    this.setData({ selectedClientIds: updatedIds, clients: updatedClients });
     this.updateCanSend();
   },
 
@@ -71,8 +85,8 @@ Page({
   },
 
   updateCanSend() {
-    const { recipientType, selectedClientId, title, message } = this.data;
-    const recipientOk = recipientType === 'all' || selectedClientId;
+    const { recipientType, selectedClientIds, title, message } = this.data;
+    const recipientOk = recipientType === 'all' || selectedClientIds.length > 0;
     const canSend = !!title.trim() && !!message.trim() && !!recipientOk;
     this.setData({ canSend });
   },
@@ -81,34 +95,31 @@ Page({
     if (!this.data.canSend || this.data.sending) return;
     this.setData({ sending: true });
 
-    const { recipientType, selectedClientId, selectedClientName, title, message, clients } = this.data;
+    const { recipientType, selectedClientIds, title, message, clients } = this.data;
 
     try {
       if (recipientType === 'all') {
-        // Insert one notification per active client
-        const inserts = clients.map(c => ({
-          client_id: c.id,
-          title: title.trim(),
-          message: message.trim(),
-          is_read: false,
-        }));
-
-        for (const n of inserts) {
-          await app.supabase('POST', 'notifications', n);
+        for (const c of clients) {
+          await app.supabase('POST', 'notifications', {
+            client_id: c.id,
+            title: title.trim(),
+            message: message.trim(),
+            is_read: false,
+          });
         }
-
       } else {
-        // Insert notification for one client
-        await app.supabase('POST', 'notifications', {
-          client_id: selectedClientId,
-          title: title.trim(),
-          message: message.trim(),
-          is_read: false,
-        });
+        for (const id of selectedClientIds) {
+          await app.supabase('POST', 'notifications', {
+            client_id: id,
+            title: title.trim(),
+            message: message.trim(),
+            is_read: false,
+          });
+        }
       }
 
-      wx.showToast({ title: 'Notification sent ✓', icon: 'none' });
-      this.setData({ title: '', message: '', selectedClientId: null, canSend: false });
+      wx.showToast({ title: 'Notification sent', icon: 'success' });
+      this.setData({ title: '', message: '', selectedClientIds: [], canSend: false });
       await this.loadRecent();
 
     } catch (err) {

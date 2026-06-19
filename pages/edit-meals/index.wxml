@@ -1,7 +1,14 @@
 <view class="container">
 
+  <!-- Top Bar -->
+  <view class="topbar">
+    <view class="back-btn" bindtap="goBack"><text class="back-arrow">‹</text></view>
+    <text class="topbar-title">Edit your meals</text>
+    <view style="width:60rpx;"></view>
+  </view>
+
   <!-- Day Tabs -->
-  <scroll-view class="day-tabs" scroll-x>
+  <view class="day-tabs">
     <view
       wx:for="{{days}}"
       wx:key="key"
@@ -10,9 +17,9 @@
       data-day="{{item.key}}"
     >
       <text class="day-tab-short">{{item.short}}</text>
-      <text class="day-tab-sub {{currentDay === item.key ? 'day-tab-sub-active' : ''}}">{{item.done ? '✓' : 'Meal 1'}}</text>
+      <text class="day-tab-check" wx:if="{{item.done}}">✓</text>
     </view>
-  </scroll-view>
+  </view>
 
   <scroll-view class="scroll" scroll-y>
 
@@ -22,8 +29,12 @@
 
     <block wx:else>
 
-      <!-- Section label -->
-      <text class="section-label">{{currentDayLabel}} — choose {{plan.meals}} meal(s)</text>
+      <!-- Plan Badge -->
+      <view class="plan-badge">
+        <text class="plan-badge-text">{{plan.name}} — {{plan.meals}} meal(s)/day</text>
+      </view>
+
+
 
       <!-- Photo preview -->
       <view wx:if="{{selectedMealIds.length > 0 && lastSelectedPhoto}}" class="photo-preview-wrap">

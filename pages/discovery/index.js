@@ -42,13 +42,36 @@ Page({
         const clientData = await app.supabase('GET', 'clients', null, `id=eq.${clientId}`);
         if (clientData && clientData.length > 0) {
           const client = clientData[0];
-          const expired = client.expiry_date && new Date(client.expiry_date) < new Date();
-          if (client.status === 'Pending Payment') { wx.reLaunch({ url: '/pages/approved/index' }); return; }
-          if (client.status === 'Active' && expired) {
-            await app.supabase('PATCH', 'clients', { status: 'Inactive' }, `id=eq.${clientId}`);
-            wx.reLaunch({ url: '/pages/renewal/index' }); return;
+
+          if (client.status === 'Pending Payment') {
+            // El cliente todavía no completó el pago — sin importar si quedó
+            // o no el pendingOrderId en storage, hay que mandarlo a terminar el pago.
+            const stillPending = wx.getStorageSync('pendingOrderId');
+            if (stillPending) {
+              wx.reLaunch({ url: '/pages/approved/index' }); return;
+            } else if (client.plan_id) {
+              // Tiene plan asignado pero el storage se perdió — reconstruir selectedPlan
+              const planData = await app.supabase('GET', 'plans', null, `id=eq.${client.plan_id}`);
+              if (planData && planData.length > 0) {
+                wx.setStorageSync('selectedPlan', planData[0]);
+                wx.setStorageSync('clientId', clientId);
+              }
+              wx.reLaunch({ url: '/pages/payment/index' }); return;
+            } else {
+              // No hay plan ni pendingOrderId — algo se rompió, volver a elegir plan
+              wx.reLaunch({ url: '/pages/tiers/index' }); return;
+            }
           }
-          if (client.status === 'Active') { wx.reLaunch({ url: '/pages/home/index' }); return; }
+
+          // Estado real calculado en base a start_date / expiry_date — nunca depende
+          // de un campo guardado que pueda desincronizarse.
+          const realStatus = app.getRealStatus(client.start_date, client.expiry_date);
+
+          if (realStatus === 'Active' || realStatus === 'Upcoming') {
+            wx.reLaunch({ url: '/pages/home/index' }); return;
+          }
+
+          // Inactive (plan vencido) → renovar
           wx.reLaunch({ url: '/pages/renewal/index' }); return;
         }
         wx.removeStorageSync('clientId');
@@ -59,6 +82,11 @@ Page({
 
     // No session — show discovery screen
     console.log('[discovery] no session — showing discovery');
+    this.setData({ checking: false });
+  },
+
+  onError(err) {
+    console.error('[discovery] page error:', err);
     this.setData({ checking: false });
   },
 

@@ -3,7 +3,7 @@
   <view class="topbar">
     <view class="back-btn" bindtap="goBack"><text class="back-arrow">‹</text></view>
     <text class="topbar-title">Complete payment</text>
-    <text class="topbar-lock">🔒</text>
+    <text class="topbar-lock"></text>
   </view>
 
   <scroll-view class="scroll" scroll-y>
@@ -55,7 +55,7 @@
       <text class="wechat-pay-amount">¥{{total}}</text>
     </view>
 
-    <text class="pay-hint">⏱  Weekly renewal · Cancel before Sunday</text>
+    <text class="pay-hint">  Weekly renewal · Cancel anytime</text>
 
   </scroll-view>
 

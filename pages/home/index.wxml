@@ -20,15 +20,22 @@
       <view class="greeting-row">
         <view>
           <text class="greeting-name">Hi, {{firstName}}</text>
-          <text class="greeting-sub">WEEK {{weekNumber}} · {{planLabel}}</text>
+          <text class="greeting-sub plan-color">{{planLabel}}</text>
         </view>
-        <view class="status-badge">
-          <text class="status-check">✓</text>
-          <text class="status-text">ACTIVE</text>
+        <view class="status-badge {{isUpcoming ? 'status-badge-upcoming' : ''}}">
+          <text class="status-check" wx:if="{{!isUpcoming}}">✓</text>
+          <text class="status-text">{{isUpcoming ? 'UPCOMING' : 'ACTIVE'}}</text>
         </view>
       </view>
 
-      <view class="delivery-banner" wx:if="{{todayDelivery}}">
+      <view class="delivery-banner delivery-banner-upcoming" wx:if="{{isUpcoming}}">
+        <view class="delivery-banner-body">
+          <text class="delivery-banner-title">Your plan starts soon</text>
+          <text class="delivery-banner-sub">First delivery on {{startDateFormatted}}</text>
+        </view>
+      </view>
+
+      <view class="delivery-banner" wx:if="{{!isUpcoming && todayDelivery}}">
         <view class="delivery-banner-icon-wrap">
           <text class="delivery-banner-icon">›</text>
         </view>
@@ -53,17 +60,7 @@
         </view>
       </view>
 
-      <view class="renewal-card" wx:if="{{showRenewal}}" bindtap="goToRenewal">
-        <view class="renewal-body">
-          <text class="renewal-title">Renew next week?</text>
-          <text class="renewal-sub">Due {{expiryFormatted}} · ¥{{planPrice}}</text>
-        </view>
-        <view class="renewal-btn">
-          <text class="renewal-btn-text">Renew</text>
-        </view>
-      </view>
-
-      <view class="btn-wrap">
+<view class="btn-wrap">
         <button class="btn-contact" bindtap="contactUs">Contact FIT IGNYTE</button>
       </view>
 

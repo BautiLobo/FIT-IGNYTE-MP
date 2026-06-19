@@ -94,6 +94,10 @@ Page({
     }
   },
 
+  editMeals() {
+    wx.navigateTo({ url: '/pages/meal-select/index?from=order-summary' });
+  },
+
   goBack() {
     wx.navigateBack();
   },

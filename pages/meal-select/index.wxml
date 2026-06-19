@@ -8,7 +8,7 @@
   </view>
 
   <!-- Day Tabs -->
-  <scroll-view class="day-tabs" scroll-x>
+  <view class="day-tabs">
     <view
       wx:for="{{days}}"
       wx:key="key"
@@ -17,9 +17,9 @@
       data-day="{{item.key}}"
     >
       <text class="day-tab-short">{{item.short}}</text>
-      <text class="day-tab-sub {{currentDay === item.key ? 'day-tab-sub-active' : ''}}">{{item.done ? '✓' : 'Meal 1'}}</text>
+      <text class="day-tab-check" wx:if="{{item.done}}">✓</text>
     </view>
-  </scroll-view>
+  </view>
 
   <scroll-view class="scroll" scroll-y>
 
@@ -35,8 +35,6 @@
         <text class="plan-badge-change" bindtap="goBack">Change plan</text>
       </view>
 
-      <!-- Section label -->
-      <text class="section-label">{{currentDayLabel | upperCase}} MENU — choose {{selectedPlan.meals}} meal(s)</text>
 
       <!-- Photo preview — shows last selected meal photo -->
       <view wx:if="{{selectedMealIds.length > 0 && lastSelectedPhoto}}" class="photo-preview-wrap">

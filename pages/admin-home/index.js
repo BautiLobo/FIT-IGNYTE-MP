@@ -31,10 +31,9 @@ Page({
     else if (hour >= 18) timeOfDay = 'evening';
 
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const now = new Date();
-    const startOfYear = new Date(now.getFullYear(), 0, 1);
-    const weekNum = Math.ceil(((now - startOfYear) / 86400000 + startOfYear.getDay() + 1) / 7);
-    const todayLabel = `${days[now.getDay()]} · WEEK ${weekNum}`;
+    const todayLabel = `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}`;
 
     this.setData({ timeOfDay, todayLabel });
   },

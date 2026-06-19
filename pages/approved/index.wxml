@@ -1,10 +1,10 @@
 <view class="container">
 
   <view class="topbar">
-    <image class="topbar-logo" src="/images/mark.png" mode="aspectFit" />
+    <image style="position: relative; left: 0rpx; top: 25rpx; width: 214rpx; height: 185rpx; display: block; box-sizing: border-box" class="topbar-logo" src="/images/mark.png" mode="aspectFit" />
   </view>
 
-  <view class="content">
+  <view class="content" style="position: relative; left: 0rpx; top: -225rpx">
 
     <view class="circle-wrap">
       <view class="hero-circle">
@@ -26,7 +26,7 @@
     </view>
 
     <view class="btn-wrap">
-      <button class="btn-secondary" bindtap="contactUs">💬  Contact FIT IGNYTE</button>
+      <button class="btn-secondary" bindtap="contactUs" style="position: relative; left: 0rpx; top: -22rpx; width: 656rpx; height: 93rpx; display: block; box-sizing: border-box">💬  Contact FIT IGNYTE</button>
     </view>
 
   </view>

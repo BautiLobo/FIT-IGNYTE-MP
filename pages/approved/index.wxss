@@ -9,14 +9,14 @@
 }
 
 .topbar {
-  padding: 40rpx 28rpx 24rpx;
+  padding: 80rpx 28rpx 24rpx;
   border-bottom: 1rpx solid #1a1a22;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.topbar-logo { width: 80rpx; height: 80rpx; }
+.topbar-logo { width: 120rpx; height: 120rpx; }
 
 .content {
   flex: 1;

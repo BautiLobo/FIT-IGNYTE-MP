@@ -14,7 +14,7 @@ page { background: #0b0b0c; }
 /* ── TOPBAR ── */
 .topbar {
   background: #0b0b0c;
-  padding: 80rpx 28rpx 20rpx;
+  padding: 80rpx 110rpx 20rpx 28rpx;
   border-bottom: 1rpx solid #1a1a22;
   display: flex;
   align-items: center;
@@ -24,17 +24,18 @@ page { background: #0b0b0c; }
   box-sizing: border-box;
 }
 
-.topbar-logo { width: 120rpx; height: 48rpx; }
+.topbar-logo { width: 160rpx; height: 64rpx; }
 
 .admin-badge {
   background: #7f1d1d;
   border: 1rpx solid #e8342a;
   border-radius: 100rpx;
-  padding: 10rpx 18rpx;
+  padding: 10rpx 16rpx;
   display: flex;
   align-items: center;
   gap: 6rpx;
   flex-shrink: 0;
+  max-width: 150rpx;
 }
 .admin-badge-icon { font-size: 22rpx; }
 .admin-badge-text { font-size: 22rpx; font-weight: 800; color: #f87171; letter-spacing: 2rpx; }
@@ -42,7 +43,7 @@ page { background: #0b0b0c; }
 /* ── SCROLL ── */
 .scroll {
   flex: 1;
-  padding: 24rpx 28rpx;
+  padding: 32rpx 28rpx;
   box-sizing: border-box;
   overflow-x: hidden;
   width: 100%;
@@ -53,15 +54,15 @@ page { background: #0b0b0c; }
 @keyframes spin { to { transform:rotate(360deg); } }
 
 /* ── GREETING ── */
-.greeting { margin-bottom: 28rpx; }
-.greeting-name { font-size: 48rpx; font-weight: 900; font-style: italic; color: #f3f3f4; display: block; }
-.greeting-sub { font-size: 22rpx; color: #5d5d65; display: block; margin-top: 6rpx; letter-spacing: 2rpx; }
+.greeting { margin-bottom: 40rpx; }
+.greeting-name { font-size: 56rpx; font-weight: 900; font-style: italic; color: #f3f3f4; display: block; }
+.greeting-sub { font-size: 25rpx; color: #8a8a92; display: block; margin-top: 8rpx; letter-spacing: 2rpx; }
 
 /* ── STATS ── */
 .stats-row {
   display: flex;
-  gap: 16rpx;
-  margin-bottom: 28rpx;
+  gap: 18rpx;
+  margin-bottom: 32rpx;
   width: 100%;
   box-sizing: border-box;
 }
@@ -70,33 +71,33 @@ page { background: #0b0b0c; }
   flex: 1;
   background: #13131a;
   border: 1rpx solid #1a1a22;
-  border-radius: 20rpx;
-  padding: 24rpx;
+  border-radius: 22rpx;
+  padding: 32rpx 28rpx;
   box-sizing: border-box;
   overflow: hidden;
 }
-.stat-label { font-size: 20rpx; color: #5d5d65; font-weight: 700; letter-spacing: 2rpx; display: block; margin-bottom: 8rpx; }
-.stat-num { font-size: 64rpx; font-weight: 900; color: #f3f3f4; display: block; line-height: 1; }
+.stat-label { font-size: 22rpx; color: #8a8a92; font-weight: 700; letter-spacing: 2rpx; display: block; margin-bottom: 12rpx; }
+.stat-num { font-size: 72rpx; font-weight: 900; color: #f3f3f4; display: block; line-height: 1; }
 .stat-red { color: #e8342a; }
 
 /* ── ACTION CARDS ── */
 .action-card {
   background: #13131a;
   border: 1rpx solid #1a1a22;
-  border-radius: 20rpx;
-  padding: 24rpx;
+  border-radius: 22rpx;
+  padding: 30rpx 28rpx;
   display: flex;
   align-items: center;
-  gap: 20rpx;
-  margin-bottom: 16rpx;
+  gap: 24rpx;
+  margin-bottom: 18rpx;
   width: 100%;
   box-sizing: border-box;
 }
 
 .action-icon-wrap {
-  width: 72rpx;
-  height: 72rpx;
-  border-radius: 16rpx;
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 18rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -104,17 +105,17 @@ page { background: #0b0b0c; }
 }
 .action-icon-red { background: #2a0808; }
 .action-icon-dark { background: #1a1a22; }
-.action-icon-glyph { font-size: 30rpx; color: #f3f3f4; }
+.action-icon-glyph { font-size: 32rpx; color: #f3f3f4; }
 
 .action-body { flex: 1; overflow: hidden; }
-.action-title { font-size: 30rpx; font-weight: 800; color: #f3f3f4; display: block; }
-.action-sub { font-size: 22rpx; color: #5d5d65; display: block; margin-top: 4rpx; }
+.action-title { font-size: 32rpx; font-weight: 800; color: #f3f3f4; display: block; }
+.action-sub { font-size: 24rpx; color: #8a8a92; display: block; margin-top: 6rpx; }
 
-.action-arrow { font-size: 40rpx; color: #5d5d65; flex-shrink: 0; }
+.action-arrow { font-size: 44rpx; color: #5d5d65; flex-shrink: 0; }
 
 .pending-badge {
-  width: 44rpx;
-  height: 44rpx;
+  width: 48rpx;
+  height: 48rpx;
   background: #e8342a;
   border-radius: 50%;
   display: flex;

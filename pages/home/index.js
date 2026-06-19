@@ -2,11 +2,11 @@
 const app = getApp();
 
 const DAYS = [
-  { key: 'mon', short: 'MON', full: 'Monday' },
-  { key: 'tue', short: 'TUE', full: 'Tuesday' },
-  { key: 'wed', short: 'WED', full: 'Wednesday' },
-  { key: 'thu', short: 'THU', full: 'Thursday' },
-  { key: 'fri', short: 'FRI', full: 'Friday' },
+  { key: 'mon', short: 'MON', full: 'Monday', idx: 1 },
+  { key: 'tue', short: 'TUE', full: 'Tuesday', idx: 2 },
+  { key: 'wed', short: 'WED', full: 'Wednesday', idx: 3 },
+  { key: 'thu', short: 'THU', full: 'Thursday', idx: 4 },
+  { key: 'fri', short: 'FRI', full: 'Friday', idx: 5 },
 ];
 
 Page({
@@ -14,7 +14,6 @@ Page({
     loading: true,
     client: null,
     firstName: '',
-    weekNumber: '',
     weekMeals: [],
     todayDelivery: null,
     showRenewal: false,
@@ -45,40 +44,47 @@ Page({
 
       const client = data[0];
 
-      // Get plan name from plans table
       if (client.plan_id) {
         const planData = await app.supabase('GET', 'plans', null, `id=eq.${client.plan_id}`);
         if (planData && planData.length > 0) {
           client.plan_name = planData[0].name;
         }
       }
-      // Load meal selections from meal_selections table
+
       const selectionsData = await app.supabase('GET', 'meal_selections', null, `client_id=eq.${clientId}&order=day.asc,slot.asc`);
       const selections = selectionsData || [];
 
       const firstName = client.name ? client.name.split(' ')[0] : 'there';
-      const weekNumber = this.getWeekNumber();
-      const weekMeals = await this.buildWeekMeals(selections);
+
+      // Determinar qué día le corresponde "hoy" dentro del plan, basado en start_date
+      const planDayKey = this.getPlanDayKey(client.start_date, client.expiry_date);
+
+      const weekMeals = await this.buildWeekMeals(selections, planDayKey);
       const todayDelivery = this.getTodayDelivery(weekMeals);
       const daysLeft = this.getDaysLeft(client.expiry_date);
 
-      // Show renewal banner on Fridays or if 1 day left
-      const today = new Date().getDay();
-      const showRenewal = today === 5 || daysLeft <= 1;
+      const realStatus = app.getRealStatus(client.start_date, client.expiry_date);
+      const isUpcoming = realStatus === 'Upcoming';
 
-      // Plan label: "Small × 2"
+      let startDateFormatted = '';
+      if (isUpcoming && client.start_date) {
+        const d = new Date(client.start_date);
+        startDateFormatted = d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+      }
+
+      const realToday = new Date().getDay();
+      const showRenewal = !isUpcoming && (realToday === 5 || daysLeft <= 1);
+
       const planLabel = client.plan_name
         ? client.plan_name.replace('Lean Fit', 'Small').replace('Muscle', 'Big').replace('Vegetarian', 'Veg')
         : '';
 
-      // Expiry formatted: "Friday, Jun 20"
       let expiryFormatted = '';
       if (client.expiry_date) {
         const d = new Date(client.expiry_date);
         expiryFormatted = d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
       }
 
-      // Plan price from plans table
       let planPrice = 0;
       if (client.plan_id) {
         const pd = await app.supabase('GET', 'plans', null, `id=eq.${client.plan_id}`);
@@ -88,7 +94,6 @@ Page({
       this.setData({
         client,
         firstName,
-        weekNumber,
         weekMeals,
         todayDelivery,
         showRenewal,
@@ -96,6 +101,8 @@ Page({
         planLabel,
         planPrice,
         expiryFormatted,
+        isUpcoming,
+        startDateFormatted,
         loading: false,
       });
 
@@ -105,12 +112,27 @@ Page({
     }
   },
 
-  async buildWeekMeals(selections) {
-    const today = new Date().getDay();
-    const dayIndexMap = { mon: 1, tue: 2, wed: 3, thu: 4, fri: 5 };
+  // Devuelve la key de día (mon/tue/wed/thu/fri) que corresponde a "hoy" dentro del ciclo del plan,
+  // o null si hoy cae fuera del rango start_date — expiry_date, o si hoy es fin de semana.
+  getPlanDayKey(startDateStr, expiryDateStr) {
+    const realToday = new Date();
+    realToday.setHours(0, 0, 0, 0);
+    const dow = realToday.getDay(); // 0=Sun ... 6=Sat
+    if (dow === 0 || dow === 6) return null;
+
+    if (startDateStr && expiryDateStr) {
+      const start = new Date(startDateStr + 'T00:00:00');
+      const expiry = new Date(expiryDateStr + 'T00:00:00');
+      if (realToday < start || realToday > expiry) return null;
+    }
+
+    const map = { 1: 'mon', 2: 'tue', 3: 'wed', 4: 'thu', 5: 'fri' };
+    return map[dow] || null;
+  },
+
+  async buildWeekMeals(selections, planDayKey) {
     const dayLabelMap = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday' };
 
-    // Collect all meal IDs
     const allIds = [];
     selections.forEach(s => {
       if (s.meals_json) s.meals_json.forEach(id => { if (id && !allIds.includes(id)) allIds.push(id); });
@@ -124,30 +146,20 @@ Page({
 
     return DAYS.map(d => {
       const dayLabel = dayLabelMap[d.key];
-      // meal_selections table: one row per day (slot=1)
       const row = selections.find(s => s.day === dayLabel && s.slot === 1);
       const mealIds = row ? (row.meals_json || []) : [];
       const meal1 = mealIds.map(id => mealMap[id] ? mealMap[id].name : '').filter(Boolean).join(' + ');
       const photo = mealIds.length > 0 && mealMap[mealIds[0]] ? mealMap[mealIds[0]].photo_url || '' : '';
       const time = row ? row.delivery_time : '';
-      const isToday = dayIndexMap[d.key] === today;
+      const isToday = d.key === planDayKey;
       return { day: d.full, dayShort: d.short, meal1, meal2: '', time, snack: null, isToday, photo };
     });
   },
 
   getTodayDelivery(weekMeals) {
-    const today = new Date().getDay();
-    const dayIndexMap = { 1: 'Monday', 2: 'Tuesday', 3: 'Wednesday', 4: 'Thursday', 5: 'Friday' };
-    if (!dayIndexMap[today]) return null;
-    const todayMeals = weekMeals.find(m => m.day === dayIndexMap[today]);
+    const todayMeals = weekMeals.find(m => m.isToday);
     if (!todayMeals || !todayMeals.meal1) return null;
     return { day: todayMeals.day, time: todayMeals.time };
-  },
-
-  getWeekNumber() {
-    const now = new Date();
-    const start = new Date(now.getFullYear(), 0, 1);
-    return Math.ceil(((now - start) / 86400000 + start.getDay() + 1) / 7);
   },
 
   getDaysLeft(expiresAt) {

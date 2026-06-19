@@ -1,6 +1,6 @@
 /* pages/start-date/index.wxss */
 
-.container { display:flex; flex-direction:column; height:100vh; background:#0b0b0c; }
+.container { display:flex; flex-direction:column; height:75vh; background:#0b0b0c; }
 
 .topbar { background:#0b0b0c; padding:80rpx 28rpx 20rpx; border-bottom:1rpx solid #1a1a22; flex-shrink:0; display:flex; align-items:center; }
 .back-btn { width:56rpx; height:56rpx; background:#1a1a22; border-radius:50%; display:flex; align-items:center; justify-content:center; }
@@ -27,27 +27,27 @@
 
 /* ── HEADING ── */
 .heading-wrap {
-  margin-bottom: 8rpx;
+  margin-bottom: 40rpx;
   display: flex;
   flex-direction: column;
-  gap: 2rpx;
+  gap: 14rpx;
+  text-align: center;
+  width: 100%;
 }
 
 .heading {
-  font-size: 56rpx;
-  font-weight: 900;
-  font-style: italic;
+  font-size: 38rpx;
+  font-weight: 800;
   color: #f3f3f4;
-  line-height: 1.15;
   display: block;
 }
 
 .heading-sub {
-  font-size: 24rpx;
+  font-size: 27rpx;
   color: #a0a0aa;
   line-height: 1.5;
   display: block;
-  margin-top: 12rpx;
+  font-weight: 600;
 }
 
 /* ── DATE PICKER ── */
@@ -82,17 +82,19 @@
 .expiry-sub { font-size:22rpx; color:#5d5d65; display:block; }
 
 /* ── BUTTON ── */
+button { margin:0 !important; padding:0 !important; background:transparent; border:none; }
+
 .btn-primary {
-  display: block;
-  background: #e8342a;
-  border: none;
-  color: #fff;
-  border-radius: 20rpx;
-  padding: 36rpx 0;
-  font-size: 34rpx;
-  font-weight: 800;
+  background: #e8342a !important;
+  border-radius: 24rpx !important;
+  height: 100rpx;
+  line-height: 100rpx;
+  color: #fff !important;
+  font-size: 34rpx !important;
+  font-weight: 800 !important;
   text-align: center;
-  width: 100%;
+  width: 100% !important;
   margin-top: 12rpx;
   box-sizing: border-box;
+  display: block;
 }

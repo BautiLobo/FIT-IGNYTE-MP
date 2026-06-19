@@ -54,7 +54,7 @@
 
 .list-sub {
   font-size: 22rpx;
-  color: #5d5d65;
+  color: #9f9fa8;
   display: block;
 }
 
@@ -94,7 +94,7 @@
 .plan-left { display: flex; flex-direction: column; gap: 4rpx; flex: 1; overflow: hidden; }
 .plan-category { font-size: 20rpx; font-weight: 700; letter-spacing: 2rpx; text-transform: uppercase; }
 .plan-name { font-size: 36rpx; font-weight: 800; color: #f3f3f4; }
-.plan-meals { font-size: 24rpx; color: #5d5d65; }
+.plan-meals { font-size: 24rpx; color: #9f9fa8; }
 
 .plan-right { display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; }
 .plan-price { font-size: 48rpx; font-weight: 800; }
@@ -111,14 +111,14 @@
 .hint-line {
   flex: 1;
   height: 1rpx;
-  background: #2a2a33;
+  background: #9f9fa8;
   display: block;
 }
 
 .hint {
   font-size: 22rpx;
-  color: #6a6a75;
+  color: #9f9fa8;
   white-space: nowrap;
 }
 
-.plan-kcal { font-size: 20rpx; color: #5d5d65; display: block; margin-top: 2rpx; }
+.plan-kcal { font-size: 20rpx; color:#9f9fa8; display: block; margin-top: 2rpx; }

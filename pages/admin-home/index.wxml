@@ -4,7 +4,7 @@
   <view class="topbar">
     <image class="topbar-logo" src="/images/logo.png" mode="aspectFit" />
     <view class="admin-badge">
-      <text class="admin-badge-icon">🔒</text>
+      
       <text class="admin-badge-text">ADMIN</text>
     </view>
   </view>
@@ -37,9 +37,6 @@
 
       <!-- Actions -->
       <view class="action-card" bindtap="goToOrders">
-        <view class="action-icon-wrap action-icon-red">
-          <text class="action-icon-glyph">≡</text>
-        </view>
         <view class="action-body">
           <text class="action-title">Review orders</text>
           <text class="action-sub">Approve or reject new requests</text>
@@ -51,9 +48,6 @@
       </view>
 
       <view class="action-card" bindtap="goToNotify">
-        <view class="action-icon-wrap action-icon-dark">
-          <text class="action-icon-glyph">🔔</text>
-        </view>
         <view class="action-body">
           <text class="action-title">Send notification</text>
           <text class="action-sub">To everyone or one client</text>
@@ -62,9 +56,6 @@
       </view>
 
       <view class="action-card" bindtap="goToClients">
-        <view class="action-icon-wrap action-icon-dark">
-          <text class="action-icon-glyph">👤</text>
-        </view>
         <view class="action-body">
           <text class="action-title">Clients</text>
           <text class="action-sub">View and manage subscriptions</text>

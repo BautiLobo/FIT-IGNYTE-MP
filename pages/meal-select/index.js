@@ -13,6 +13,7 @@ Page({
   data: {
     loading: true,
     fromRenewal: false,
+    fromOrderSummary: false,
     selectedPlan: null,
     days: [],
     currentDay: 'mon',
@@ -40,7 +41,10 @@ Page({
   },
 
   async onLoad(options) {
-    const fromRenewal = options.from === 'renewal';
+    const fromRenewal = options.from === 'renewal' || wx.getStorageSync('flowContext') === 'renewal';
+    const fromOrderSummary = options.from === 'order-summary';
+    console.log('[meal-select] fromRenewal:', fromRenewal, 'options.from:', options.from, 'storage:', wx.getStorageSync('flowContext'));
+    if (fromRenewal) wx.removeStorageSync('flowContext');
     const selectedPlan = wx.getStorageSync('selectedPlan');
 
     if (!selectedPlan) {
@@ -72,7 +76,7 @@ Page({
     }
 
     const days = DAYS.map(d => ({ ...d, done: false }));
-    this.setData({ fromRenewal, selectedPlan, days, allSelections });
+    this.setData({ fromRenewal, fromOrderSummary, selectedPlan, days, allSelections });
     await this.loadMenu('mon');
   },
 
@@ -134,9 +138,15 @@ Page({
         d.key === dayKey ? { ...d, done: dayConfirmed } : d
       );
 
+      const updatedMeals = (meals || []).map(m => ({
+        ...m,
+        selected: existingMealIds.includes(m.id),
+        selectedIndex: existingMealIds.indexOf(m.id) >= 0 ? existingMealIds.indexOf(m.id) + 1 : 0,
+      }));
+
       this.setData({
         loading: false,
-        menuMeals: meals || [],
+        menuMeals: updatedMeals,
         currentDay: dayKey,
         currentDayLabel: dayLabel,
         snackOfDay,
@@ -278,14 +288,15 @@ Page({
 
   async goNext() {
     if (!this.data.canGoNext) return;
-    const { currentDay, isLastDay, allSelections, fromRenewal } = this.data;
+    const { currentDay, isLastDay, allSelections, fromRenewal, fromOrderSummary } = this.data;
 
     if (isLastDay) {
-      if (fromRenewal) {
-        wx.setStorageSync('mealSelections', allSelections);
-        wx.navigateTo({ url: '/pages/payment/index?from=renewal' });
+      wx.setStorageSync('mealSelections', allSelections);
+      if (fromOrderSummary) {
+        wx.navigateBack();
+      } else if (fromRenewal) {
+        wx.navigateTo({ url: '/pages/start-date/index?from=renewal' });
       } else {
-        wx.setStorageSync('mealSelections', allSelections);
         wx.navigateTo({ url: '/pages/register/index' });
       }
     } else {

@@ -1,7 +1,6 @@
 {
   "pages": [
     "pages/discovery/index",
-    "pages/loading/index",
     "pages/tiers/index",
     "pages/plans/index",
     "pages/register/index",

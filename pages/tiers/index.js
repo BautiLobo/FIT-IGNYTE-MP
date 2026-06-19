@@ -1,12 +1,12 @@
 // pages/tiers/index.js
 const app = getApp();
 
+// Mismos colores base que usa plans/index.js por tier
 const TIER_COLORS = {
-  default: '#e8342a',
+  'Lean Fit':    '#38BDF8',
+  'Muscle Gain': '#FBBF24',
+  'Vegetarian':  '#34D399',
 };
-
-// Assign colors by index for variety
-const COLORS = ['#38BDF8', '#e8342a', '#34D399', '#FBBF24', '#A78BFA'];
 
 Page({
   data: {
@@ -31,10 +31,11 @@ Page({
         tierMap[p.tier]++;
       });
 
-      const tiers = Object.entries(tierMap).map(([name, count], i) => ({
+      const tiers = Object.entries(tierMap).map(([name, count]) => ({
         name,
+        tag: name.toUpperCase(),
         planCount: count,
-        color: COLORS[i % COLORS.length],
+        color: TIER_COLORS[name] || '#e8342a',
       }));
 
       this.setData({ tiers, loading: false });
@@ -46,6 +47,7 @@ Page({
 
   selectTier(e) {
     const tier = e.currentTarget.dataset.tier;
+    if (this.data.fromRenewal) wx.setStorageSync('flowContext', 'renewal');
     wx.navigateTo({ url: '/pages/plans/index?tier=' + encodeURIComponent(tier) });
   },
 

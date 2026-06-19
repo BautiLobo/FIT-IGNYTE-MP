@@ -44,15 +44,16 @@ Page({
   },
 
   keepSameMeals() {
-    wx.redirectTo({ url: '/pages/edit-meals/index?from=renewal' });
+    wx.navigateTo({ url: '/pages/edit-meals/index?from=renewal' });
   },
 
   choosNewMeals() {
-    wx.redirectTo({ url: '/pages/meal-select/index?from=renewal' });
+    wx.navigateTo({ url: '/pages/meal-select/index?from=renewal' });
   },
 
   changePlan() {
-    wx.redirectTo({ url: '/pages/tiers/index?from=renewal' });
+    wx.setStorageSync('flowContext', 'renewal');
+    wx.navigateTo({ url: '/pages/tiers/index?from=renewal' });
   },
 
   goBack() {

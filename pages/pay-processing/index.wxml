@@ -15,7 +15,7 @@
     </view>
 
     <text class="title">{{done ? 'Payment confirmed!' : 'Processing payment...'}}</text>
-    <text class="sub">{{done ? 'Welcome to FIT IGNYTE 🔥' : 'Please don\'t close this screen'}}</text>
+    <text class="sub">{{done ? 'Welcome to FIT IGNYTE 🔥' : 'Please do not close this screen'}}</text>
 
     <!-- Animated dots -->
     <view class="dots" wx:if="{{!done}}">

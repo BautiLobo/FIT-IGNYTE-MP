@@ -1,25 +1,23 @@
 <view class="container">
 
-  <!-- Topbar -->
+  <!-- Top Bar -->
   <view class="topbar">
-    <view class="back-btn" bindtap="goBack">
-      <text class="back-arrow">‹</text>
-    </view>
-    <text class="topbar-title">Review orders</text>
+    <view class="back-btn" bindtap="goBack"><text class="back-arrow">‹</text></view>
+    <text class="topbar-title">Edit your meals</text>
     <view style="width:60rpx;"></view>
   </view>
 
-  <!-- Filter Tabs -->
-  <view class="filter-tabs">
-    <view class="filter-tab {{filter === 'pending' ? 'filter-tab-active' : ''}}" bindtap="setFilter" data-filter="pending">
-      <text class="filter-tab-text {{filter === 'pending' ? 'filter-tab-text-active' : ''}}">Pending</text>
-      <view wx:if="{{pendingCount > 0}}" class="filter-badge">{{pendingCount}}</view>
-    </view>
-    <view class="filter-tab {{filter === 'approved' ? 'filter-tab-active' : ''}}" bindtap="setFilter" data-filter="approved">
-      <text class="filter-tab-text {{filter === 'approved' ? 'filter-tab-text-active' : ''}}">Approved</text>
-    </view>
-    <view class="filter-tab {{filter === 'rejected' ? 'filter-tab-active' : ''}}" bindtap="setFilter" data-filter="rejected">
-      <text class="filter-tab-text {{filter === 'rejected' ? 'filter-tab-text-active' : ''}}">Rejected</text>
+  <!-- Day Tabs -->
+  <view class="day-tabs">
+    <view
+      wx:for="{{days}}"
+      wx:key="key"
+      class="day-tab {{currentDay === item.key ? 'day-tab-active' : ''}}"
+      bindtap="switchDay"
+      data-day="{{item.key}}"
+    >
+      <text class="day-tab-short">{{item.short}}</text>
+      <text class="day-tab-check" wx:if="{{item.done}}">✓</text>
     </view>
   </view>
 
@@ -29,76 +27,77 @@
       <view class="loading-wrap"><view class="spinner"></view></view>
     </block>
 
-    <block wx:elif="{{orders.length === 0}}">
-      <view class="empty-wrap">
-        <text class="empty-text">No {{filter}} orders</text>
-      </view>
-    </block>
-
     <block wx:else>
-      <view wx:for="{{orders}}" wx:key="id" class="order-card">
 
-        <!-- Header: avatar + name + badge -->
-        <view class="order-header">
-          <view class="avatar">
-            <text class="avatar-icon">👤</text>
-          </view>
-          <view class="order-header-body">
-            <text class="order-name">{{item.name}}</text>
-            <text class="order-plan">{{item.plan_name}}</text>
-          </view>
-          <view class="status-badge status-{{item.status}}">
-            <text class="status-text">{{item.status}}</text>
-          </view>
-        </view>
-
-        <!-- Info rows -->
-        <view class="order-divider"></view>
-
-        <view class="info-row">
-          <text class="info-icon">📍</text>
-          <text class="info-val">{{item.address}}, {{item.district}}</text>
-        </view>
-        <view class="info-row">
-          <text class="info-icon">📱</text>
-          <text class="info-val">{{item.phone}}</text>
-        </view>
-        <view class="info-row" wx:if="{{item.allergies}}">
-          <text class="info-icon">⚠️</text>
-          <text class="info-val info-warning">{{item.allergies}}</text>
-        </view>
-
-        <!-- Actions -->
-        <view wx:if="{{item.status === 'pending'}}" class="order-actions">
-          <button class="btn-reject" catchtap="rejectOrder" data-id="{{item.id}}">
-            <text>✕</text><text>  Reject</text>
-          </button>
-          <button class="btn-approve" catchtap="approveOrder" data-id="{{item.id}}">
-            <text>✓</text><text>  Approve</text>
-          </button>
-        </view>
-
+      <!-- Plan Badge -->
+      <view class="plan-badge">
+        <text class="plan-badge-text">{{plan.name}} — {{plan.meals}} meal(s)/day</text>
       </view>
+
+      <!-- Section label -->
+      <text class="section-label">{{currentDayLabel}} — choose {{plan.meals}} meal(s)</text>
+
+
+      <!-- Meal List -->
+      <view class="meal-list">
+        <view
+          wx:for="{{menuMeals}}"
+          wx:key="id"
+          class="meal-row {{item.selected ? 'meal-row-selected' : ''}}"
+          bindtap="toggleMeal"
+          data-meal="{{item}}"
+        >
+          <view class="meal-thumb-wrap">
+            <image wx:if="{{item.photo_url}}" class="meal-thumb" src="{{item.photo_url}}" mode="aspectFill" />
+            <view wx:else class="meal-thumb-placeholder">
+              <text class="meal-thumb-label">{{item.name.substring(0,2).toUpperCase()}}</text>
+            </view>
+          </view>
+          <view class="meal-info">
+            <text class="meal-name {{item.selected ? 'meal-name-active' : ''}}">{{item.name}}</text>
+            <text class="meal-desc">{{item.sauce}} · {{item.kcal}} kcal</text>
+          </view>
+          <view class="meal-check {{item.selected ? 'meal-check-on' : ''}}">
+            <text wx:if="{{item.selected}}" class="meal-check-num">{{item.selectedIndex}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- Snack + Time + Notes — show when meals selected -->
+      <block wx:if="{{selectedMealIds.length >= plan.meals}}">
+
+        <view wx:if="{{snackOfDay}}" class="snack-wrap">
+          <view class="snack-inner {{snackAdded ? 'snack-inner-added' : ''}}" bindtap="toggleSnack">
+            <text class="snack-name">{{snackOfDay}}</text>
+            <view class="snack-badge {{snackAdded ? 'snack-badge-added' : ''}}">
+              <text>{{snackAdded ? 'Added' : '+ Add snack'}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="time-picker">
+          <text class="time-picker-label">DELIVERY TIME</text>
+          <picker mode="time" value="{{selectedTime}}" start="07:00" end="20:00" bindchange="onTimeChange">
+            <view class="time-picker-display">
+              <text class="time-picker-value">{{selectedTime}}</text>
+              <text class="time-picker-tap">Tap to change</text>
+            </view>
+          </picker>
+        </view>
+
+        <view class="notes-wrap">
+          <text class="notes-label">Notes (optional)</text>
+          <textarea class="notes-input" placeholder="e.g. no onion, extra sauce..." value="{{currentNotes}}" bindinput="onNotesInput" auto-height />
+        </view>
+
+        <button class="btn-save-next" bindtap="saveAndNext">
+          {{isLastDay ? 'Save changes →' : 'Save & Next →'}}
+        </button>
+
+      </block>
+
     </block>
 
   </scroll-view>
-
-  <!-- Rejection Modal -->
-  <view class="modal-overlay {{showRejectModal ? 'modal-visible' : ''}}" bindtap="closeModal">
-    <view class="modal" catchtap="noop">
-      <text class="modal-title">Reason for rejection</text>
-      <textarea
-        class="modal-input"
-        placeholder="e.g. Outside delivery area, will expand soon..."
-        value="{{rejectionNote}}"
-        bindinput="onRejectNoteInput"
-        auto-height
-      />
-      <view class="modal-actions">
-        <button class="modal-btn-cancel" bindtap="closeModal">Cancel</button>
-        <button class="modal-btn-confirm" bindtap="confirmReject">Send rejection</button>
-      </view>
-    </view>
-  </view>
 
 </view>

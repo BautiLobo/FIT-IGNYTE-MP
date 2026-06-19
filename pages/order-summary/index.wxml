@@ -22,7 +22,10 @@
 
     <!-- Meals -->
     <view class="card">
-      <text class="card-label">CHOSEN MEALS</text>
+      <view class="card-header-row">
+        <text class="card-label">CHOSEN MEALS</text>
+        <view class="btn-edit" bindtap="editMeals"><text>Edit ›</text></view>
+      </view>
       <view wx:for="{{mealSummary}}" wx:key="day">
         <view class="day-header">
           <text class="day-label">{{item.dayLabel}}</text>

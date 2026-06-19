@@ -30,9 +30,9 @@ Page({
           phone:     c.phone || '',
           district:  c.district || '',
           address:   c.address || '',
-          access:    c.building_access || '',
+          access:    c.access || '',
           allergies: c.allergies || '',
-          goal:      c.fitness_goal || '',
+          goal:      c.goal || '',
         }
       });
     } catch (err) {
@@ -54,13 +54,13 @@ Page({
 
     try {
       await app.supabase('PATCH', 'clients', {
-        name:            form.name.trim(),
-        phone:           form.phone.trim(),
-        district:        form.district.trim(),
-        address:         form.address.trim(),
-        access: form.access.trim(),
-        allergies:       form.allergies.trim(),
-        fitness_goal:    form.goal.trim(),
+        name:      form.name.trim(),
+        phone:     form.phone.trim(),
+        district:  form.district.trim(),
+        address:   form.address.trim(),
+        access:    form.access.trim(),
+        allergies: form.allergies.trim(),
+        goal:      form.goal.trim(),
       }, `id=eq.${clientId}`);
 
       wx.showToast({ title: 'Profile updated ✓', icon: 'none' });

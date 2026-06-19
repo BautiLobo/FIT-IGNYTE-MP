@@ -14,6 +14,21 @@ App({
     // this.checkAdmin();
   },
 
+  // ── REAL CLIENT STATUS (calculated, not stored) ────────────────
+  // start_date/expiry_date son las fuentes de verdad. El campo `status`
+  // en la tabla clients ya no se usa para Active/Upcoming/Inactive —
+  // se calcula siempre en el momento para que nunca se desincronice.
+  getRealStatus(startDate, expiryDate) {
+    if (!startDate || !expiryDate) return 'Inactive';
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const start = new Date(startDate + 'T00:00:00');
+    const expiry = new Date(expiryDate + 'T00:00:00');
+    if (today < start) return 'Upcoming';
+    if (today > expiry) return 'Inactive';
+    return 'Active';
+  },
+
   // ── SUPABASE HELPER ──────────────────────────────────────────
   supabase(method, table, body, query) {
     return new Promise((resolve, reject) => {

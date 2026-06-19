@@ -1,9 +1,7 @@
 <view class="container">
 
   <view class="topbar">
-    <view class="back-btn" bindtap="goBack">
-      <text class="back-arrow">‹</text>
-    </view>
+    <view style="width:60rpx;"></view>
     <text class="topbar-title">Renew your plan</text>
     <view style="width:60rpx;"></view>
   </view>
@@ -33,8 +31,8 @@
     </view>
 
     <view class="buttons">
-      <button class="btn-primary" bindtap="keepSameMeals">✓  Renew this plan</button>
-      <button class="btn-outline" bindtap="changePlan">Choose a different plan</button>
+      <view class="btn-primary" bindtap="keepSameMeals"><text>✓  Renew this plan</text></view>
+      <view class="btn-outline" bindtap="changePlan"><text>Choose a different plan</text></view>
     </view>
 
   </scroll-view>

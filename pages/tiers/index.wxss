@@ -39,13 +39,13 @@
 .tier-left { display:flex; flex-direction:column; gap:6rpx; }
 .tier-tag { font-size:20rpx; font-weight:700; letter-spacing:2rpx; display:block; }
 .tier-name { font-size:38rpx; font-weight:800; color:#f3f3f4; display:block; }
-.tier-sub { font-size:24rpx; color:#5d5d65; display:block; }
+.tier-sub { font-size:24rpx; color:#9f9fa8; display:block; }
 .tier-arrow { font-size:48rpx; font-weight:300; }
 
 /* ── HINT ── */
 .hint-wrap { display:flex; align-items:center; gap:16rpx; padding:32rpx 4rpx; }
-.hint-line { flex:1; height:1rpx; background:#2a2a33; display:block; }
-.hint { font-size:22rpx; color:#6a6a75; white-space:nowrap; }
+.hint-line { flex:1; height:1rpx; background:#9f9fa8; display:block; }
+.hint { font-size:22rpx; color:#9f9fa8; white-space:nowrap; }
 
 /* ── BOTTOM BAR ── */
 .bottom-bar { padding:8rpx 0 40rpx; }

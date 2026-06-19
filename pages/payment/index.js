@@ -76,54 +76,74 @@ Page({
 
     try {
       if (fromRenewal) {
-        const mealSelections = wx.getStorageSync('mealSelections') || null;
-        const updateData = {
-          status: 'Active',
-          expiry_date: nextFriday,
-            paid: true,
+        const expiryDate = wx.getStorageSync('expiryDate') || nextFriday;
+        const startDate = wx.getStorageSync('startDate') || new Date().toISOString().split('T')[0];
+        const realStatus = app.getRealStatus(startDate, expiryDate);
+        console.log('[payment] renewal PATCH clientId:', clientId, 'plan_id:', selectedPlan && selectedPlan.id);
+        await app.supabase('PATCH', 'clients', {
+          status: realStatus,
+          start_date: startDate,
+          expiry_date: expiryDate,
+          paid: true,
           plan_id: selectedPlan.id,
-          plan_id: selectedPlan.id,
-        };
-        if (mealSelections) {
-          // meal_selections now in meal_selections table
-          wx.removeStorageSync('mealSelections');
-        }
-        await app.supabase('PATCH', 'clients', updateData, `id=eq.${clientId}`);
-        wx.reLaunch({ url: '/pages/home/index' });
+        }, `id=eq.${clientId}`);
+        wx.removeStorageSync('mealSelections');
+        wx.removeStorageSync('expiryDate');
+        wx.removeStorageSync('startDate');
+        wx.showToast({ title: 'Plan renewed!', icon: 'success' });
+        setTimeout(() => wx.reLaunch({ url: '/pages/home/index' }), 1000);
 
       } else {
         const pendingOrderId = wx.getStorageSync('pendingOrderId');
+        console.log('[payment] pendingOrderId:', pendingOrderId);
         const orderData = await app.supabase('GET', 'new_orders', null, `id=eq.${pendingOrderId}`);
 
-        if (orderData && orderData.length > 0) {
-          const order = orderData[0];
-          const clientData = await app.supabase('GET', 'clients', null, `phone=eq.${order.phone}`);
-
-          if (clientData && clientData.length > 0) {
-            const newClientId = clientData[0].id;
-
-            // Marcar order como paid
-            await app.supabase('PATCH', 'new_orders', { status: 'paid' }, `id=eq.${pendingOrderId}`);
-
-            // Activar cliente
-            await app.supabase('PATCH', 'clients', {
-              status: 'Active',
-              expiry_date: nextFriday,
-              paid: true,
-            }, `id=eq.${newClientId}`);
-
-            wx.setStorageSync('clientId', newClientId);
-            wx.removeStorageSync('pendingOrderId');
-            wx.removeStorageSync('selectedPlan');
-          }
+        if (!orderData || orderData.length === 0) {
+          throw new Error('Order not found — cannot complete payment.');
         }
 
+        const order = orderData[0];
+        console.log('[payment] order phone:', order.phone);
+        const clientData = await app.supabase('GET', 'clients', null, `phone=eq.${order.phone}`);
+
+        if (!clientData || clientData.length === 0) {
+          throw new Error('Client not found for this order.');
+        }
+
+        const newClientId = clientData[0].id;
+        console.log('[payment] newClientId:', newClientId, 'pendingOrderId:', pendingOrderId);
+
+        // Marcar order como paid
+        await app.supabase('PATCH', 'new_orders', { status: 'paid' }, `id=eq.${pendingOrderId}`);
+
+        // Activar cliente
+        const startDate = wx.getStorageSync('startDate') || new Date().toISOString().split('T')[0];
+        const realStatus = app.getRealStatus(startDate, nextFriday);
+        console.log('[payment] PATCH clients with:', JSON.stringify({ status: realStatus, start_date: startDate, expiry_date: nextFriday, paid: true }), 'where id=', newClientId);
+        await app.supabase('PATCH', 'clients', {
+          status: realStatus,
+          start_date: startDate,
+          expiry_date: nextFriday,
+          paid: true,
+        }, `id=eq.${newClientId}`);
+
+        wx.removeStorageSync('startDate');
+        wx.removeStorageSync('expiryDate');
+        wx.setStorageSync('clientId', newClientId);
+        wx.removeStorageSync('pendingOrderId');
+        wx.removeStorageSync('selectedPlan');
+
+        // Solo navegamos si todo lo anterior se completó sin lanzar error
         wx.reLaunch({ url: '/pages/welcome/index' });
       }
 
     } catch (err) {
-      console.error('Payment success handler error:', err);
-      wx.showToast({ title: 'Something went wrong', icon: 'none' });
+      console.error('Payment success handler error:', JSON.stringify(err), err.message);
+      wx.showModal({
+        title: 'Payment error',
+        content: err.message || 'Something went wrong saving your data.',
+        showCancel: false,
+      });
     }
   },
 

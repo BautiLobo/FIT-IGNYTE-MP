@@ -1,6 +1,6 @@
 /* pages/pay-processing/index.wxss */
 .container { display:flex; flex-direction:column; height:100vh; background:#0d0d0d; }
-.topbar { background:#111; padding:40rpx 28rpx 20rpx; border-bottom:1rpx solid #1a1a1a; flex-shrink:0; }
+.topbar { background:#111; padding:110rpx 28rpx 20rpx; border-bottom:1rpx solid #1a1a1a; flex-shrink:0; }
 .brand { font-size:32rpx; font-weight:800; letter-spacing:4rpx; color:#fff; }
 .brand-red { color:#E8342A; }
 

@@ -91,30 +91,36 @@ page { background: #0b0b0c; }
 button { margin: 0 !important; padding: 0 !important; background: transparent; border: none; }
 
 .btn-primary {
-  background: #e8342a !important;
-  border-radius: 20rpx !important;
+  background: #e8342a;
+  border-radius: 20rpx;
   height: 96rpx;
-  line-height: 96rpx;
-  font-size: 34rpx !important;
-  font-weight: 800 !important;
-  color: #fff !important;
-  width: 100% !important;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
   box-sizing: border-box;
-  display: block;
+}
+
+.btn-primary text {
+  font-size: 34rpx;
+  font-weight: 800;
+  color: #fff;
 }
 
 .btn-outline {
-  background: transparent !important;
-  border: 1rpx solid #2a2a33 !important;
-  border-radius: 20rpx !important;
+  background: transparent;
+  border: 1rpx solid #2a2a33;
+  border-radius: 20rpx;
   height: 96rpx;
-  line-height: 96rpx;
-  font-size: 32rpx !important;
-  font-weight: 700 !important;
-  color: #e8342a !important;
-  width: 100% !important;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
   box-sizing: border-box;
-  display: block;
+}
+
+.btn-outline text {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #e8342a;
 }

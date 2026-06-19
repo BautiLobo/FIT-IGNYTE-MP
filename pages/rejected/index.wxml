@@ -24,11 +24,11 @@
     <!-- Notify card -->
     <view class="notify-card">
       <text class="notify-label">NOTIFY ME WHEN YOU ARRIVE</text>
-      <button class="btn-notify" bindtap="requestNotify">🔔  Notify me when available</button>
+      <button class="btn-notify" bindtap="requestNotify">  Notify me when available</button>
     </view>
 
     <!-- Contact -->
-    <button class="btn-secondary" bindtap="contactUs">💬  Contact us anyway</button>
+    <button class="btn-secondary" bindtap="contactUs">  Contact us anyway</button>
 
   </view>
 

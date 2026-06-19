@@ -56,22 +56,23 @@ Page({
     const plan = e.currentTarget.dataset.plan;
     wx.setStorageSync('selectedPlan', plan);
 
-    if (this.data.fromRenewal) {
-      wx.showModal({
-        title: 'Same meals as last week?',
-        content: 'Do you want to keep the same meal selections or choose new ones?',
-        confirmText: 'Choose new',
-        cancelText: 'Keep same',
-        success: (res) => {
-          if (res.confirm) {
-            wx.navigateTo({ url: '/pages/meal-select/index?from=renewal' });
-          } else {
-            wx.navigateTo({ url: '/pages/payment/index?from=renewal' });
-          }
+    const url = this.data.fromRenewal
+      ? '/pages/meal-select/index?from=renewal'
+      : '/pages/meal-select/index';
+
+    if (false) {
+      // placeholder
+    } else {
+      wx.navigateTo({
+        url,
+        fail: (err) => {
+          console.error('navigateTo meal-select failed:', err);
+          // Retry once
+          setTimeout(() => {
+            wx.navigateTo({ url: '/pages/meal-select/index' });
+          }, 500);
         }
       });
-    } else {
-      wx.navigateTo({ url: '/pages/meal-select/index' });
     }
   },
 

@@ -9,7 +9,9 @@ Page({
     minDate: '',
   },
 
-  onLoad() {
+  onLoad(options) {
+    const fromRenewal = options.from === 'renewal';
+    this.setData({ fromRenewal });
     // Min date = next business day
     const min = this.getNextBusinessDay(new Date());
     const minStr = this.toDateString(min);

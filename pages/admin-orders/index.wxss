@@ -76,7 +76,7 @@
   background: transparent;
   border: 2rpx solid #3a1010;
   color: #f87171;
-  border-radius: 16rpx;
+  border-radius: 20rpx;
   padding: 24rpx 0;
   font-size: 28rpx;
   font-weight: 700;
@@ -87,7 +87,7 @@
   background: #e8342a;
   border: none;
   color: #fff;
-  border-radius: 16rpx;
+  border-radius: 20rpx;
   padding: 24rpx 0;
   font-size: 28rpx;
   font-weight: 700;

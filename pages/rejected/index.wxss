@@ -3,7 +3,7 @@
 .container { display:flex; flex-direction:column; height:100vh; background:#0b0b0c; }
 
 /* ── TOPBAR ── */
-.topbar { padding:40rpx 28rpx 24rpx; border-bottom:1rpx solid #1a1a22; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.topbar { padding:80rpx 28rpx 24rpx; border-bottom:1rpx solid #1a1a22; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
 .topbar-logo { width:80rpx; height:80rpx; }
 
 /* ── CONTENT ── */
@@ -50,7 +50,7 @@
 
 .hero-sub {
   font-size: 26rpx;
-  color: #6b6b75;
+  color: #9f9fa8;
   line-height: 1.7;
   display: block;
   padding: 0 8rpx;
@@ -85,35 +85,40 @@
 
 .notify-label {
   font-size: 20rpx;
-  color: #5d5d65;
+  color: #9f9fa8;
   font-weight: 700;
   letter-spacing: 3rpx;
   display: block;
 }
 
+button { margin:0 !important; padding:0 !important; background:transparent; border:none; }
+
 .btn-notify {
-  display: block;
-  background: #e8342a;
-  border: none;
-  color: #fff;
-  border-radius: 16rpx;
-  padding: 30rpx 0;
-  font-size: 30rpx;
-  font-weight: 700;
+  background: #e8342a !important;
+  border-radius: 24rpx !important;
+  height: 92rpx;
+  line-height: 92rpx;
+  color: #fff !important;
+  font-size: 30rpx !important;
+  font-weight: 700 !important;
   text-align: center;
-  width: 100%;
+  width: 100% !important;
+  box-sizing: border-box;
+  display: block;
 }
 
 /* ── CONTACT ── */
 .btn-secondary {
-  display: block;
-  background: #13131a;
-  border: 1rpx solid #1a1a22;
-  color: #6b6b75;
-  border-radius: 20rpx;
-  padding: 28rpx 0;
-  font-size: 28rpx;
-  font-weight: 600;
+  background: #13131a !important;
+  border: 1rpx solid #1a1a22 !important;
+  border-radius: 24rpx !important;
+  height: 88rpx;
+  line-height: 88rpx;
+  color: #9f9fa8 !important;
+  font-size: 28rpx !important;
+  font-weight: 600 !important;
   text-align: center;
-  width: 100%;
+  width: 100% !important;
+  box-sizing: border-box;
+  display: block;
 }

@@ -134,17 +134,21 @@
   gap: 16rpx;
 }
 
+button { margin:0 !important; padding:0 !important; background:transparent; border:none; }
+
 .btn-contact {
-  display: block;
-  background: transparent;
-  border: 2rpx solid #e8342a;
-  color: #e8342a;
-  border-radius: 20rpx;
-  padding: 28rpx 0;
-  font-size: 30rpx;
-  font-weight: 700;
+  background: transparent !important;
+  border: 2rpx solid #e8342a !important;
+  border-radius: 24rpx !important;
+  height: 88rpx;
+  line-height: 88rpx;
+  color: #e8342a !important;
+  font-size: 30rpx !important;
+  font-weight: 700 !important;
   text-align: center;
-  width: 100%;
+  width: 100% !important;
+  box-sizing: border-box;
+  display: block;
 }
 
 .hint {
