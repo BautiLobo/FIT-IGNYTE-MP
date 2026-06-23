@@ -10,6 +10,30 @@
 
 .scroll { flex:1; padding:28rpx 28rpx; box-sizing:border-box; overflow-x:hidden; }
 
+.pending-banner {
+  background:#1a1610;
+  border:1rpx solid #3a2e15;
+  border-radius:16rpx;
+  padding:20rpx 24rpx;
+  margin-bottom:28rpx;
+}
+.pending-banner-text { font-size:24rpx; color:#e3b341; line-height:1.5; }
+
+.result-banner {
+  border-radius:16rpx;
+  padding:20rpx 24rpx;
+  margin-bottom:28rpx;
+  display:flex;
+  align-items:flex-start;
+  gap:16rpx;
+}
+.result-banner-approved { background:#0f1f12; border:1rpx solid #1a3a22; }
+.result-banner-rejected { background:#1a1010; border:1rpx solid #3a1a1a; }
+.result-banner-text { font-size:24rpx; line-height:1.5; flex:1; }
+.result-banner-approved .result-banner-text { color:#4ade80; }
+.result-banner-rejected .result-banner-text { color:#f87171; }
+.result-banner-close { font-size:24rpx; color:#9f9fa8; flex-shrink:0; padding:0 4rpx; }
+
 .field { margin-bottom:36rpx; }
 
 .field-label {

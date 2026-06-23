@@ -17,6 +17,14 @@
 
     <block wx:else>
 
+      <view wx:for="{{notifications}}" wx:key="id" class="notif-banner">
+        <view class="notif-banner-body">
+          <text class="notif-banner-title">{{item.title}}</text>
+          <text class="notif-banner-message">{{item.message}}</text>
+        </view>
+        <text class="notif-banner-close" bindtap="dismissNotification" data-id="{{item.id}}">✕</text>
+      </view>
+
       <view class="greeting-row">
         <view>
           <text class="greeting-name">Hi, {{firstName}}</text>
@@ -55,7 +63,9 @@
 
         <view wx:for="{{weekMeals}}" wx:key="day" class="week-row {{index === weekMeals.length - 1 ? 'week-row-last' : ''}}">
           <text class="week-day {{item.isToday ? 'week-day-today' : ''}}">{{item.dayShort}}</text>
-          <text class="week-meal-name">{{item.meal1}}</text>
+          <view class="week-meal-names">
+            <text wx:for="{{item.mealNames}}" wx:for-item="mealName" wx:key="*this" class="week-meal-name">{{mealName}}</text>
+          </view>
           <text class="week-time {{item.isToday ? 'week-time-today' : ''}}">{{item.time}}</text>
         </view>
       </view>

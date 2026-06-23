@@ -28,7 +28,9 @@
 
 .address-card { display:flex; align-items:flex-start; gap:16rpx; }
 .address-icon { font-size:36rpx; margin-top:4rpx; }
+.address-info { flex:1; }
 .address-text { font-size:28rpx; color:#f3f3f4; display:block; margin-top:6rpx; line-height:1.5; }
+.address-card .btn-edit { flex-shrink:0; margin-top:4rpx; }
 
 .price-card { background:#13131a; border:1rpx solid #2a2a33; border-radius:20rpx; padding:24rpx; margin-bottom:24rpx; }
 .price-row { display:flex; justify-content:space-between; align-items:center; padding:12rpx 0; }

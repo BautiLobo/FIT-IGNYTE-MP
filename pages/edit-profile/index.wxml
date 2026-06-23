@@ -10,6 +10,20 @@
 
   <scroll-view class="scroll" scroll-y>
 
+    <view class="pending-banner" wx:if="{{pendingAddressChange}}">
+      <text class="pending-banner-text">Your address change is pending review. Delivery will keep using your current address until it's approved.</text>
+    </view>
+
+    <view class="result-banner result-banner-approved" wx:if="{{addressChangeStatus === 'approved'}}">
+      <text class="result-banner-text">Your address change was approved ✓</text>
+      <text class="result-banner-close" bindtap="dismissAddressChangeNotice">✕</text>
+    </view>
+
+    <view class="result-banner result-banner-rejected" wx:if="{{addressChangeStatus === 'rejected'}}">
+      <text class="result-banner-text">Your address change was rejected{{addressChangeNote ? ': ' + addressChangeNote : '.'}} Delivery continues using your previous address.</text>
+      <text class="result-banner-close" bindtap="dismissAddressChangeNotice">✕</text>
+    </view>
+
     <view class="field">
       <text class="field-label">Full name</text>
       <input class="field-input" placeholder="Your name" value="{{form.name}}" bindinput="onInput" data-field="name" />
@@ -17,7 +31,7 @@
 
     <view class="field">
       <text class="field-label">Phone / WeChat ID</text>
-      <input class="field-input" placeholder="+86 xxx xxxx xxxx" value="{{form.phone}}" bindinput="onInput" data-field="phone" type="number" />
+      <input class="field-input" placeholder="+86 xxx xxxx xxxx" value="{{form.phone}}" bindinput="onInput" data-field="phone" type="text" />
     </view>
 
     <view class="field">

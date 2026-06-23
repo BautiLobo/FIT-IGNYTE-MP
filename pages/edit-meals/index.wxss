@@ -73,8 +73,12 @@
 .meal-name-active { color:#e8342a; font-weight:800; }
 .meal-desc { font-size:26rpx; color:#9f9fa8; display:block; margin-top:6rpx; }
 .meal-desc-active { color:#e8342a; }
-.meal-check { width:30rpx; height:30rpx; border:2rpx solid #2a2a33; border-radius:50%; flex-shrink:0; }
-.meal-check-on { background:#e8342a; border-color:#e8342a; display:flex; align-items:center; justify-content:center; }
+.meal-stepper { display:flex; align-items:center; gap:14rpx; flex-shrink:0; }
+.stepper-btn { width:56rpx; height:56rpx; border-radius:50%; background:#2a2a33; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.stepper-btn-plus { background:#e8342a; }
+.stepper-btn-disabled { opacity:0.4; }
+.stepper-btn-text { font-size:32rpx; font-weight:800; color:#fff; line-height:1; }
+.stepper-qty { font-size:30rpx; font-weight:800; color:#f3f3f4; min-width:36rpx; text-align:center; }
 .scroll-hint { font-size:20rpx; color:#3a3a3a; text-align:center; display:block; margin-bottom:16rpx; }
 
 /* Time Picker */
@@ -149,7 +153,6 @@
   color: #9f9fa8;
 }
 
-.meal-check-num { font-size:18rpx; color:#fff; font-weight:800; }
 
 /* Photo preview */
 .photo-preview-wrap {

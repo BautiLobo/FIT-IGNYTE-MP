@@ -15,11 +15,11 @@ page { background: #0b0b0c; }
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 50vh;
-  background: radial-gradient(ellipse at 50% 0%, #3a0808 0%, #0b0b0c 70%);
+  background: radial-gradient(ellipse at 50% 75%, #3a0808 0%, #0b0b0c 50%);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-top:300rpx;
+  padding-top:200rpx;
 }
 .hero-logo { width: 120rpx; height: 420rpx; opacity: 0.9; }
 
@@ -107,7 +107,7 @@ button { margin: 0 !important; padding: 0 !important; background: transparent; b
   border-radius: 24rpx !important;
   height: 100rpx;
   line-height: 100rpx;
-  font-size: 34rpx !important;
+  font-size: 44rpx !important;
   font-weight: 800 !important;
   color: #fff !important;
   width: 100% !important;

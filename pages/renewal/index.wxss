@@ -124,3 +124,21 @@ button { margin: 0 !important; padding: 0 !important; background: transparent; b
   font-weight: 700;
   color: #e8342a;
 }
+
+.btn-feedback {
+  background: rgba(167,139,250,0.12);
+  border: 1rpx solid #f77a05;
+  border-radius: 20rpx;
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.btn-feedback text {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #f77a05;
+}

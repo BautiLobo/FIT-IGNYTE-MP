@@ -53,10 +53,21 @@ Page({
 
   changePlan() {
     wx.setStorageSync('flowContext', 'renewal');
+    wx.setStorageSync('renewalFreshMeals', true);
+    wx.removeStorageSync('mealSelections');
     wx.navigateTo({ url: '/pages/tiers/index?from=renewal' });
   },
 
   goBack() {
     wx.navigateBack();
+  },
+
+  contactUs() {
+    wx.showModal({
+      title: 'Contact us on WeChat',
+      content: 'Search for: fitignyte_shanghai',
+      showCancel: false,
+      confirmText: 'OK',
+    });
   },
 });

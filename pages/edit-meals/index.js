@@ -22,8 +22,6 @@ Page({
     currentDayLabel: 'Monday',
     menuMeals: [],
     selectedMealIds: [],
-    selectedMealNames: [],
-    selectedMealPhotos: [],
     snackOfDay: null,
     snackAdded: false,
     snackId: null,
@@ -80,7 +78,7 @@ Page({
   },
 
   async loadMenu(dayKey) {
-    this.setData({ loading: true, selectedMealIds: [], selectedMealNames: [], selectedMealPhotos: [] });
+    this.setData({ loading: true, selectedMealIds: [], lastSelectedPhoto: '', lastSelectedName: '' });
 
     try {
       const { plan, allSelections } = this.data;
@@ -111,16 +109,20 @@ Page({
       const existingNotes = existing ? existing.notes : '';
       const existingSnack = existing ? !!existing.snack_id : false;
 
-      let existingMealNames = [], existingMealPhotos = [];
-      existingMealIds.forEach(id => {
-        const m = (meals || []).find(meal => meal.id === id);
-        if (m) { existingMealNames.push(m.name); existingMealPhotos.push(m.photo_url || ''); }
-      });
+      let lastSelectedPhoto = '';
+      let lastSelectedName = '';
+      if (existingMealIds.length > 0 && meals.length > 0) {
+        const lastId = existingMealIds[existingMealIds.length - 1];
+        const m = (meals || []).find(meal => meal.id === lastId);
+        if (m) {
+          lastSelectedPhoto = m.photo_url || '';
+          lastSelectedName = m.name;
+        }
+      }
 
       const updatedMeals = (meals || []).map(m => ({
         ...m,
-        selected: existingMealIds.includes(m.id),
-        selectedIndex: existingMealIds.indexOf(m.id) >= 0 ? existingMealIds.indexOf(m.id) + 1 : 0,
+        qty: existingMealIds.filter(id => id === m.id).length,
       }));
 
       const dayIndex = DAYS.findIndex(d => d.key === dayKey);
@@ -134,13 +136,11 @@ Page({
         snackOfDay, snackId,
         snackAdded: existingSnack,
         selectedMealIds: existingMealIds,
-        selectedMealNames: existingMealNames,
-        selectedMealPhotos: existingMealPhotos,
         selectedTime: existingTime,
         currentNotes: existingNotes,
         isLastDay,
-        lastSelectedPhoto: existingMealPhotos[existingMealPhotos.length - 1] || '',
-        lastSelectedName: existingMealNames[existingMealNames.length - 1] || '',
+        lastSelectedPhoto,
+        lastSelectedName,
       });
 
     } catch (err) {
@@ -149,36 +149,48 @@ Page({
     }
   },
 
-  toggleMeal(e) {
+  incrementMeal(e) {
     const meal = e.currentTarget.dataset.meal;
-    const { selectedMealIds, selectedMealNames, selectedMealPhotos, plan, menuMeals } = this.data;
+    const { selectedMealIds, plan, menuMeals } = this.data;
     const maxMeals = plan.meals;
-    const idx = selectedMealIds.indexOf(meal.id);
-    let newIds = [...selectedMealIds];
-    let newNames = [...selectedMealNames];
-    let newPhotos = [...selectedMealPhotos];
 
-    if (idx >= 0) {
-      newIds.splice(idx, 1); newNames.splice(idx, 1); newPhotos.splice(idx, 1);
-    } else if (newIds.length < maxMeals) {
-      newIds.push(meal.id); newNames.push(meal.name); newPhotos.push(meal.photo_url || '');
-    } else {
-      wx.showToast({ title: `Max ${maxMeals} meal(s)`, icon: 'none' }); return;
+    if (selectedMealIds.length >= maxMeals) {
+      wx.showToast({ title: `Max ${maxMeals} meal(s) for this plan`, icon: 'none' });
+      return;
     }
 
+    const newIds = [...selectedMealIds, meal.id];
     const updatedMeals = menuMeals.map(m => ({
       ...m,
-      selected: newIds.includes(m.id),
-      selectedIndex: newIds.indexOf(m.id) >= 0 ? newIds.indexOf(m.id) + 1 : 0,
+      qty: m.id === meal.id ? (m.qty || 0) + 1 : m.qty,
     }));
 
     this.setData({
       selectedMealIds: newIds,
-      selectedMealNames: newNames,
-      selectedMealPhotos: newPhotos,
       menuMeals: updatedMeals,
-      lastSelectedPhoto: newPhotos[newPhotos.length - 1] || '',
-      lastSelectedName: newNames[newNames.length - 1] || '',
+      lastSelectedPhoto: meal.photo_url || '',
+      lastSelectedName: meal.name,
+    });
+  },
+
+  decrementMeal(e) {
+    const meal = e.currentTarget.dataset.meal;
+    const { selectedMealIds, menuMeals } = this.data;
+    const idx = selectedMealIds.indexOf(meal.id);
+    if (idx < 0) return;
+
+    const newIds = [...selectedMealIds];
+    newIds.splice(idx, 1);
+    const updatedMeals = menuMeals.map(m => ({
+      ...m,
+      qty: m.id === meal.id ? Math.max((m.qty || 0) - 1, 0) : m.qty,
+    }));
+
+    this.setData({
+      selectedMealIds: newIds,
+      menuMeals: updatedMeals,
+      lastSelectedPhoto: meal.photo_url || '',
+      lastSelectedName: meal.name,
     });
   },
 

@@ -18,14 +18,41 @@ Page({
     todayDelivery: null,
     showRenewal: false,
     daysLeft: 0,
+    notifications: [],
   },
 
   async onLoad() {
     await this.loadClientData();
+    await this.loadNotifications();
   },
 
   onShow() {
     this.loadClientData();
+    this.loadNotifications();
+  },
+
+  async loadNotifications() {
+    const clientId = wx.getStorageSync('clientId');
+    if (!clientId) return;
+
+    try {
+      const data = await app.supabase('GET', 'notifications', null, `client_id=eq.${clientId}&is_read=eq.false&order=created_at.desc`);
+      this.setData({ notifications: data || [] });
+    } catch (err) {
+      console.error('Load notifications error:', err);
+    }
+  },
+
+  async dismissNotification(e) {
+    const id = e.currentTarget.dataset.id;
+    const notifications = this.data.notifications.filter(n => n.id !== id);
+    this.setData({ notifications });
+
+    try {
+      await app.supabase('PATCH', 'notifications', { is_read: true }, `id=eq.${id}`);
+    } catch (err) {
+      console.error('Dismiss notification error:', err);
+    }
   },
 
   async loadClientData() {
@@ -148,17 +175,17 @@ Page({
       const dayLabel = dayLabelMap[d.key];
       const row = selections.find(s => s.day === dayLabel && s.slot === 1);
       const mealIds = row ? (row.meals_json || []) : [];
-      const meal1 = mealIds.map(id => mealMap[id] ? mealMap[id].name : '').filter(Boolean).join(' + ');
+      const mealNames = mealIds.map(id => mealMap[id] ? mealMap[id].name : '').filter(Boolean);
       const photo = mealIds.length > 0 && mealMap[mealIds[0]] ? mealMap[mealIds[0]].photo_url || '' : '';
       const time = row ? row.delivery_time : '';
       const isToday = d.key === planDayKey;
-      return { day: d.full, dayShort: d.short, meal1, meal2: '', time, snack: null, isToday, photo };
+      return { day: d.full, dayShort: d.short, mealNames, time, snack: null, isToday, photo };
     });
   },
 
   getTodayDelivery(weekMeals) {
     const todayMeals = weekMeals.find(m => m.isToday);
-    if (!todayMeals || !todayMeals.meal1) return null;
+    if (!todayMeals || !todayMeals.mealNames || todayMeals.mealNames.length === 0) return null;
     return { day: todayMeals.day, time: todayMeals.time };
   },
 

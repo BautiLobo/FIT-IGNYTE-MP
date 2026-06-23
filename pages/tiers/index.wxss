@@ -50,4 +50,17 @@
 /* ── BOTTOM BAR ── */
 .bottom-bar { padding:8rpx 0 40rpx; }
 button { margin:0 !important; padding:0 !important; background:transparent; border:none; }
-.btn-pdf { background:#1a1a22 !important; border-radius:100rpx !important; height:80rpx; line-height:80rpx; font-size:26rpx !important; color:#a0a0aa !important; width:100% !important; text-align:center; box-sizing:border-box; }
+.btn-pdf {
+  background: rgba(167,139,250,0.12) !important;
+  border: 2rpx solid #f77a05 !important;
+  border-radius: 24rpx !important;
+  height: 92rpx;
+  line-height: 92rpx;
+  color: #f77a05 !important;
+  font-size: 30rpx !important;
+  font-weight: 800 !important;
+  text-align: center;
+  width: 100% !important;
+  box-sizing: border-box;
+  display: block;
+}

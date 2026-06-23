@@ -3,101 +3,164 @@
   <!-- Top Bar -->
   <view class="topbar">
     <view class="back-btn" bindtap="goBack"><text class="back-arrow">‹</text></view>
-    <text class="topbar-title">Edit your meals</text>
+    <text class="topbar-title">Orders</text>
     <view style="width:60rpx;"></view>
   </view>
 
-  <!-- Day Tabs -->
-  <view class="day-tabs">
-    <view
-      wx:for="{{days}}"
-      wx:key="key"
-      class="day-tab {{currentDay === item.key ? 'day-tab-active' : ''}}"
-      bindtap="switchDay"
-      data-day="{{item.key}}"
-    >
-      <text class="day-tab-short">{{item.short}}</text>
-      <text class="day-tab-check" wx:if="{{item.done}}">✓</text>
+  <!-- View Tabs -->
+  <view class="filter-tabs">
+    <view class="filter-tab {{view === 'orders' ? 'filter-tab-active' : ''}}" bindtap="switchView" data-view="orders">
+      <text class="filter-tab-text {{view === 'orders' ? 'filter-tab-text-active' : ''}}">Orders</text>
+      <text wx:if="{{pendingCount > 0}}" class="filter-badge">{{pendingCount}}</text>
+    </view>
+    <view class="filter-tab {{view === 'address' ? 'filter-tab-active' : ''}}" bindtap="switchView" data-view="address">
+      <text class="filter-tab-text {{view === 'address' ? 'filter-tab-text-active' : ''}}">Address Changes</text>
+      <text wx:if="{{pendingAddressCount > 0}}" class="filter-badge">{{pendingAddressCount}}</text>
     </view>
   </view>
 
-  <scroll-view class="scroll" scroll-y>
+  <!-- ── ORDERS VIEW ── -->
+  <block wx:if="{{view === 'orders'}}">
 
-    <block wx:if="{{loading}}">
-      <view class="loading-wrap"><view class="spinner"></view></view>
-    </block>
-
-    <block wx:else>
-
-      <!-- Plan Badge -->
-      <view class="plan-badge">
-        <text class="plan-badge-text">{{plan.name}} — {{plan.meals}} meal(s)/day</text>
+    <view class="filter-tabs">
+      <view class="filter-tab {{filter === 'pending' ? 'filter-tab-active' : ''}}" bindtap="setFilter" data-filter="pending">
+        <text class="filter-tab-text {{filter === 'pending' ? 'filter-tab-text-active' : ''}}">Pending</text>
       </view>
-
-      <!-- Section label -->
-      <text class="section-label">{{currentDayLabel}} — choose {{plan.meals}} meal(s)</text>
-
-
-      <!-- Meal List -->
-      <view class="meal-list">
-        <view
-          wx:for="{{menuMeals}}"
-          wx:key="id"
-          class="meal-row {{item.selected ? 'meal-row-selected' : ''}}"
-          bindtap="toggleMeal"
-          data-meal="{{item}}"
-        >
-          <view class="meal-thumb-wrap">
-            <image wx:if="{{item.photo_url}}" class="meal-thumb" src="{{item.photo_url}}" mode="aspectFill" />
-            <view wx:else class="meal-thumb-placeholder">
-              <text class="meal-thumb-label">{{item.name.substring(0,2).toUpperCase()}}</text>
-            </view>
-          </view>
-          <view class="meal-info">
-            <text class="meal-name {{item.selected ? 'meal-name-active' : ''}}">{{item.name}}</text>
-            <text class="meal-desc">{{item.sauce}} · {{item.kcal}} kcal</text>
-          </view>
-          <view class="meal-check {{item.selected ? 'meal-check-on' : ''}}">
-            <text wx:if="{{item.selected}}" class="meal-check-num">{{item.selectedIndex}}</text>
-          </view>
-        </view>
+      <view class="filter-tab {{filter === 'approved' ? 'filter-tab-active' : ''}}" bindtap="setFilter" data-filter="approved">
+        <text class="filter-tab-text {{filter === 'approved' ? 'filter-tab-text-active' : ''}}">Approved</text>
       </view>
+      <view class="filter-tab {{filter === 'rejected' ? 'filter-tab-active' : ''}}" bindtap="setFilter" data-filter="rejected">
+        <text class="filter-tab-text {{filter === 'rejected' ? 'filter-tab-text-active' : ''}}">Rejected</text>
+      </view>
+    </view>
 
-      <!-- Snack + Time + Notes — show when meals selected -->
-      <block wx:if="{{selectedMealIds.length >= plan.meals}}">
+    <scroll-view class="scroll" scroll-y>
 
-        <view wx:if="{{snackOfDay}}" class="snack-wrap">
-          <view class="snack-inner {{snackAdded ? 'snack-inner-added' : ''}}" bindtap="toggleSnack">
-            <text class="snack-name">{{snackOfDay}}</text>
-            <view class="snack-badge {{snackAdded ? 'snack-badge-added' : ''}}">
-              <text>{{snackAdded ? 'Added' : '+ Add snack'}}</text>
+      <block wx:if="{{loading}}">
+        <view class="loading-wrap"><view class="spinner"></view></view>
+      </block>
+
+      <block wx:else>
+
+        <view wx:if="{{orders.length === 0}}" class="empty-wrap">
+          <text class="empty-text">No {{filter}} orders</text>
+        </view>
+
+        <view wx:for="{{orders}}" wx:key="id" class="order-card">
+
+          <view class="order-header">
+            <view class="avatar"><text class="avatar-icon">👤</text></view>
+            <view class="order-header-body">
+              <text class="order-name">{{item.name}}</text>
+              <text class="order-plan">{{item.plan}} · {{item.created_at_formatted}}</text>
+            </view>
+            <view class="status-badge status-{{item.status}}">
+              <text class="status-text">{{item.status}}</text>
             </view>
           </view>
-        </view>
 
-        <view class="time-picker">
-          <text class="time-picker-label">DELIVERY TIME</text>
-          <picker mode="time" value="{{selectedTime}}" start="07:00" end="20:00" bindchange="onTimeChange">
-            <view class="time-picker-display">
-              <text class="time-picker-value">{{selectedTime}}</text>
-              <text class="time-picker-tap">Tap to change</text>
-            </view>
-          </picker>
-        </view>
+          <view class="order-divider"></view>
 
-        <view class="notes-wrap">
-          <text class="notes-label">Notes (optional)</text>
-          <textarea class="notes-input" placeholder="e.g. no onion, extra sauce..." value="{{currentNotes}}" bindinput="onNotesInput" auto-height />
-        </view>
+          <view class="info-row">
+            <text class="info-icon">📞</text>
+            <text class="info-val">{{item.phone}}</text>
+          </view>
+          <view class="info-row">
+            <text class="info-icon">📍</text>
+            <text class="info-val">{{item.district}} — {{item.address}}</text>
+          </view>
+          <view class="info-row" wx:if="{{item.access}}">
+            <text class="info-icon">🔑</text>
+            <text class="info-val">{{item.access}}</text>
+          </view>
+          <view class="info-row" wx:if="{{item.allergies}}">
+            <text class="info-icon">⚠️</text>
+            <text class="info-val info-warning">{{item.allergies}}</text>
+          </view>
+          <view class="info-row" wx:if="{{item.note}}">
+            <text class="info-icon">📝</text>
+            <text class="info-val">{{item.note}}</text>
+          </view>
 
-        <button class="btn-save-next" bindtap="saveAndNext">
-          {{isLastDay ? 'Save changes →' : 'Save & Next →'}}
-        </button>
+          <view class="order-actions" wx:if="{{item.status === 'pending'}}">
+            <button class="btn-reject" bindtap="rejectOrder" data-id="{{item.id}}">Reject</button>
+            <button class="btn-approve" bindtap="approveOrder" data-id="{{item.id}}">Approve</button>
+          </view>
+
+        </view>
 
       </block>
 
-    </block>
+    </scroll-view>
 
-  </scroll-view>
+  </block>
+
+  <!-- ── ADDRESS CHANGES VIEW ── -->
+  <block wx:if="{{view === 'address'}}">
+
+    <scroll-view class="scroll" scroll-y>
+
+      <view wx:if="{{addressChanges.length === 0}}" class="empty-wrap">
+        <text class="empty-text">No pending address changes</text>
+      </view>
+
+      <view wx:for="{{addressChanges}}" wx:key="id" class="order-card">
+
+        <view class="order-header">
+          <view class="avatar"><text class="avatar-icon">📍</text></view>
+          <view class="order-header-body">
+            <text class="order-name">{{item.client_name}}</text>
+            <text class="order-plan">{{item.client_phone}} · {{item.created_at_formatted}}</text>
+          </view>
+          <view class="status-badge status-pending">
+            <text class="status-text">pending</text>
+          </view>
+        </view>
+
+        <view class="order-divider"></view>
+
+        <view class="info-row">
+          <text class="info-icon">🏠</text>
+          <text class="info-val">Current: {{item.old_district}} — {{item.old_address}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-icon">📍</text>
+          <text class="info-val">New: {{item.new_district}} — {{item.new_address}}</text>
+        </view>
+
+        <view class="order-actions">
+          <button class="btn-reject" bindtap="rejectAddressChange" data-id="{{item.id}}">Reject</button>
+          <button class="btn-approve" bindtap="approveAddressChange" data-id="{{item.id}}">Approve</button>
+        </view>
+
+      </view>
+
+    </scroll-view>
+
+  </block>
+
+  <!-- Reject Order Modal -->
+  <view class="modal-overlay {{showRejectModal ? 'modal-visible' : ''}}" bindtap="closeModal">
+    <view class="modal" catchtap="noop">
+      <text class="modal-title">Reject order</text>
+      <textarea class="modal-input" placeholder="Reason for rejection..." value="{{rejectionNote}}" bindinput="onRejectNoteInput" />
+      <view class="modal-actions">
+        <button class="modal-btn-cancel" bindtap="closeModal">Cancel</button>
+        <button class="modal-btn-confirm" bindtap="confirmReject">Reject</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- Reject Address Change Modal -->
+  <view class="modal-overlay {{showAddrRejectModal ? 'modal-visible' : ''}}" bindtap="closeAddrModal">
+    <view class="modal" catchtap="noop">
+      <text class="modal-title">Reject address change</text>
+      <textarea class="modal-input" placeholder="Reason for rejection..." value="{{addrRejectionNote}}" bindinput="onAddrRejectNoteInput" />
+      <view class="modal-actions">
+        <button class="modal-btn-cancel" bindtap="closeAddrModal">Cancel</button>
+        <button class="modal-btn-confirm" bindtap="confirmAddrReject">Reject</button>
+      </view>
+    </view>
+  </view>
 
 </view>

@@ -22,7 +22,7 @@
 
     <view class="field">
       <text class="field-label">Phone / WeChat ID</text>
-      <input class="field-input" placeholder="+86 xxx xxxx xxxx" value="{{form.phone}}" bindinput="onInput" data-field="phone" type="number" />
+      <input class="field-input" placeholder="+86 xxx xxxx xxxx" value="{{form.phone}}" bindinput="onInput" data-field="phone" type="text" />
     </view>
 
     <view class="field">
@@ -52,9 +52,9 @@
 
     <view class="btn-wrap">
       <button class="btn-primary {{submitting ? 'btn-disabled' : ''}}" bindtap="submit" disabled="{{submitting}}">
-        {{submitting ? 'Submitting...' : 'Next →'}}
+        {{submitting ? 'Submitting...' : (editing ? 'Save changes' : 'Next →')}}
       </button>
-      <text class="btn-hint">We'll verify your delivery area before payment</text>
+      <text class="btn-hint">{{editing ? 'Your delivery details will be updated' : 'We\'ll verify your delivery area before payment'}}</text>
     </view>
 
   </scroll-view>

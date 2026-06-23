@@ -45,19 +45,20 @@
     <!-- Address -->
     <view class="card address-card">
       <view class="address-icon">📍</view>
-      <view>
+      <view class="address-info">
         <text class="card-label">ADDRESS</text>
         <text class="address-text">{{order.address}}{{order.district ? ' · ' + order.district : ''}}</text>
       </view>
+      <view class="btn-edit" bindtap="editAddress"><text>Edit ›</text></view>
     </view>
 
     <!-- Price -->
     <view class="price-card">
       <view class="price-row price-row-border">
         <text class="price-label">Plan</text>
-        <text class="price-val price-val-strike">¥{{selectedPlan.price}}</text>
+        <text class="price-val {{discount > 0 ? 'price-val-strike' : ''}}">¥{{selectedPlan.price}}</text>
       </view>
-      <view class="price-row price-row-border">
+      <view class="price-row price-row-border" wx:if="{{discount > 0}}">
         <text class="price-label" style="color:#e8342a;">25% first week discount</text>
         <text class="price-val" style="color:#e8342a;">-¥{{discount}}</text>
       </view>
@@ -72,9 +73,9 @@
     </view>
 
     <button class="btn-submit {{submitting ? 'btn-disabled' : ''}}" bindtap="submitOrder" disabled="{{submitting}}">
-      {{submitting ? 'Submitting...' : 'Place order  →'}}
+      {{submitting ? 'Submitting...' : (fromRenewal ? 'Continue to payment  →' : 'Place order  →')}}
     </button>
-    <text class="hint">We verify your delivery zone and confirm shortly</text>
+    <text class="hint">{{fromRenewal ? 'Review your renewal before paying' : 'We verify your delivery zone and confirm shortly'}}</text>
 
   </scroll-view>
 

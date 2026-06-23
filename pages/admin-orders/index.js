@@ -3,6 +3,7 @@ const app = getApp();
 
 Page({
   data: {
+    view: 'orders', // 'orders' | 'address'
     loading: true,
     filter: 'pending',
     orders: [],
@@ -10,14 +11,26 @@ Page({
     showRejectModal: false,
     rejectingOrderId: null,
     rejectionNote: '',
+
+    addressChanges: [],
+    pendingAddressCount: 0,
+    showAddrRejectModal: false,
+    rejectingAddrId: null,
+    addrRejectionNote: '',
   },
 
   async onLoad() {
-    await this.loadOrders();
+    await Promise.all([this.loadOrders(), this.loadAddressChanges()]);
   },
 
   onShow() {
     this.loadOrders();
+    this.loadAddressChanges();
+  },
+
+  switchView(e) {
+    const view = e.currentTarget.dataset.view;
+    this.setData({ view });
   },
 
   async loadOrders() {
@@ -176,6 +189,114 @@ Page({
 
   closeModal() {
     this.setData({ showRejectModal: false, rejectingOrderId: null });
+  },
+
+  // ── Address Changes ──
+
+  async loadAddressChanges() {
+    try {
+      const data = await app.supabase('GET', 'address_changes', null, 'select=*,clients(name,phone)&status=eq.pending&order=created_at.desc');
+      const addressChanges = (data || []).map(a => ({
+        ...a,
+        client_name: a.clients ? a.clients.name : '',
+        client_phone: a.clients ? a.clients.phone : '',
+        created_at_formatted: this.formatDate(a.created_at),
+      }));
+
+      this.setData({
+        addressChanges,
+        pendingAddressCount: addressChanges.length,
+      });
+    } catch (err) {
+      console.error('Load address changes error:', err);
+    }
+  },
+
+  async approveAddressChange(e) {
+    const id = e.currentTarget.dataset.id;
+    const change = this.data.addressChanges.find(a => a.id === id);
+    if (!change) return;
+
+    wx.showLoading({ title: 'Approving...' });
+
+    try {
+      await app.supabase('PATCH', 'clients', {
+        district: change.new_district,
+        address: change.new_address,
+      }, `id=eq.${change.client_id}`);
+
+      await app.supabase('PATCH', 'address_changes', {
+        status: 'approved',
+      }, `id=eq.${id}`);
+
+      await app.supabase('POST', 'notifications', {
+        client_id: change.client_id,
+        title: 'Address change approved',
+        message: `Your new address has been approved: ${change.new_district} — ${change.new_address}`,
+        is_read: false,
+      });
+
+      wx.hideLoading();
+      wx.showToast({ title: 'Address approved ✓', icon: 'none' });
+      await this.loadAddressChanges();
+
+    } catch (err) {
+      wx.hideLoading();
+      console.error('Approve address error:', err);
+      wx.showToast({ title: 'Something went wrong', icon: 'none' });
+    }
+  },
+
+  rejectAddressChange(e) {
+    const id = e.currentTarget.dataset.id;
+    this.setData({
+      showAddrRejectModal: true,
+      rejectingAddrId: id,
+      addrRejectionNote: '',
+    });
+  },
+
+  onAddrRejectNoteInput(e) {
+    this.setData({ addrRejectionNote: e.detail.value });
+  },
+
+  async confirmAddrReject() {
+    const { rejectingAddrId, addrRejectionNote } = this.data;
+    const change = this.data.addressChanges.find(a => a.id === rejectingAddrId);
+
+    wx.showLoading({ title: 'Rejecting...' });
+
+    try {
+      await app.supabase('PATCH', 'address_changes', {
+        status: 'rejected',
+        rejection_note: addrRejectionNote.trim(),
+      }, `id=eq.${rejectingAddrId}`);
+
+      if (change) {
+        await app.supabase('POST', 'notifications', {
+          client_id: change.client_id,
+          title: 'Address change rejected',
+          message: addrRejectionNote.trim()
+            ? `Your address change was rejected: ${addrRejectionNote.trim()}`
+            : 'Your address change was rejected. Delivery continues using your previous address.',
+          is_read: false,
+        });
+      }
+
+      wx.hideLoading();
+      this.setData({ showAddrRejectModal: false, rejectingAddrId: null });
+      wx.showToast({ title: 'Address change rejected', icon: 'none' });
+      await this.loadAddressChanges();
+
+    } catch (err) {
+      wx.hideLoading();
+      console.error('Reject address error:', err);
+      wx.showToast({ title: 'Something went wrong', icon: 'none' });
+    }
+  },
+
+  closeAddrModal() {
+    this.setData({ showAddrRejectModal: false, rejectingAddrId: null });
   },
 
   noop() {},

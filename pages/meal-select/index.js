@@ -20,9 +20,7 @@ Page({
     currentDayLabel: 'Monday',
     menuMeals: [],
     // Selected meals for current day (before confirming)
-    selectedMealIds: [],   // array of meal IDs selected for this day
-    selectedMealNames: [], // for display
-    selectedMealPhotos: [],
+    selectedMealIds: [],   // array of meal IDs selected for this day (can repeat)
     // Snack
     snackOfDay: null,
     snackAdded: false,
@@ -52,8 +50,11 @@ Page({
       return;
     }
 
-    let allSelections = {};
-    if (fromRenewal) {
+    const freshMeals = wx.getStorageSync('renewalFreshMeals');
+    if (freshMeals) wx.removeStorageSync('renewalFreshMeals');
+
+    let allSelections = freshMeals ? {} : (wx.getStorageSync('mealSelections') || {});
+    if (fromRenewal && !freshMeals) {
       const clientId = wx.getStorageSync('clientId');
       try {
         const data = await app.supabase('GET', 'meal_selections', null, `client_id=eq.${clientId}&order=day.asc,slot.asc`);
@@ -81,7 +82,7 @@ Page({
   },
 
   async loadMenu(dayKey) {
-    this.setData({ loading: true, selectedMealIds: [], selectedMealNames: [], selectedMealPhotos: [], dayConfirmed: false });
+    this.setData({ loading: true, selectedMealIds: [], lastSelectedPhoto: '', lastSelectedName: '', dayConfirmed: false });
 
     try {
       const dayLabel = DAYS.find(d => d.key === dayKey)?.label || '';
@@ -119,17 +120,16 @@ Page({
       const existingNotes = existing ? existing.notes : '';
       const existingSnack = existing ? !!existing.snack_id : false;
 
-      // Get meal names for existing selections
-      let existingMealNames = [];
-      let existingMealPhotos = [];
+      // Last selected meal photo/name for the preview
+      let lastSelectedPhoto = '';
+      let lastSelectedName = '';
       if (existingMealIds.length > 0 && meals.length > 0) {
-        existingMealIds.forEach(id => {
-          const m = (meals || []).find(meal => meal.id === id);
-          if (m) {
-            existingMealNames.push(m.name);
-            existingMealPhotos.push(m.photo_url || '');
-          }
-        });
+        const lastId = existingMealIds[existingMealIds.length - 1];
+        const m = (meals || []).find(meal => meal.id === lastId);
+        if (m) {
+          lastSelectedPhoto = m.photo_url || '';
+          lastSelectedName = m.name;
+        }
       }
 
       const dayConfirmed = existingMealIds.length >= (this.data.selectedPlan ? this.data.selectedPlan.meals : 1);
@@ -140,8 +140,7 @@ Page({
 
       const updatedMeals = (meals || []).map(m => ({
         ...m,
-        selected: existingMealIds.includes(m.id),
-        selectedIndex: existingMealIds.indexOf(m.id) >= 0 ? existingMealIds.indexOf(m.id) + 1 : 0,
+        qty: existingMealIds.filter(id => id === m.id).length,
       }));
 
       this.setData({
@@ -156,8 +155,8 @@ Page({
         selectedTime: existingTime,
         currentNotes: existingNotes,
         selectedMealIds: existingMealIds,
-        selectedMealNames: existingMealNames,
-        selectedMealPhotos: existingMealPhotos,
+        lastSelectedPhoto,
+        lastSelectedName,
         dayConfirmed,
         canGoNext: dayConfirmed,
         days,
@@ -170,127 +169,128 @@ Page({
     }
   },
 
-  toggleMeal(e) {
+  incrementMeal(e) {
     const meal = e.currentTarget.dataset.meal;
-    const { selectedMealIds, selectedMealNames, selectedMealPhotos, selectedPlan, menuMeals } = this.data;
+    const { selectedMealIds, selectedPlan, menuMeals } = this.data;
     const maxMeals = selectedPlan ? selectedPlan.meals : 1;
 
-    const idx = selectedMealIds.indexOf(meal.id);
-    let newIds = [...selectedMealIds];
-    let newNames = [...selectedMealNames];
-    let newPhotos = [...selectedMealPhotos];
-
-    if (idx >= 0) {
-      newIds.splice(idx, 1);
-      newNames.splice(idx, 1);
-      newPhotos.splice(idx, 1);
-    } else if (newIds.length < maxMeals) {
-      newIds.push(meal.id);
-      newNames.push(meal.name);
-      newPhotos.push(meal.photo_url || '');
-    } else {
+    if (selectedMealIds.length >= maxMeals) {
       wx.showToast({ title: `Max ${maxMeals} meal(s) for this plan`, icon: 'none' });
       return;
     }
 
-    // Update menuMeals with selected flag
+    const newIds = [...selectedMealIds, meal.id];
     const updatedMeals = menuMeals.map(m => ({
       ...m,
-      selected: newIds.includes(m.id),
-      selectedIndex: newIds.indexOf(m.id) >= 0 ? newIds.indexOf(m.id) + 1 : 0,
+      qty: m.id === meal.id ? (m.qty || 0) + 1 : m.qty,
     }));
-
-    const lastSelectedPhoto = newPhotos.length > 0 ? newPhotos[newPhotos.length - 1] : '';
-    const lastSelectedName = newNames.length > 0 ? newNames[newNames.length - 1] : '';
     const dayConfirmed = newIds.length >= maxMeals;
 
     this.setData({
       selectedMealIds: newIds,
-      selectedMealNames: newNames,
-      selectedMealPhotos: newPhotos,
       menuMeals: updatedMeals,
-      lastSelectedPhoto,
-      lastSelectedName,
+      lastSelectedPhoto: meal.photo_url || '',
+      lastSelectedName: meal.name,
       dayConfirmed,
-    });
+    }, () => this.persistCurrentDay());
+  },
+
+  decrementMeal(e) {
+    const meal = e.currentTarget.dataset.meal;
+    const { selectedMealIds, selectedPlan, menuMeals } = this.data;
+    const maxMeals = selectedPlan ? selectedPlan.meals : 1;
+
+    const idx = selectedMealIds.indexOf(meal.id);
+    if (idx < 0) return;
+
+    const newIds = [...selectedMealIds];
+    newIds.splice(idx, 1);
+    const updatedMeals = menuMeals.map(m => ({
+      ...m,
+      qty: m.id === meal.id ? Math.max((m.qty || 0) - 1, 0) : m.qty,
+    }));
+    const dayConfirmed = newIds.length >= maxMeals;
+
+    this.setData({
+      selectedMealIds: newIds,
+      menuMeals: updatedMeals,
+      lastSelectedPhoto: meal.photo_url || '',
+      lastSelectedName: meal.name,
+      dayConfirmed,
+    }, () => this.persistCurrentDay());
   },
 
   onTimeChange(e) {
-    this.setData({ selectedTime: e.detail.value });
+    this.setData({ selectedTime: e.detail.value }, () => this.persistCurrentDay());
   },
 
   onNotesInput(e) {
-    this.setData({ currentNotes: e.detail.value });
+    this.setData({ currentNotes: e.detail.value }, () => this.persistCurrentDay());
   },
 
   toggleSnack() {
-    this.setData({ snackAdded: !this.data.snackAdded });
+    this.setData({ snackAdded: !this.data.snackAdded }, () => this.persistCurrentDay());
+  },
+
+  // Guarda en memoria (allSelections) lo que haya en pantalla para el día
+  // actual, sin pegarle a Supabase — así no se pierde nada al cambiar de
+  // día sin tocar un botón explícito de "Save".
+  persistCurrentDay() {
+    const { selectedMealIds, selectedTime, currentNotes, snackAdded, snackId, currentDay, allSelections, days } = this.data;
+
+    const updatedSelections = { ...allSelections };
+    if (selectedMealIds.length === 0) {
+      delete updatedSelections[currentDay];
+    } else {
+      updatedSelections[currentDay] = {
+        meal_ids: selectedMealIds,
+        snack_id: snackAdded ? snackId : null,
+        time: selectedTime,
+        notes: currentNotes,
+      };
+    }
+
+    const maxMeals = this.data.selectedPlan ? this.data.selectedPlan.meals : 1;
+    const dayDone = selectedMealIds.length >= maxMeals;
+    const updatedDays = days.map(d => d.key === currentDay ? { ...d, done: dayDone } : d);
+
+    this.setData({ allSelections: updatedSelections, days: updatedDays, canGoNext: dayDone });
   },
 
   saveAndNext() {
-    const { selectedMealIds, selectedTime, currentNotes, snackAdded, snackId, currentDay, allSelections, selectedPlan, currentDayLabel } = this.data;
+    const { selectedMealIds, selectedPlan } = this.data;
 
     if (selectedMealIds.length < selectedPlan.meals) {
       wx.showToast({ title: `Select ${selectedPlan.meals} meal(s) first`, icon: 'none' });
       return;
     }
 
-    const updatedSelections = {
-      ...allSelections,
-      [currentDay]: {
-        meal_ids: selectedMealIds,
-        snack_id: snackAdded ? snackId : null,
-        time: selectedTime,
-        notes: currentNotes,
-      }
-    };
-
-    const days = this.data.days.map(d =>
-      d.key === currentDay ? { ...d, done: true } : d
-    );
-
-    this.setData({ allSelections: updatedSelections, days, canGoNext: true }, () => {
-      this.goNext();
-    });
-  },
-
-  confirmDay() {
-    const { selectedMealIds, selectedMealNames, selectedTime, currentNotes, snackAdded, snackId, currentDay, allSelections, selectedPlan } = this.data;
-
-    if (selectedMealIds.length < selectedPlan.meals) {
-      wx.showToast({ title: `Select ${selectedPlan.meals} meal(s) first`, icon: 'none' });
-      return;
-    }
-
-    const updatedSelections = {
-      ...allSelections,
-      [currentDay]: {
-        meal_ids: selectedMealIds,
-        snack_id: snackAdded ? snackId : null,
-        time: selectedTime,
-        notes: currentNotes,
-      }
-    };
-
-    const days = this.data.days.map(d =>
-      d.key === currentDay ? { ...d, done: true } : d
-    );
-
-    this.setData({ allSelections: updatedSelections, days, canGoNext: true });
-    wx.showToast({ title: `${this.data.currentDayLabel} saved`, icon: 'none' });
+    this.persistCurrentDay();
+    this.goNext();
   },
 
   switchDay(e) {
     const day = e.currentTarget.dataset.day;
     if (day === this.data.currentDay) return;
+    this.persistCurrentDay();
     this.loadMenu(day);
   },
 
   async goNext() {
     if (!this.data.canGoNext) return;
-    const { currentDay, isLastDay, allSelections, fromRenewal, fromOrderSummary } = this.data;
+    const { currentDay, isLastDay, allSelections, fromRenewal, fromOrderSummary, selectedPlan } = this.data;
 
     if (isLastDay) {
+      const incompleteDay = DAYS.find(d => {
+        const sel = allSelections[d.key];
+        return !sel || !sel.meal_ids || sel.meal_ids.length < selectedPlan.meals;
+      });
+
+      if (incompleteDay) {
+        wx.showToast({ title: `Select your ${incompleteDay.label} meal(s) first`, icon: 'none' });
+        return;
+      }
+
       wx.setStorageSync('mealSelections', allSelections);
       if (fromOrderSummary) {
         wx.navigateBack();

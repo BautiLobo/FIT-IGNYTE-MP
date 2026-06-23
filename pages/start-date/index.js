@@ -1,4 +1,5 @@
 // pages/start-date/index.js
+const { PUBLIC_HOLIDAYS, MAKEUP_WORKDAYS } = require('./holidays');
 
 Page({
   data: {
@@ -30,10 +31,11 @@ Page({
   onDateChange(e) {
     const dateStr = e.detail.value; // YYYY-MM-DD
     const date = new Date(dateStr + 'T00:00:00');
-    // Skip weekends — move to next Monday if weekend selected
-    const day = date.getDay();
-    if (day === 0) date.setDate(date.getDate() + 1); // Sunday → Monday
-    if (day === 6) date.setDate(date.getDate() + 2); // Saturday → Monday
+
+    if (this.isNonWorkingDay(date)) {
+      wx.showToast({ title: 'No deliveries on weekends or public holidays — pick another date', icon: 'none', duration: 2500 });
+      return; // keep the previously selected date
+    }
 
     const expiry = this.addBusinessDays(date, 4);
 
@@ -44,12 +46,23 @@ Page({
     });
   },
 
+  // A weekend day, unless it's been designated a make-up workday;
+  // or a listed public holiday.
+  isNonWorkingDay(date) {
+    const dateStr = this.toDateString(date);
+    if (PUBLIC_HOLIDAYS.includes(dateStr)) return true;
+    const day = date.getDay();
+    const isWeekend = day === 0 || day === 6;
+    if (isWeekend && !MAKEUP_WORKDAYS.includes(dateStr)) return true;
+    return false;
+  },
+
   getNextBusinessDay(date) {
     const d = new Date(date);
     d.setDate(d.getDate() + 1);
-    const day = d.getDay();
-    if (day === 0) d.setDate(d.getDate() + 1);
-    if (day === 6) d.setDate(d.getDate() + 2);
+    while (this.isNonWorkingDay(d)) {
+      d.setDate(d.getDate() + 1);
+    }
     return d;
   },
 
@@ -58,8 +71,7 @@ Page({
     let added = 0;
     while (added < days) {
       d.setDate(d.getDate() + 1);
-      const day = d.getDay();
-      if (day !== 0 && day !== 6) added++;
+      if (!this.isNonWorkingDay(d)) added++;
     }
     return d;
   },
@@ -87,7 +99,7 @@ Page({
 
     const { fromRenewal } = this.data;
     if (fromRenewal) {
-      wx.navigateTo({ url: '/pages/payment/index?from=renewal' });
+      wx.navigateTo({ url: '/pages/order-summary/index?from=renewal' });
     } else {
       wx.navigateTo({ url: '/pages/order-summary/index' });
     }

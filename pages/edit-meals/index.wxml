@@ -49,9 +49,7 @@
         <view
           wx:for="{{menuMeals}}"
           wx:key="id"
-          class="meal-row {{item.selected ? 'meal-row-selected' : ''}}"
-          bindtap="toggleMeal"
-          data-meal="{{item}}"
+          class="meal-row {{item.qty > 0 ? 'meal-row-selected' : ''}}"
         >
           <view class="meal-thumb-wrap">
             <image wx:if="{{item.photo_url}}" class="meal-thumb" src="{{item.photo_url}}" mode="aspectFill" />
@@ -60,11 +58,17 @@
             </view>
           </view>
           <view class="meal-info">
-            <text class="meal-name {{item.selected ? 'meal-name-active' : ''}}">{{item.name}}</text>
+            <text class="meal-name {{item.qty > 0 ? 'meal-name-active' : ''}}">{{item.name}}</text>
             <text class="meal-desc">{{item.sauce}} · {{item.kcal}} kcal</text>
           </view>
-          <view class="meal-check {{item.selected ? 'meal-check-on' : ''}}">
-            <text wx:if="{{item.selected}}" class="meal-check-num">{{item.selectedIndex}}</text>
+          <view class="meal-stepper">
+            <view class="stepper-btn stepper-btn-minus {{item.qty === 0 ? 'stepper-btn-disabled' : ''}}" bindtap="decrementMeal" data-meal="{{item}}">
+              <text class="stepper-btn-text">−</text>
+            </view>
+            <text class="stepper-qty">{{item.qty}}</text>
+            <view class="stepper-btn stepper-btn-plus" bindtap="incrementMeal" data-meal="{{item}}">
+              <text class="stepper-btn-text">+</text>
+            </view>
           </view>
         </view>
       </view>

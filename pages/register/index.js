@@ -5,6 +5,7 @@ Page({
   data: {
     selectedPlan: null,
     submitting: false,
+    editing: false,
     form: {
       name: '',
       phone: '',
@@ -16,13 +17,38 @@ Page({
     }
   },
 
-  onLoad() {
+  async onLoad(options) {
     const selectedPlan = wx.getStorageSync('selectedPlan');
     if (!selectedPlan) {
       wx.navigateTo({ url: '/pages/plans/index' });
       return;
     }
     this.setData({ selectedPlan });
+
+    if (options.from === 'order-summary') {
+      const pendingOrderId = wx.getStorageSync('pendingOrderId');
+      if (!pendingOrderId) return;
+      try {
+        const data = await app.supabase('GET', 'new_orders', null, `id=eq.${pendingOrderId}`);
+        if (data && data.length > 0) {
+          const order = data[0];
+          this.setData({
+            editing: true,
+            form: {
+              name: order.name || '',
+              phone: order.phone || '',
+              district: order.district || '',
+              address: order.address || '',
+              access: order.access || '',
+              allergies: order.allergies || '',
+              goal: order.goal || '',
+            },
+          });
+        }
+      } catch (err) {
+        console.error('Load order for edit error:', err);
+      }
+    }
   },
 
   onInput(e) {
@@ -63,7 +89,22 @@ Page({
     this.setData({ submitting: true });
 
     try {
-      const { form, selectedPlan } = this.data;
+      const { form, selectedPlan, editing } = this.data;
+
+      if (editing) {
+        const pendingOrderId = wx.getStorageSync('pendingOrderId');
+        await app.supabase('PATCH', 'new_orders', {
+          name: form.name.trim(),
+          phone: form.phone.trim(),
+          district: form.district.trim(),
+          address: form.address.trim(),
+          access: form.access.trim(),
+          allergies: form.allergies.trim(),
+          goal: form.goal.trim(),
+        }, `id=eq.${pendingOrderId}`);
+        wx.navigateBack();
+        return;
+      }
 
       // Get meal selections saved from meal-select
       const mealSelections = wx.getStorageSync('mealSelections') || {};
@@ -81,7 +122,6 @@ Page({
         access: form.access.trim(),
         allergies: form.allergies.trim(),
         goal: form.goal.trim(),
-        plan_id: selectedPlan.id,
         plan_id: selectedPlan.id,
         meals: mealSelections,
         status: 'draft',

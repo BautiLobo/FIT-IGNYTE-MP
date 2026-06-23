@@ -5,6 +5,7 @@
   background: #0b0b0c;
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 
 /* ── LOGO + TAGLINE ── */
@@ -14,26 +15,25 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 100rpx 40rpx 28rpx;
+  padding: 80rpx 40rpx 28rpx;
   gap: 20rpx;
-  background: radial-gradient(ellipse at 50% 30%, #3a0a0a 0%, #0b0b0c 65%);
 }
 
 .logo-glow {
   position: absolute;
-  top: 60rpx;
+  top: 20rpx;
   left: 50%;
   transform: translateX(-50%);
-  width: 280rpx;
-  height: 280rpx;
-  background: radial-gradient(circle, rgba(232,52,42,0.35) 0%, rgba(232,52,42,0) 70%);
-  filter: blur(10rpx);
+  width: 480rpx;
+  height: 480rpx;
+  background: radial-gradient(circle, rgba(232,52,42,0.45) 0%, rgba(232,52,42,0.15) 45%, rgba(232,52,42,0) 100%);
+  filter: blur(40rpx);
   z-index: 0;
 }
 
 .logo {
   width: 400rpx;
-  height: 120rpx;
+  height: 220rpx;
   position: relative;
   z-index: 1;
 }
@@ -57,7 +57,7 @@
 }
 
 .sub-tagline {
-  font-size: 20rpx;
+  font-size: 28rpx;
   color: #5d5d65;
   letter-spacing: 5rpx;
   font-weight: 600;
@@ -67,7 +67,7 @@
   z-index: 1;
 }
 
-/* ── DISCOUNT BANNER ── */
+/* ── PROMO BANNER ── */
 .discount-wrap {
   padding: 0 28rpx;
   margin-top: 8rpx;
@@ -75,55 +75,19 @@
   width: 100%;
 }
 
-.discount-banner {
-  background: repeating-linear-gradient(135deg, #16161c 0 18rpx, #1c1c22 18rpx 36rpx);
-  border: 1rpx solid #2a2a33;
-  border-radius: 20rpx;
-  height: 220rpx;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6rpx;
-  box-sizing: border-box;
+.discount-banner-img {
   width: 100%;
-}
-
-.discount-label {
-  font-size: 20rpx;
-  font-weight: 700;
-  letter-spacing: 5rpx;
-  color: rgba(255,255,255,0.7);
+  height: 220rpx;
+  border-radius: 20rpx;
   display: block;
-  text-align: center;
-}
-
-.discount-main {
-  font-size: 88rpx;
-  font-weight: 900;
-  color: #fff;
-  line-height: 1;
-  display: block;
-  letter-spacing: -1rpx;
-  text-align: center;
-}
-
-.discount-sub {
-  font-size: 24rpx;
-  font-weight: 500;
-  color: rgba(255,255,255,0.8);
-  display: block;
-  text-align: center;
 }
 
 /* ── BUTTONS ── */
 .btn-wrap {
-  padding: 24rpx 28rpx 64rpx;
+  padding: 48rpx 28rpx 0;
   display: flex;
   flex-direction: column;
   gap: 16rpx;
-  margin-top: auto;
-  margin-bottom: 40rpx;
   box-sizing: border-box;
   width: 100%;
 }
@@ -132,7 +96,7 @@ button { margin: 0 !important; padding: 0 !important; background: transparent; b
 
 .btn-start {
   background: #e8342a !important;
-  border-radius: 100rpx !important;
+  border-radius: 24rpx !important;
   height: 100rpx;
   line-height: 100rpx;
   color: #fff !important;
@@ -145,13 +109,14 @@ button { margin: 0 !important; padding: 0 !important; background: transparent; b
 }
 
 .btn-plans {
-  background: #1a1a22 !important;
-  border-radius: 100rpx !important;
+  background: rgba(167,139,250,0.12) !important;
+  border: 2rpx solid #f77a05 !important;
+  border-radius: 24rpx !important;
   height: 92rpx;
   line-height: 92rpx;
-  color: #f3f3f4 !important;
+  color: #f77a05 !important;
   font-size: 30rpx !important;
-  font-weight: 600 !important;
+  font-weight: 800 !important;
   text-align: center;
   width: 100% !important;
   box-sizing: border-box;

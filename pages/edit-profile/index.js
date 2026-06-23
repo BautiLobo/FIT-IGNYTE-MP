@@ -4,6 +4,11 @@ const app = getApp();
 Page({
   data: {
     saving: false,
+    pendingAddressChange: false,
+    addressChangeStatus: '', // 'approved' | 'rejected' shown once
+    addressChangeNote: '',
+    originalAddress: '',
+    originalDistrict: '',
     form: {
       name: '',
       phone: '',
@@ -25,6 +30,8 @@ Page({
 
       const c = data[0];
       this.setData({
+        originalAddress: c.address || '',
+        originalDistrict: c.district || '',
         form: {
           name:      c.name || '',
           phone:     c.phone || '',
@@ -35,9 +42,32 @@ Page({
           goal:      c.goal || '',
         }
       });
+
+      const latest = await app.supabase('GET', 'address_changes', null, `client_id=eq.${clientId}&order=created_at.desc&limit=1`);
+      const latestChange = latest && latest.length > 0 ? latest[0] : null;
+
+      if (latestChange && latestChange.status === 'pending') {
+        this.setData({ pendingAddressChange: true });
+      } else if (latestChange && (latestChange.status === 'approved' || latestChange.status === 'rejected')) {
+        const seenKey = `seenAddressChange_${latestChange.id}`;
+        if (!wx.getStorageSync(seenKey)) {
+          this.setData({
+            addressChangeStatus: latestChange.status,
+            addressChangeNote: latestChange.rejection_note || '',
+          });
+          this.seenAddressChangeKey = seenKey;
+        }
+      }
     } catch (err) {
       console.error('Load profile error:', err);
     }
+  },
+
+  dismissAddressChangeNotice() {
+    if (this.seenAddressChangeKey) {
+      wx.setStorageSync(this.seenAddressChangeKey, true);
+    }
+    this.setData({ addressChangeStatus: '', addressChangeNote: '' });
   },
 
   onInput(e) {
@@ -50,21 +80,47 @@ Page({
     this.setData({ saving: true });
 
     const clientId = wx.getStorageSync('clientId');
-    const { form } = this.data;
+    const { form, originalAddress, originalDistrict } = this.data;
+    const newAddress = form.address.trim();
+    const newDistrict = form.district.trim();
+    const addressChanged = newAddress !== originalAddress || newDistrict !== originalDistrict;
 
     try {
+      // El distrito/dirección no se actualizan directo — quedan pendientes
+      // de revisión para chequear que estén en zona de cobertura. El resto
+      // de los campos se guarda normal.
       await app.supabase('PATCH', 'clients', {
         name:      form.name.trim(),
         phone:     form.phone.trim(),
-        district:  form.district.trim(),
-        address:   form.address.trim(),
         access:    form.access.trim(),
         allergies: form.allergies.trim(),
         goal:      form.goal.trim(),
       }, `id=eq.${clientId}`);
 
-      wx.showToast({ title: 'Profile updated ✓', icon: 'none' });
-      setTimeout(() => wx.navigateBack(), 800);
+      if (addressChanged) {
+        const existingPending = await app.supabase('GET', 'address_changes', null, `client_id=eq.${clientId}&status=eq.pending`);
+
+        if (existingPending && existingPending.length > 0) {
+          await app.supabase('PATCH', 'address_changes', {
+            new_district: newDistrict,
+            new_address: newAddress,
+          }, `id=eq.${existingPending[0].id}`);
+        } else {
+          await app.supabase('POST', 'address_changes', {
+            client_id: clientId,
+            old_district: originalDistrict,
+            old_address: originalAddress,
+            new_district: newDistrict,
+            new_address: newAddress,
+            status: 'pending',
+          });
+        }
+        wx.showToast({ title: 'Saved. Address pending review', icon: 'none' });
+      } else {
+        wx.showToast({ title: 'Profile updated ✓', icon: 'none' });
+      }
+
+      setTimeout(() => wx.navigateBack(), 1000);
 
     } catch (err) {
       console.error('Save profile error:', err);

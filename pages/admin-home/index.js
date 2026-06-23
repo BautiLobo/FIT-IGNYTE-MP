@@ -12,6 +12,8 @@ Page({
     todayLabel: '',
     pendingCount: 0,
     activeCount: 0,
+    pendingOrdersCount: 0,
+    pendingAddressCount: 0,
   },
 
   async onLoad() {
@@ -40,13 +42,19 @@ Page({
 
   async loadStats() {
     try {
-      const [pendingData, activeData] = await Promise.all([
+      const [pendingData, activeData, pendingAddressData] = await Promise.all([
         app.supabase('GET', 'new_orders', null, 'status=eq.pending'),
         app.supabase('GET', 'clients', null, 'status=eq.Active'),
+        app.supabase('GET', 'address_changes', null, 'status=eq.pending'),
       ]);
 
+      const pendingOrdersCount = (pendingData || []).length;
+      const pendingAddressCount = (pendingAddressData || []).length;
+
       this.setData({
-        pendingCount: (pendingData || []).length,
+        pendingOrdersCount,
+        pendingAddressCount,
+        pendingCount: pendingOrdersCount + pendingAddressCount,
         activeCount: (activeData || []).length,
         loading: false,
       });

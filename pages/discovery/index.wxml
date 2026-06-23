@@ -11,19 +11,15 @@
     <text class="sub-tagline">WEEKLY PLANS · MON-FRI</text>
   </view>
 
-  <!-- Discount banner -->
+  <!-- Promo banner -->
   <view class="discount-wrap">
-    <view class="discount-banner">
-      <text class="discount-label">LIMITED OFFER</text>
-      <text class="discount-main">25% OFF</text>
-      <text class="discount-sub">your first week</text>
-    </view>
+    <image class="discount-banner-img" src="/images/promo-banner.png" mode="aspectFill" />
   </view>
 
   <!-- Buttons -->
   <view class="btn-wrap">
-    <button class="btn-start" bindtap="goToTiers">Get started  →</button>
     <button class="btn-plans" bindtap="openBrochure">☰  See our plans</button>
+    <button class="btn-start" bindtap="goToTiers">Get started  →</button>
   </view>
 
 </view>

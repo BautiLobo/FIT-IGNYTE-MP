@@ -2,7 +2,7 @@
 
   <view class="topbar">
     <view class="back-btn" bindtap="goBack"><text class="back-arrow">‹</text></view>
-    <text class="topbar-title">Choose your goal</text>
+    <text class="topbar-title">Tiers</text>
     <view style="width:60rpx;"></view>
   </view>
 
@@ -15,8 +15,8 @@
     <block wx:else>
 
       <view class="list-header">
-        <text class="list-title">What's your goal?</text>
-        <text class="list-sub">Choose a diet tier to see available plans</text>
+        <text class="list-title"></text>
+    
       </view>
 
       <view wx:for="{{tiers}}" wx:key="name" class="tier-wrap">
