@@ -109,6 +109,19 @@ Page({
       // Get meal selections saved from meal-select
       const mealSelections = wx.getStorageSync('mealSelections') || {};
 
+      // Evitar colisión: si el teléfono ya pertenece a un cliente existente,
+      // no crear una orden nueva — eso pisaría los datos de ese cliente al aprobar.
+      const existingClient = await app.supabase('GET', 'clients', null, `phone=eq.${form.phone.trim()}`);
+      if (existingClient && existingClient.length > 0) {
+        wx.showModal({
+          title: 'Phone already registered',
+          content: 'This phone number already belongs to an existing client. Please use a different number, or contact us if you need to renew/update an existing account.',
+          showCancel: false,
+        });
+        this.setData({ submitting: false });
+        return;
+      }
+
       // Get WeChat code for openid resolution on backend
       const loginRes = await new Promise((resolve, reject) => {
         wx.login({ success: resolve, fail: reject });

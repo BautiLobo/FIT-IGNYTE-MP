@@ -10,8 +10,46 @@ App({
   },
 
   onLaunch() {
-    // Admin detection disabled until AppSecret is configured
-    // this.checkAdmin();
+    this.adminCheckPromise = this.checkAdmin();
+  },
+
+  // ── ADMIN DETECTION (vía Edge Function wx-login) ────────────────
+  // Resuelve el code de wx.login() contra WeChat (AppSecret nunca sale
+  // del Edge Function) y marca isAdmin si el openid está en la allowlist.
+  // Devuelve una promesa para que las páginas puedan esperar el resultado
+  // antes de decidir a dónde navegar (evita la carrera con checkSession).
+  checkAdmin() {
+    return new Promise((resolve) => {
+      wx.login({
+        success: (loginRes) => {
+          if (!loginRes.code) { resolve(false); return; }
+          wx.request({
+            url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/wx-login',
+            method: 'POST',
+            header: { 'Content-Type': 'application/json' },
+            data: { code: loginRes.code },
+            success: (res) => {
+              const data = res.data || {};
+              if (data.openid) {
+                wx.setStorageSync('openid', data.openid);
+                console.log('[checkAdmin] openid:', data.openid);
+              }
+              this.globalData.isAdmin = !!data.isAdmin;
+              wx.setStorageSync('isAdmin', !!data.isAdmin);
+              resolve(this.globalData.isAdmin);
+            },
+            fail: (err) => {
+              console.error('[checkAdmin] wx-login request failed:', err);
+              resolve(false);
+            }
+          });
+        },
+        fail: (err) => {
+          console.error('[checkAdmin] wx.login failed:', err);
+          resolve(false);
+        }
+      });
+    });
   },
 
   // ── REAL CLIENT STATUS (calculated, not stored) ────────────────

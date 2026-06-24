@@ -306,23 +306,6 @@ Page({
     }
   },
 
-  async saveMealSelections(clientId, allSelections) {
-    const dayMap = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday' };
-    for (const [key, label] of Object.entries(dayMap)) {
-      const sel = allSelections[key];
-      if (!sel || !sel.meal_ids || sel.meal_ids.length === 0) continue;
-      await app.supabase('POST', 'meal_selections', {
-        client_id: clientId,
-        day: label,
-        slot: 1,
-        meals_json: sel.meal_ids,
-        delivery_time: sel.time,
-        snack_id: sel.snack_id,
-        note: sel.notes || '',
-      });
-    }
-  },
-
   goBack() {
     wx.navigateBack();
   },

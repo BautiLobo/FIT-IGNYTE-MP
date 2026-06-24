@@ -85,13 +85,28 @@ Page({
     const newDistrict = form.district.trim();
     const addressChanged = newAddress !== originalAddress || newDistrict !== originalDistrict;
 
+    const newPhone = form.phone.trim();
+
     try {
+      // Evitar colisión: si el teléfono cambió y ya pertenece a OTRO cliente,
+      // no permitir el guardado — pisaría los datos de ese otro cliente.
+      const existingPhoneOwner = await app.supabase('GET', 'clients', null, `phone=eq.${newPhone}`);
+      if (existingPhoneOwner && existingPhoneOwner.length > 0 && existingPhoneOwner[0].id !== clientId) {
+        wx.showModal({
+          title: 'Phone already registered',
+          content: 'This phone number already belongs to another client. Please use a different number.',
+          showCancel: false,
+        });
+        this.setData({ saving: false });
+        return;
+      }
+
       // El distrito/dirección no se actualizan directo — quedan pendientes
       // de revisión para chequear que estén en zona de cobertura. El resto
       // de los campos se guarda normal.
       await app.supabase('PATCH', 'clients', {
         name:      form.name.trim(),
-        phone:     form.phone.trim(),
+        phone:     newPhone,
         access:    form.access.trim(),
         allergies: form.allergies.trim(),
         goal:      form.goal.trim(),

@@ -13,6 +13,9 @@ Page({
   async checkSession() {
     console.log('[discovery] checking session...');
     try {
+      const isAdmin = await app.adminCheckPromise;
+      if (isAdmin) { wx.reLaunch({ url: '/pages/admin-home/index' }); return; }
+
       const pendingOrderId = wx.getStorageSync('pendingOrderId');
       if (pendingOrderId) {
         const orderData = await app.supabase('GET', 'new_orders', null, `id=eq.${pendingOrderId}`);

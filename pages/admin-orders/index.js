@@ -127,7 +127,8 @@ Page({
           for (const [key, label] of Object.entries(dayMap)) {
             const sel = meals[key];
             if (!sel || !sel.meal_ids || sel.meal_ids.length === 0) continue;
-            await app.supabase('POST', 'meal_selections', {
+
+            const mealRow = {
               client_id: clientId,
               day: label,
               slot: 1,
@@ -135,7 +136,15 @@ Page({
               delivery_time: sel.time || '',
               snack_id: sel.snack_id || null,
               note: sel.notes || '',
-            });
+            };
+
+            // Ya existe una selección para este día/slot (ej. re-aprobación) — actualizar en vez de insertar.
+            const existingSel = await app.supabase('GET', 'meal_selections', null, `client_id=eq.${clientId}&day=eq.${label}&slot=eq.1`);
+            if (existingSel && existingSel.length > 0) {
+              await app.supabase('PATCH', 'meal_selections', mealRow, `id=eq.${existingSel[0].id}`);
+            } else {
+              await app.supabase('POST', 'meal_selections', mealRow);
+            }
           }
         }
       }
