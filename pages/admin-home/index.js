@@ -42,20 +42,23 @@ Page({
 
   async loadStats() {
     try {
-      const [pendingData, activeData, pendingAddressData] = await Promise.all([
+      const [pendingData, allClients, pendingAddressData] = await Promise.all([
         app.supabase('GET', 'new_orders', null, 'status=eq.pending'),
-        app.supabase('GET', 'clients', null, 'status=eq.Active'),
+        app.supabase('GET', 'clients', null, 'select=start_date,expiry_date'),
         app.supabase('GET', 'address_changes', null, 'status=eq.pending'),
       ]);
 
       const pendingOrdersCount = (pendingData || []).length;
       const pendingAddressCount = (pendingAddressData || []).length;
+      const activeCount = (allClients || []).filter(
+        c => app.getRealStatus(c.start_date, c.expiry_date) === 'Active'
+      ).length;
 
       this.setData({
         pendingOrdersCount,
         pendingAddressCount,
         pendingCount: pendingOrdersCount + pendingAddressCount,
-        activeCount: (activeData || []).length,
+        activeCount,
         loading: false,
       });
     } catch (err) {

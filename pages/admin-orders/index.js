@@ -95,6 +95,7 @@ Page({
             status: 'Pending Payment',
             plan_id: order.plan_id,
             expiry_date: nextFriday,
+            ...(order.wechat_openid ? { wechat_openid: order.wechat_openid } : {}),
           }, `id=eq.${existing[0].id}`);
         } else {
           // New client — create record with Pending Payment status
@@ -111,6 +112,7 @@ Page({
             status: 'Pending Payment',
             start_date: new Date().toISOString().split('T')[0],
             paid: false,
+            wechat_openid: order.wechat_openid || '',
           });
         }
       }
@@ -152,6 +154,13 @@ Page({
       wx.hideLoading();
       wx.showToast({ title: 'Order approved ✓', icon: 'none' });
       await this.loadOrders();
+
+      if (orderData && orderData.length > 0) {
+        const clientLookup = await app.supabase('GET', 'clients', null, `phone=eq.${orderData[0].phone}`);
+        if (clientLookup && clientLookup.length > 0) {
+          app.pushNotify(clientLookup[0].id, 'FIT IGNYTE', 'Order approved!');
+        }
+      }
 
     } catch (err) {
       wx.hideLoading();
@@ -248,6 +257,7 @@ Page({
       wx.hideLoading();
       wx.showToast({ title: 'Address approved ✓', icon: 'none' });
       await this.loadAddressChanges();
+      app.pushNotify(change.client_id, 'FIT IGNYTE', 'Address approved');
 
     } catch (err) {
       wx.hideLoading();
@@ -296,6 +306,9 @@ Page({
       this.setData({ showAddrRejectModal: false, rejectingAddrId: null });
       wx.showToast({ title: 'Address change rejected', icon: 'none' });
       await this.loadAddressChanges();
+      if (change) {
+        app.pushNotify(change.client_id, 'FIT IGNYTE', 'Address rejected');
+      }
 
     } catch (err) {
       wx.hideLoading();

@@ -20,8 +20,11 @@ Page({
 
   async loadClients() {
     try {
-      const data = await app.supabase('GET', 'clients', null, 'status=eq.Active&order=name.asc');
-      const clients = (data || []).map(c => ({ ...c, selected: false }));
+      const data = await app.supabase('GET', 'clients', null, 'order=name.asc');
+      const activeClients = (data || []).filter(
+        c => app.getRealStatus(c.start_date, c.expiry_date) === 'Active'
+      );
+      const clients = activeClients.map(c => ({ ...c, selected: false }));
       this.setData({ clients, clientCount: clients.length });
     } catch (err) {
       console.error('Load clients error:', err);
@@ -98,24 +101,16 @@ Page({
     const { recipientType, selectedClientIds, title, message, clients } = this.data;
 
     try {
-      if (recipientType === 'all') {
-        for (const c of clients) {
-          await app.supabase('POST', 'notifications', {
-            client_id: c.id,
-            title: title.trim(),
-            message: message.trim(),
-            is_read: false,
-          });
-        }
-      } else {
-        for (const id of selectedClientIds) {
-          await app.supabase('POST', 'notifications', {
-            client_id: id,
-            title: title.trim(),
-            message: message.trim(),
-            is_read: false,
-          });
-        }
+      const targetIds = recipientType === 'all' ? clients.map(c => c.id) : selectedClientIds;
+
+      for (const id of targetIds) {
+        await app.supabase('POST', 'notifications', {
+          client_id: id,
+          title: title.trim(),
+          message: message.trim(),
+          is_read: false,
+        });
+        app.pushNotify(id, 'FIT IGNYTE', title.trim());
       }
 
       wx.showToast({ title: 'Notification sent', icon: 'success' });

@@ -24,6 +24,10 @@ Page({
   async onLoad() {
     await this.loadClientData();
     await this.loadNotifications();
+    const clientId = wx.getStorageSync('clientId');
+    if (clientId) {
+      app.captureOpenid(clientId);
+    }
   },
 
   onShow() {

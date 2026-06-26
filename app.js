@@ -2,6 +2,17 @@
 const config = require('./config');
 
 
+// Template de WeChat Subscribe Message "Message notification" — único template
+// reutilizado para todos los tipos de notificación push.
+// TODO: completar con las keys reales que muestra WeChat en el detalle del
+// template (ej. thing1, thing8, time4) antes de probar en real.
+const WX_TEMPLATE_ID = 'A7o5PTcftFBe1nYsidWchFofz2z_DN9Whn_96H60x2M';
+const WX_TEMPLATE_KEYS = {
+  writer: 'name1',    // Commenter
+  content: 'thing2',  // Message content
+  time: 'time4',      // Sending time
+};
+
 App({
 
   globalData: {
@@ -48,6 +59,97 @@ App({
           console.error('[checkAdmin] wx.login failed:', err);
           resolve(false);
         }
+      });
+    });
+  },
+
+  // ── WECHAT SUBSCRIBE MESSAGES (push notifications) ──────────────
+  // 0) resolveOpenid: cambia un código fresco de wx.login por el openid real
+  //    (vía wx-login, mismo Edge Function que usa el admin). El código expira
+  //    en minutos, así que esto hay que hacerlo apenas se obtiene.
+  resolveOpenid() {
+    return new Promise((resolve) => {
+      wx.login({
+        success: (loginRes) => {
+          if (!loginRes.code) { resolve(null); return; }
+          wx.request({
+            url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/wx-login',
+            method: 'POST',
+            header: { 'Content-Type': 'application/json' },
+            data: { code: loginRes.code },
+            success: (res) => resolve((res.data && res.data.openid) || null),
+            fail: () => resolve(null),
+          });
+        },
+        fail: () => resolve(null),
+      });
+    });
+  },
+
+  // 1) captureOpenid: resuelve el openid del cliente y lo guarda en
+  //    clients.wechat_openid. Sin esto el backend no tiene a quién mandarle el push.
+  async captureOpenid(clientId) {
+    if (!clientId) return null;
+    const openid = await this.resolveOpenid();
+    if (!openid) return null;
+    try {
+      await this.supabase('PATCH', 'clients', { wechat_openid: openid }, `id=eq.${clientId}`);
+    } catch (err) {
+      console.error('[captureOpenid] save error:', err);
+    }
+    return openid;
+  },
+
+  // 2) requestSubscribe: pide permiso al usuario para recibir el template de
+  //    push. WeChat exige que esto se dispare desde una acción del usuario
+  //    (tap de un botón) — no funciona si se llama solo en onLoad/onShow.
+  //    Cada permiso otorgado autoriza, en general, UN próximo envío.
+  requestSubscribe() {
+    return new Promise((resolve) => {
+      wx.requestSubscribeMessage({
+        tmplIds: [WX_TEMPLATE_ID],
+        success: (res) => resolve(res[WX_TEMPLATE_ID] === 'accept'),
+        fail: (err) => { console.error('[requestSubscribe] error:', err); resolve(false); },
+      });
+    });
+  },
+
+  // Formato fijo para el campo "time4" (sending time) — el template no
+  // acepta más de ~20 caracteres, así que evitamos toLocaleString() (varía
+  // según locale y puede ser demasiado largo).
+  formatPushTime() {
+    const d = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  },
+
+  // 3) pushNotify: le pide al Edge Function wx-notify que mande el push al
+  //    cliente indicado. Si el cliente nunca otorgó permiso o no tiene
+  //    openid guardado, el Edge Function simplemente no manda nada (no es
+  //    un error) — por eso esto nunca debe bloquear el flujo principal.
+  pushNotify(clientId, writer, content, time) {
+    // El template limita "name1" a ~10 caracteres y "thing2" a ~20 — WeChat
+    // rechaza el envío si se exceden, así que recortamos antes de mandar.
+    const safeWriter = (writer || '').slice(0, 10);
+    const safeContent = (content || '').slice(0, 20);
+    const safeTime = time || this.formatPushTime();
+
+    return new Promise((resolve) => {
+      wx.request({
+        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/wx-notify',
+        method: 'POST',
+        header: { 'Content-Type': 'application/json' },
+        data: {
+          client_id: clientId,
+          template_id: WX_TEMPLATE_ID,
+          data: {
+            [WX_TEMPLATE_KEYS.writer]: { value: safeWriter },
+            [WX_TEMPLATE_KEYS.content]: { value: safeContent },
+            [WX_TEMPLATE_KEYS.time]: { value: safeTime },
+          },
+        },
+        success: (res) => resolve(res.data),
+        fail: (err) => { console.error('[pushNotify] error:', err); resolve(null); },
       });
     });
   },

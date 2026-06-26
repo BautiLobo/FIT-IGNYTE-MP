@@ -122,10 +122,9 @@ Page({
         return;
       }
 
-      // Get WeChat code for openid resolution on backend
-      const loginRes = await new Promise((resolve, reject) => {
-        wx.login({ success: resolve, fail: reject });
-      });
+      // Resolver el openid ahora — el código de wx.login expira en minutos y la
+      // aprobación del admin puede tardar horas, así que no sirve guardarlo crudo.
+      const openid = await app.resolveOpenid();
 
       const orderData = {
         name: form.name.trim(),
@@ -138,7 +137,7 @@ Page({
         plan_id: selectedPlan.id,
         meals: mealSelections,
         status: 'draft',
-        wechat_code: loginRes.code,
+        wechat_openid: openid,
       };
 
       const result = await app.supabase('POST', 'new_orders', orderData);
