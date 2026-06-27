@@ -20,6 +20,7 @@ Page({
   },
 
   async onLoad() {
+    await app.adminCheckPromise;
     await Promise.all([this.loadOrders(), this.loadAddressChanges()]);
   },
 

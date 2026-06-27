@@ -67,7 +67,8 @@ Page({
       wx.showToast({ title: 'Name should not contain numbers', icon: 'none' });
       return false;
     }
-    if (!phone.trim() || !/^\d{8,11}$/.test(phone.trim())) {
+    const normalizedPhone = phone.trim().replace(/[\s-]/g, '');
+    if (!normalizedPhone || !/^\+?\d{7,15}$/.test(normalizedPhone)) {
       wx.showToast({ title: 'Please enter a valid phone number', icon: 'none' });
       return false;
     }

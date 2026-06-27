@@ -47,6 +47,11 @@ App({
               }
               this.globalData.isAdmin = !!data.isAdmin;
               wx.setStorageSync('isAdmin', !!data.isAdmin);
+              if (data.isAdmin && data.accessToken) {
+                wx.setStorageSync('adminAccessToken', data.accessToken);
+              } else {
+                wx.removeStorageSync('adminAccessToken');
+              }
               resolve(this.globalData.isAdmin);
             },
             fail: (err) => {
@@ -170,14 +175,19 @@ App({
   },
 
   // ── SUPABASE HELPER ──────────────────────────────────────────
-  supabase(method, table, body, query) {
+  // Si hay un JWT de admin guardado (obtenido via wx-login cuando el openid
+  // esta en la allowlist), se usa como Authorization en vez de la anon key,
+  // para que las escrituras pasen las políticas RLS "authenticated".
+  supabase(method, table, body, query, _retried) {
     return new Promise((resolve, reject) => {
       let url = `${config.SUPABASE_URL}/rest/v1/${table}`;
       if (query) url += `?${query}`;
 
+      const adminToken = this.globalData.isAdmin ? wx.getStorageSync('adminAccessToken') : null;
+
       const header = {
         'apikey': config.SUPABASE_KEY,
-        'Authorization': `Bearer ${config.SUPABASE_KEY}`,
+        'Authorization': adminToken ? `Bearer ${adminToken}` : `Bearer ${config.SUPABASE_KEY}`,
         'Content-Type': 'application/json',
       };
 
@@ -192,6 +202,13 @@ App({
         success: (res) => {
           if (res.statusCode >= 200 && res.statusCode < 300) {
             resolve(res.data);
+          } else if (res.statusCode === 401 && adminToken && !_retried) {
+            // El JWT de admin guardado venció (dura 1h) — pedimos uno nuevo
+            // vía checkAdmin() y reintentamos una sola vez antes de fallar.
+            console.warn(`[supabase] ${method} ${table} got 401, refreshing admin token and retrying once`);
+            this.checkAdmin().then(() => {
+              this.supabase(method, table, body, query, true).then(resolve, reject);
+            });
           } else {
             console.error(`[supabase] ${method} ${table} failed:`, res.statusCode, res.data);
             reject(new Error(`Supabase error ${res.statusCode}: ${JSON.stringify(res.data)}`));

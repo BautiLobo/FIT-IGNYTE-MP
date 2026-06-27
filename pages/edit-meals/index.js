@@ -170,7 +170,7 @@ Page({
       menuMeals: updatedMeals,
       lastSelectedPhoto: meal.photo_url || '',
       lastSelectedName: meal.name,
-    });
+    }, () => this.persistCurrentDay());
   },
 
   decrementMeal(e) {
@@ -191,39 +191,53 @@ Page({
       menuMeals: updatedMeals,
       lastSelectedPhoto: meal.photo_url || '',
       lastSelectedName: meal.name,
-    });
+    }, () => this.persistCurrentDay());
   },
 
-  onTimeChange(e) { this.setData({ selectedTime: e.detail.value }); },
-  onNotesInput(e) { this.setData({ currentNotes: e.detail.value }); },
-  toggleSnack() { this.setData({ snackAdded: !this.data.snackAdded }); },
+  onTimeChange(e) { this.setData({ selectedTime: e.detail.value }, () => this.persistCurrentDay()); },
+  onNotesInput(e) { this.setData({ currentNotes: e.detail.value }, () => this.persistCurrentDay()); },
+  toggleSnack() { this.setData({ snackAdded: !this.data.snackAdded }, () => this.persistCurrentDay()); },
+
+  // Guarda en memoria (allSelections) lo del día actual antes de cambiar de
+  // día, sin pegarle a Supabase — así no se pierde nada al cambiar de día
+  // sin tocar un botón explícito de "Save" (mismo patrón que meal-select).
+  persistCurrentDay() {
+    const { selectedMealIds, selectedTime, currentNotes, snackAdded, snackId, currentDay, allSelections, plan, days } = this.data;
+
+    const updatedSelections = { ...allSelections };
+    if (selectedMealIds.length === 0) {
+      delete updatedSelections[currentDay];
+    } else {
+      updatedSelections[currentDay] = {
+        meal_ids: selectedMealIds,
+        snack_id: snackAdded ? snackId : null,
+        time: selectedTime,
+        notes: currentNotes,
+      };
+    }
+
+    const dayDone = selectedMealIds.length >= plan.meals;
+    const updatedDays = days.map(d => d.key === currentDay ? { ...d, done: dayDone } : d);
+
+    this.setData({ allSelections: updatedSelections, days: updatedDays });
+  },
+
   switchDay(e) {
     const day = e.currentTarget.dataset.day;
     if (day === this.data.currentDay) return;
+    this.persistCurrentDay();
     this.loadMenu(day);
   },
 
   saveAndNext() {
-    const { selectedMealIds, selectedTime, currentNotes, snackAdded, snackId, currentDay, allSelections, plan } = this.data;
+    const { selectedMealIds, plan } = this.data;
 
     if (selectedMealIds.length < plan.meals) {
       wx.showToast({ title: `Select ${plan.meals} meal(s) first`, icon: 'none' }); return;
     }
 
-    const updatedSelections = {
-      ...allSelections,
-      [currentDay]: {
-        meal_ids: selectedMealIds,
-        snack_id: snackAdded ? snackId : null,
-        time: selectedTime,
-        notes: currentNotes,
-      }
-    };
-
-    const days = this.data.days.map(d => d.key === currentDay ? { ...d, done: true } : d);
-    this.setData({ allSelections: updatedSelections, days }, () => {
-      this.goNext();
-    });
+    this.persistCurrentDay();
+    this.goNext();
   },
 
   async goNext() {

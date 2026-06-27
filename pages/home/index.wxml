@@ -18,6 +18,7 @@
     <block wx:else>
 
       <view wx:for="{{notifications}}" wx:key="id" class="notif-banner">
+        <view class="notif-banner-icon">🔔</view>
         <view class="notif-banner-body">
           <text class="notif-banner-title">{{item.title}}</text>
           <text class="notif-banner-message">{{item.message}}</text>

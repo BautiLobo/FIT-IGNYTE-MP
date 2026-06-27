@@ -15,11 +15,12 @@
 @keyframes spin { to { transform:rotate(360deg); } }
 
 /* ── NOTIFICATION BANNER ── */
-.notif-banner { background:#13131a; border:1rpx solid #2a2a33; border-radius:18rpx; padding:20rpx 22rpx; display:flex; align-items:flex-start; gap:16rpx; margin-bottom:16rpx; }
+.notif-banner { background:linear-gradient(135deg, #2a1416, #1a1014); border:1rpx solid #e8342a; border-left:6rpx solid #e8342a; border-radius:20rpx; padding:24rpx 22rpx; display:flex; align-items:flex-start; gap:18rpx; margin-bottom:18rpx; box-shadow:0 4rpx 20rpx rgba(232,52,42,0.25); }
+.notif-banner-icon { font-size:36rpx; flex-shrink:0; line-height:1; margin-top:2rpx; }
 .notif-banner-body { flex:1; }
-.notif-banner-title { font-size:26rpx; font-weight:800; color:#f3f3f4; display:block; }
-.notif-banner-message { font-size:24rpx; color:#9f9fa8; display:block; margin-top:6rpx; line-height:1.5; }
-.notif-banner-close { font-size:24rpx; color:#5d5d65; flex-shrink:0; padding:0 4rpx; }
+.notif-banner-title { font-size:30rpx; font-weight:900; color:#ffffff; display:block; }
+.notif-banner-message { font-size:26rpx; color:#d8c9ca; display:block; margin-top:8rpx; line-height:1.5; }
+.notif-banner-close { font-size:28rpx; color:#d8c9ca; flex-shrink:0; padding:0 4rpx; }
 
 /* ── GREETING ── */
 .greeting-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:24rpx; overflow:hidden; }
