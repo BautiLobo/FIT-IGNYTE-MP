@@ -72,7 +72,7 @@
       </view>
 
 <view class="btn-wrap">
-        <button class="btn-contact" bindtap="contactUs">Contact FIT IGNYTE</button>
+        <button class="btn-contact" open-type="contact">Contact FIT IGNYTE</button>
       </view>
 
     </block>

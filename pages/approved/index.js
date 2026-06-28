@@ -51,12 +51,4 @@ Page({
     }, 300);
   },
 
-  contactUs() {
-    wx.showModal({
-      title: 'Contact us on WeChat',
-      content: 'Search for: fitignyte_shanghai',
-      showCancel: false,
-      confirmText: 'OK',
-    });
-  },
 });

@@ -33,9 +33,12 @@
     <view class="buttons">
       <view class="btn-primary" bindtap="keepSameMeals"><text>✓  Renew this plan</text></view>
       <view class="btn-outline" bindtap="changePlan"><text>Choose a different plan</text></view>
-      <view class="btn-feedback" bindtap="contactUs"><text>Leave your opinion</text></view>
     </view>
 
   </scroll-view>
+
+  <view class="footer">
+    <button class="btn-feedback" open-type="contact"><text>💬  Leave us feedback</text></button>
+  </view>
 
 </view>

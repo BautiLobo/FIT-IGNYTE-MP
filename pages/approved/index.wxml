@@ -26,7 +26,7 @@
     </view>
 
     <view class="btn-wrap">
-      <button class="btn-secondary" bindtap="contactUs" style="position: relative; left: 0rpx; top: -22rpx; width: 656rpx; height: 93rpx; display: block; box-sizing: border-box">💬  Contact FIT IGNYTE</button>
+      <button class="btn-secondary" open-type="contact" style="position: relative; left: 0rpx; top: -22rpx; width: 656rpx; height: 93rpx; display: block; box-sizing: border-box">💬  Contact FIT IGNYTE</button>
     </view>
 
   </view>

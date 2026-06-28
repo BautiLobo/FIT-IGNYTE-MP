@@ -54,7 +54,7 @@
 
   <!-- Fixed bottom -->
   <view class="bottom-bar">
-    <button class="btn-contact" bindtap="contactUs">Contact us while you wait</button>
+    <button class="btn-contact" open-type="contact">Contact us while you wait</button>
     <text class="hint">Usually reviewed in under 1 hour</text>
   </view>
 

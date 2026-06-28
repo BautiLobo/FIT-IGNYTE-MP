@@ -28,7 +28,7 @@
     </view>
 
     <!-- Contact -->
-    <button class="btn-secondary" bindtap="contactUs">  Contact us anyway</button>
+    <button class="btn-secondary" open-type="contact">  Contact us anyway</button>
 
   </view>
 

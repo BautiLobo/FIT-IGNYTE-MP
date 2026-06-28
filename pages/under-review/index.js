@@ -1,9 +1,6 @@
 // pages/under-review/index.js
 const app = getApp();
 
-// WeChat ID of the business — replace with real ID
-const WECHAT_ID = 'fitignyte_shanghai';
-
 Page({
   data: {
     order: null,
@@ -58,20 +55,4 @@ Page({
     }
   },
 
-  contactUs() {
-    wx.openCustomerServiceChat({
-      extInfo: { url: '' },
-      corpId: '',
-      success() {},
-      fail() {
-        // Fallback — show WeChat ID to copy
-        wx.showModal({
-          title: 'Contact us on WeChat',
-          content: `Search for: ${WECHAT_ID}`,
-          showCancel: false,
-          confirmText: 'OK',
-        });
-      }
-    });
-  },
 });

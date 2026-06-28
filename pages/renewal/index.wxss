@@ -125,20 +125,34 @@ button { margin: 0 !important; padding: 0 !important; background: transparent; b
   color: #e8342a;
 }
 
+.footer {
+  padding: 1rpx 200rpx 32rpx;
+  box-sizing: border-box;
+  width: 100%;
+}
+
 .btn-feedback {
-  background: rgba(167,139,250,0.12);
-  border: 1rpx solid #f77a05;
+  background: transparent;
+  border: 1rpx solid #2a2a33;
   border-radius: 20rpx;
-  height: 88rpx;
+  height: 96rpx;
   display: flex;
   align-items: center;
   justify-content: center;
+  text-align: center;
   width: 100%;
   box-sizing: border-box;
+  padding: 100rpx;
+  line-height: normal;
+}
+
+.btn-feedback::after {
+  border: none;
 }
 
 .btn-feedback text {
   font-size: 32rpx;
   font-weight: 700;
-  color: #f77a05;
+  color: #9a9aa3;
+  text-align: center;
 }
