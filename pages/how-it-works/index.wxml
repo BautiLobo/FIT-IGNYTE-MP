@@ -1,0 +1,90 @@
+<view class="container">
+
+  <view class="topbar">
+    <view class="back-btn" bindtap="goBack">
+      <text class="back-arrow">‹</text>
+    </view>
+    <text class="topbar-title">How it works</text>
+    <view style="width:64rpx;"></view>
+  </view>
+
+  <scroll-view class="scroll" scroll-y>
+   <view class="scroll-inner">
+
+    <view class="header-block">
+    <text class="kicker">FIT IGNYTE · FOUR STEPS</text>
+    <view class="headline-wrap">
+      <text class="headline">Goal to door,</text>
+      <text class="headline">handled.</text>
+    </view>
+    <text class="intro">Fresh fitness meals, delivered to your door. No shopping, no cooking.</text>
+    <view class="header-divider"></view>
+    </view>
+
+    <view class="timeline">
+
+      <view class="step-row">
+        <view class="step-marker">
+          <text class="step-circle">1</text>
+          <view class="step-line"></view>
+        </view>
+        <view class="step-content">
+          <view class="step-head">
+            <text class="step-title">Choose your plan</text>
+            <text class="step-tag">YOUR GOAL</text>
+          </view>
+          <text class="step-desc">Pick a plan based on your goal: lose fat, build muscle, or maintain.</text>
+        </view>
+      </view>
+
+      <view class="step-row">
+        <view class="step-marker">
+          <text class="step-circle">2</text>
+          <view class="step-line"></view>
+        </view>
+        <view class="step-content">
+          <view class="step-head">
+            <text class="step-title">Build your menu</text>
+            <text class="step-tag">MON-FRI</text>
+          </view>
+          <text class="step-desc">Choose your meals and delivery time for each weekday.</text>
+        </view>
+      </view>
+
+      <view class="step-row">
+        <view class="step-marker">
+          <text class="step-circle">3</text>
+          <view class="step-line"></view>
+        </view>
+        <view class="step-content">
+          <view class="step-head">
+            <text class="step-title">Get approved & pay</text>
+            <text class="step-tag">FAST</text>
+          </view>
+          <text class="step-desc">We review your order, then you confirm with payment.</text>
+        </view>
+      </view>
+
+      <view class="step-row step-row-last">
+        <view class="step-marker">
+          <text class="step-circle">4</text>
+        </view>
+        <view class="step-content">
+          <view class="step-head">
+            <text class="step-title">Delivered & renewed weekly</text>
+            <text class="step-tag">FLEXIBLE</text>
+          </view>
+          <text class="step-desc">Meals arrive at your chosen time. Renew each week — no auto-renewal.</text>
+        </view>
+      </view>
+
+    </view>
+
+    <view class="btn-wrap">
+      <button class="btn-start" bindtap="getStarted">Get started  →</button>
+    </view>
+
+   </view>
+  </scroll-view>
+
+</view>

@@ -59,6 +59,9 @@
 .week-meal-photo { display:none; }
 .week-meal-names { flex:1; display:flex; flex-direction:column; gap:4rpx; }
 .week-meal-name { font-size:28rpx; color:#f3f3f4; font-weight:600; line-height:1.4; display:block; }
+.week-snack-row { display:flex; align-items:center; gap:8rpx; margin-top:2rpx; }
+.week-snack-label { color:#5d5d65; font-weight:700; font-size:22rpx; letter-spacing:0.5rpx; }
+.week-snack-name { color:#e8342a; font-weight:600; font-size:25rpx; }
 .week-time { font-size:28rpx; color:#5d5d65; font-weight:700; flex-shrink:0; margin-left:12rpx; padding-top:4rpx; }
 .week-time-today { color:#e8342a; }
 

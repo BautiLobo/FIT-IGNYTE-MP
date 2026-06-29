@@ -110,11 +110,11 @@ button { margin: 0 !important; padding: 0 !important; background: transparent; b
 
 .btn-plans {
   background: rgba(167,139,250,0.12) !important;
-  border: 2rpx solid #f77a05 !important;
+  border: 2rpx solid #e8342a !important;
   border-radius: 24rpx !important;
   height: 92rpx;
   line-height: 92rpx;
-  color: #f77a05 !important;
+  color: #e8342a !important;
   font-size: 30rpx !important;
   font-weight: 800 !important;
   text-align: center;

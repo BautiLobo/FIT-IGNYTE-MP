@@ -60,9 +60,19 @@ Page({
           wx.downloadFile({
             url: data[0].value,
             success: (res) => {
-              wx.openDocument({ filePath: res.tempFilePath, showMenu: true });
+              wx.openDocument({
+                filePath: res.tempFilePath,
+                showMenu: true,
+                fail: (err) => {
+                  console.error('openDocument error:', err);
+                  wx.showToast({ title: err.errMsg || 'Failed to open', icon: 'none' });
+                }
+              });
             },
-            fail: () => wx.showToast({ title: 'Failed to open', icon: 'none' })
+            fail: (err) => {
+              console.error('downloadFile error:', err);
+              wx.showToast({ title: err.errMsg || 'Failed to download', icon: 'none' });
+            }
           });
         } else {
           wx.showToast({ title: 'Brochure not found', icon: 'none' });

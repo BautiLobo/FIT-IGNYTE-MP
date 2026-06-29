@@ -117,7 +117,7 @@
 
 /* Snack */
 .snack-wrap { margin-bottom:16rpx; }
-.snack-inner { background:#13131a; border:1rpx solid #2a2a33; border-radius:18rpx; padding:26rpx 28rpx; display:flex; align-items:center; justify-content:space-between; }
+.snack-inner { background:#13131a; border:2rpx solid #166534; border-radius:18rpx; padding:26rpx 28rpx; display:flex; align-items:center; justify-content:space-between; }
 .snack-inner-added { background:#052e16; border-color:#166534; }
 .snack-name { font-size:30rpx; color:#ccc; font-weight:600; }
 .snack-badge { background:#2a2a33; color:#9f9fa8; font-size:20rpx; padding:6rpx 18rpx; border-radius:24rpx; }

@@ -66,6 +66,10 @@
           <text class="week-day {{item.isToday ? 'week-day-today' : ''}}">{{item.dayShort}}</text>
           <view class="week-meal-names">
             <text wx:for="{{item.mealNames}}" wx:for-item="mealName" wx:key="*this" class="week-meal-name">{{mealName}}</text>
+            <view wx:if="{{item.snack}}" class="week-snack-row">
+              <text class="week-snack-label">Snack</text>
+              <text class="week-snack-name">{{item.snack}}</text>
+            </view>
           </view>
           <text class="week-time {{item.isToday ? 'week-time-today' : ''}}">{{item.time}}</text>
         </view>

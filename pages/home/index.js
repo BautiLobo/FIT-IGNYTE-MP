@@ -167,6 +167,7 @@ Page({
     const allIds = [];
     selections.forEach(s => {
       if (s.meals_json) s.meals_json.forEach(id => { if (id && !allIds.includes(id)) allIds.push(id); });
+      if (s.snack_id && !allIds.includes(s.snack_id)) allIds.push(s.snack_id);
     });
 
     let mealMap = {};
@@ -183,7 +184,8 @@ Page({
       const photo = mealIds.length > 0 && mealMap[mealIds[0]] ? mealMap[mealIds[0]].photo_url || '' : '';
       const time = row ? row.delivery_time : '';
       const isToday = d.key === planDayKey;
-      return { day: d.full, dayShort: d.short, mealNames, time, snack: null, isToday, photo };
+      const snack = row && row.snack_id && mealMap[row.snack_id] ? mealMap[row.snack_id].name : null;
+      return { day: d.full, dayShort: d.short, mealNames, time, snack, isToday, photo };
     });
   },
 
