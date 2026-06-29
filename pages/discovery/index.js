@@ -27,7 +27,7 @@ Page({
           if (status === 'paid') {
             // Find the client and set clientId
             const order = orderData[0];
-            const clientData = await app.supabase('GET', 'clients', null, `phone=eq.${order.phone}`);
+            const clientData = await app.getClient({ phone: order.phone });
             wx.removeStorageSync('pendingOrderId');
             wx.removeStorageSync('selectedPlan');
             if (clientData && clientData.length > 0) {
@@ -42,7 +42,7 @@ Page({
 
       const clientId = wx.getStorageSync('clientId');
       if (clientId) {
-        const clientData = await app.supabase('GET', 'clients', null, `id=eq.${clientId}`);
+        const clientData = await app.getClient({ clientId });
         if (clientData && clientData.length > 0) {
           const client = clientData[0];
 

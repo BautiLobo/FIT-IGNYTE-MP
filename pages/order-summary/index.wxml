@@ -33,7 +33,7 @@
         </view>
         <view wx:for="{{item.meals}}" wx:key="slot" wx:for-item="meal" class="meal-row">
           <text class="meal-slot">M{{meal.slot + 1}}</text>
-          <text class="meal-name">{{meal.name}}</text>
+          <text class="meal-name">{{meal.name}}{{meal.sauceName ? ' — ' + meal.sauceName : ''}}</text>
         </view>
         <view wx:if="{{item.snack}}" class="meal-row">
           <text class="snack-slot">SNK</text>

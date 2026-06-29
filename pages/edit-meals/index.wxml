@@ -51,23 +51,30 @@
           wx:key="id"
           class="meal-row {{item.qty > 0 ? 'meal-row-selected' : ''}}"
         >
-          <view class="meal-thumb-wrap">
-            <image wx:if="{{item.photo_url}}" class="meal-thumb" src="{{item.photo_url}}" mode="aspectFill" />
-            <view wx:else class="meal-thumb-placeholder">
-              <text class="meal-thumb-label">{{item.name.substring(0,2).toUpperCase()}}</text>
+          <view class="meal-row-top">
+            <view class="meal-thumb-wrap">
+              <image wx:if="{{item.photo_url}}" class="meal-thumb" src="{{item.photo_url}}" mode="aspectFill" />
+              <view wx:else class="meal-thumb-placeholder">
+                <text class="meal-thumb-label">{{item.name.substring(0,2).toUpperCase()}}</text>
+              </view>
             </view>
-          </view>
-          <view class="meal-info">
-            <text class="meal-name {{item.qty > 0 ? 'meal-name-active' : ''}}">{{item.name}}</text>
-            <text class="meal-desc">{{item.sauce}} · {{item.kcal}} kcal</text>
-          </view>
-          <view class="meal-stepper">
-            <view class="stepper-btn stepper-btn-minus {{item.qty === 0 ? 'stepper-btn-disabled' : ''}}" bindtap="decrementMeal" data-meal="{{item}}">
-              <text class="stepper-btn-text">−</text>
+            <view class="meal-info">
+              <text class="meal-name {{item.qty > 0 ? 'meal-name-active' : ''}}">{{item.name}}</text>
+              <view class="meal-desc-row">
+                <text class="meal-desc">{{item.kcal}} kcal</text>
+                <view wx:if="{{item.qty > 0 && item.sauceOptions.length > 0}}" class="sauce-btn" bindtap="openSaucePicker" data-meal-id="{{item.id}}">
+                  <text class="sauce-btn-text">{{item.selectedSauceName ? item.selectedSauceName : 'Select sauce'}}</text>
+                </view>
+              </view>
             </view>
-            <text class="stepper-qty">{{item.qty}}</text>
-            <view class="stepper-btn stepper-btn-plus" bindtap="incrementMeal" data-meal="{{item}}">
-              <text class="stepper-btn-text">+</text>
+            <view class="meal-stepper">
+              <view class="stepper-btn stepper-btn-minus {{item.qty === 0 ? 'stepper-btn-disabled' : ''}}" bindtap="decrementMeal" data-meal="{{item}}">
+                <text class="stepper-btn-text">−</text>
+              </view>
+              <text class="stepper-qty">{{item.qty}}</text>
+              <view class="stepper-btn stepper-btn-plus" bindtap="incrementMeal" data-meal="{{item}}">
+                <text class="stepper-btn-text">+</text>
+              </view>
             </view>
           </view>
         </view>

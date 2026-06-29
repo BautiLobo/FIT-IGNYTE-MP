@@ -112,7 +112,7 @@ Page({
 
       // Evitar colisión: si el teléfono ya pertenece a un cliente existente,
       // no crear una orden nueva — eso pisaría los datos de ese cliente al aprobar.
-      const existingClient = await app.supabase('GET', 'clients', null, `phone=eq.${form.phone.trim()}`);
+      const existingClient = await app.getClient({ phone: form.phone.trim() });
       if (existingClient && existingClient.length > 0) {
         wx.showModal({
           title: 'Phone already registered',

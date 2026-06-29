@@ -67,7 +67,7 @@ Page({
     }
 
     try {
-      const data = await app.supabase('GET', 'clients', null, `id=eq.${clientId}`);
+      const data = await app.getClient({ clientId });
       if (!data || data.length === 0) {
         wx.reLaunch({ url: '/pages/discovery/index' });
         return;
@@ -168,6 +168,7 @@ Page({
     selections.forEach(s => {
       if (s.meals_json) s.meals_json.forEach(id => { if (id && !allIds.includes(id)) allIds.push(id); });
       if (s.snack_id && !allIds.includes(s.snack_id)) allIds.push(s.snack_id);
+      if (s.sauce_ids) s.sauce_ids.forEach(id => { if (id && !allIds.includes(id)) allIds.push(id); });
     });
 
     let mealMap = {};
@@ -180,7 +181,13 @@ Page({
       const dayLabel = dayLabelMap[d.key];
       const row = selections.find(s => s.day === dayLabel && s.slot === 1);
       const mealIds = row ? (row.meals_json || []) : [];
-      const mealNames = mealIds.map(id => mealMap[id] ? mealMap[id].name : '').filter(Boolean);
+      const sauceIds = row ? (row.sauce_ids || []) : [];
+      const mealNames = mealIds.map((id, i) => {
+        if (!mealMap[id]) return null;
+        const sauceId = sauceIds[i];
+        const sauceName = sauceId && mealMap[sauceId] ? mealMap[sauceId].name : null;
+        return { name: mealMap[id].name, sauceName };
+      }).filter(Boolean);
       const photo = mealIds.length > 0 && mealMap[mealIds[0]] ? mealMap[mealIds[0]].photo_url || '' : '';
       const time = row ? row.delivery_time : '';
       const isToday = d.key === planDayKey;

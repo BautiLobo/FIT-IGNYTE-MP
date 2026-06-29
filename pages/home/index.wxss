@@ -58,7 +58,11 @@
 .week-day-today { color:#e8342a; }
 .week-meal-photo { display:none; }
 .week-meal-names { flex:1; display:flex; flex-direction:column; gap:4rpx; }
+.week-meal-row { display:flex; flex-direction:column; gap:4rpx; }
 .week-meal-name { font-size:28rpx; color:#f3f3f4; font-weight:600; line-height:1.4; display:block; }
+.week-sauce-tag { display:flex; align-items:center; gap:6rpx; }
+.week-sauce-dot { width:10rpx; height:10rpx; border-radius:50%; background:#5d5d65; flex-shrink:0; }
+.week-sauce-text { font-size:21rpx; color:#9f9fa8; font-weight:600; }
 .week-snack-row { display:flex; align-items:center; gap:8rpx; margin-top:2rpx; }
 .week-snack-label { color:#5d5d65; font-weight:700; font-size:22rpx; letter-spacing:0.5rpx; }
 .week-snack-name { color:#e8342a; font-weight:600; font-size:25rpx; }

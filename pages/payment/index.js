@@ -26,7 +26,7 @@ Page({
     try {
       if (fromRenewal) {
         const clientId = wx.getStorageSync('clientId');
-        const data = await app.supabase('GET', 'clients', null, `id=eq.${clientId}`);
+        const data = await app.getClient({ clientId });
         if (data && data.length > 0) this.setData({ order: data[0] });
       } else {
         const pendingOrderId = wx.getStorageSync('pendingOrderId');
@@ -80,13 +80,20 @@ Page({
         const startDate = wx.getStorageSync('startDate') || new Date().toISOString().split('T')[0];
         const realStatus = app.getRealStatus(startDate, expiryDate);
         console.log('[payment] renewal PATCH clientId:', clientId, 'plan_id:', selectedPlan && selectedPlan.id);
-        await app.supabase('PATCH', 'clients', {
+        await app.completePayment({
+          type: 'renewal',
+          clientId,
           status: realStatus,
           start_date: startDate,
           expiry_date: expiryDate,
-          paid: true,
           plan_id: selectedPlan.id,
-        }, `id=eq.${clientId}`);
+        });
+
+        const mealSelections = wx.getStorageSync('mealSelections');
+        if (mealSelections) {
+          await this.saveMealSelections(clientId, mealSelections);
+        }
+
         wx.removeStorageSync('mealSelections');
         wx.removeStorageSync('expiryDate');
         wx.removeStorageSync('startDate');
@@ -104,7 +111,7 @@ Page({
 
         const order = orderData[0];
         console.log('[payment] order phone:', order.phone);
-        const clientData = await app.supabase('GET', 'clients', null, `phone=eq.${order.phone}`);
+        const clientData = await app.getClient({ phone: order.phone });
 
         if (!clientData || clientData.length === 0) {
           throw new Error('Client not found for this order.');
@@ -113,19 +120,22 @@ Page({
         const newClientId = clientData[0].id;
         console.log('[payment] newClientId:', newClientId, 'pendingOrderId:', pendingOrderId);
 
-        // Marcar order como paid
-        await app.supabase('PATCH', 'new_orders', { status: 'paid' }, `id=eq.${pendingOrderId}`);
-
-        // Activar cliente
+        // Marcar order como paid + activar cliente (vía Edge Function con
+        // service_role — un PATCH directo con la anon key matcheaba 0 filas
+        // porque `clients` no tiene policy de SELECT para anon, y Postgres
+        // necesita que la fila sea visible para poder matchear el WHERE de
+        // un UPDATE, aun cuando la policy de UPDATE es permisiva).
         const startDate = wx.getStorageSync('startDate') || new Date().toISOString().split('T')[0];
         const realStatus = app.getRealStatus(startDate, nextFriday);
-        console.log('[payment] PATCH clients with:', JSON.stringify({ status: realStatus, start_date: startDate, expiry_date: nextFriday, paid: true }), 'where id=', newClientId);
-        await app.supabase('PATCH', 'clients', {
+        console.log('[payment] completePayment with:', JSON.stringify({ status: realStatus, start_date: startDate, expiry_date: nextFriday }), 'clientId=', newClientId, 'pendingOrderId=', pendingOrderId);
+        await app.completePayment({
+          type: 'new',
+          clientId: newClientId,
+          pendingOrderId,
           status: realStatus,
           start_date: startDate,
           expiry_date: nextFriday,
-          paid: true,
-        }, `id=eq.${newClientId}`);
+        });
 
         wx.removeStorageSync('startDate');
         wx.removeStorageSync('expiryDate');
@@ -144,6 +154,35 @@ Page({
         content: err.message || 'Something went wrong saving your data.',
         showCancel: false,
       });
+    }
+  },
+
+  // Persiste las selecciones de meal-select en meal_selections — necesario
+  // porque, a diferencia de edit-meals (que escribe directo a la tabla),
+  // meal-select solo guarda en wx.storage y dependía de que algo más lo
+  // sincronizara más adelante en el flujo de renovación.
+  async saveMealSelections(clientId, allSelections) {
+    const dayMap = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday' };
+    for (const [key, label] of Object.entries(dayMap)) {
+      const sel = allSelections[key];
+      if (!sel || !sel.meal_ids || sel.meal_ids.length === 0) continue;
+      const existing = await app.supabase('GET', 'meal_selections', null, `client_id=eq.${clientId}&day=eq.${label}&slot=eq.1`);
+      const sauces = sel.sauces || {};
+      const payload = {
+        client_id: clientId,
+        day: label,
+        slot: 1,
+        meals_json: sel.meal_ids,
+        delivery_time: sel.time,
+        snack_id: sel.snack_id || null,
+        note: sel.notes || '',
+        sauce_ids: sel.meal_ids.map(id => sauces[id] || null),
+      };
+      if (existing && existing.length > 0) {
+        await app.supabase('PATCH', 'meal_selections', payload, `client_id=eq.${clientId}&day=eq.${label}&slot=eq.1`);
+      } else {
+        await app.supabase('POST', 'meal_selections', payload);
+      }
     }
   },
 

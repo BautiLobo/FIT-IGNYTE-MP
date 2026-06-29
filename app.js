@@ -174,6 +174,63 @@ App({
     return 'Active';
   },
 
+  // ── GET CLIENT (vía Edge Function get-client) ───────────────────
+  // Reemplaza los GET directos a /rest/v1/clients?id=eq./phone=eq. para
+  // clientes normales (sin adminToken): la Edge Function usa la service_role
+  // key del lado del servidor y solo devuelve la fila pedida, en vez de dejar
+  // la tabla entera abierta a SELECT con la anon key.
+  getClient({ clientId, phone } = {}) {
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/get-client',
+        method: 'POST',
+        header: { 'Content-Type': 'application/json' },
+        data: { clientId, phone },
+        success: (res) => {
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            resolve(res.data);
+          } else {
+            console.error('[getClient] failed:', res.statusCode, res.data);
+            reject(new Error(`getClient error ${res.statusCode}: ${JSON.stringify(res.data)}`));
+          }
+        },
+        fail: (err) => {
+          console.error('[getClient] network error:', err);
+          reject(err);
+        }
+      });
+    });
+  },
+
+  // ── COMPLETE PAYMENT (vía Edge Function complete-payment) ──────
+  // Reemplaza los PATCH directos a `clients`/`new_orders` con la anon key:
+  // `clients` solo tiene policy de SELECT para `authenticated`, así que un
+  // UPDATE con anon key matchea 0 filas (PostgREST devuelve 200 con []),
+  // dejando `paid`/`status` sin actualizar pero sin lanzar ningún error.
+  // Esta función usa la service_role key del lado del servidor.
+  completePayment({ type, clientId, pendingOrderId, status, start_date, expiry_date, plan_id }) {
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/complete-payment',
+        method: 'POST',
+        header: { 'Content-Type': 'application/json' },
+        data: { type, clientId, pendingOrderId, status, start_date, expiry_date, plan_id },
+        success: (res) => {
+          if (res.statusCode >= 200 && res.statusCode < 300 && res.data && res.data.ok) {
+            resolve(res.data);
+          } else {
+            console.error('[completePayment] failed:', res.statusCode, res.data);
+            reject(new Error(`completePayment error: ${JSON.stringify(res.data)}`));
+          }
+        },
+        fail: (err) => {
+          console.error('[completePayment] network error:', err);
+          reject(err);
+        }
+      });
+    });
+  },
+
   // ── SUPABASE HELPER ──────────────────────────────────────────
   // Si hay un JWT de admin guardado (obtenido via wx-login cuando el openid
   // esta en la allowlist), se usa como Authorization en vez de la anon key,

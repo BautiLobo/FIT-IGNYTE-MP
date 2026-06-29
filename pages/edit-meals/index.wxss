@@ -59,9 +59,14 @@
 
 /* Meal List */
 .meal-list { background:#13131a; border:1rpx solid #2a2a33; border-radius:20rpx; overflow:hidden; margin-bottom:8rpx; }
-.meal-row { display:flex; align-items:center; gap:20rpx; padding:24rpx 24rpx; border-bottom:1rpx solid #1a1a22; }
+.meal-row { display:flex; flex-direction:column; padding:24rpx 24rpx; border-bottom:1rpx solid #1a1a22; }
 .meal-row:last-child { border-bottom:none; }
 .meal-row-selected { background:#1a0808; border-left:4rpx solid #e8342a; }
+.meal-row-top { display:flex; align-items:center; gap:20rpx; }
+
+.meal-desc-row { display:flex; align-items:center; gap:14rpx; margin-top:6rpx; }
+.sauce-btn { display:inline-flex; align-items:center; background:#e8342a; padding:6rpx 16rpx; border-radius:16rpx; }
+.sauce-btn-text { font-size:20rpx; font-weight:700; color:#fff; }
 
 .meal-thumb-wrap { width:110rpx; height:110rpx; border-radius:16rpx; overflow:hidden; flex-shrink:0; }
 .meal-thumb { width:100%; height:100%; }
@@ -71,7 +76,7 @@
 .meal-info { flex:1; }
 .meal-name { font-size:32rpx; color:#ccc; display:block; font-weight:700; }
 .meal-name-active { color:#e8342a; font-weight:800; }
-.meal-desc { font-size:26rpx; color:#9f9fa8; display:block; margin-top:6rpx; }
+.meal-desc { font-size:26rpx; color:#9f9fa8; display:block; }
 .meal-desc-active { color:#e8342a; }
 .meal-stepper { display:flex; align-items:center; gap:14rpx; flex-shrink:0; }
 .stepper-btn { width:56rpx; height:56rpx; border-radius:50%; background:#2a2a33; display:flex; align-items:center; justify-content:center; flex-shrink:0; }

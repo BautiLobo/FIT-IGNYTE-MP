@@ -16,7 +16,7 @@ Page({
     if (!clientId) return;
 
     try {
-      const data = await app.supabase('GET', 'clients', null, `id=eq.${clientId}`);
+      const data = await app.getClient({ clientId });
       if (!data || data.length === 0) return;
 
       const client = data[0];

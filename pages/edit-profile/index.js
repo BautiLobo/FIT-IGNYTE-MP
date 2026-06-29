@@ -25,7 +25,7 @@ Page({
     if (!clientId) return;
 
     try {
-      const data = await app.supabase('GET', 'clients', null, `id=eq.${clientId}`);
+      const data = await app.getClient({ clientId });
       if (!data || data.length === 0) return;
 
       const c = data[0];
@@ -90,7 +90,7 @@ Page({
     try {
       // Evitar colisión: si el teléfono cambió y ya pertenece a OTRO cliente,
       // no permitir el guardado — pisaría los datos de ese otro cliente.
-      const existingPhoneOwner = await app.supabase('GET', 'clients', null, `phone=eq.${newPhone}`);
+      const existingPhoneOwner = await app.getClient({ phone: newPhone });
       if (existingPhoneOwner && existingPhoneOwner.length > 0 && existingPhoneOwner[0].id !== clientId) {
         wx.showModal({
           title: 'Phone already registered',

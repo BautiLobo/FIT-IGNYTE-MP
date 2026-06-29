@@ -32,7 +32,7 @@ Page({
     }
 
     // Cargar cliente
-    const clientData = await app.supabase('GET', 'clients', null, `id=eq.${clientId}`);
+    const clientData = await app.getClient({ clientId });
     if (!clientData || clientData.length === 0) return;
     const client = clientData[0];
     const firstName = client.name ? client.name.split(' ')[0] : 'there';
@@ -48,13 +48,22 @@ Page({
     const firstDay = DAY_LABELS[first.day] || first.day || 'Monday';
     const firstTime = first.delivery_time || '09:45';
     const mealIds = first.meals_json || [];
+    const sauceIds = first.sauce_ids || [];
 
     // Cargar nombres de meals
     let firstMeals = '';
     if (mealIds.length > 0) {
-      const mealsData = await app.supabase('GET', 'meal_library', null, `id=in.(${mealIds.join(',')})`);
+      const allIds = [...mealIds, ...sauceIds.filter(Boolean)];
+      const mealsData = await app.supabase('GET', 'meal_library', null, `id=in.(${allIds.join(',')})`);
       if (mealsData && mealsData.length > 0) {
-        firstMeals = mealsData.map(m => m.name).join(' + ');
+        const mealMap = {};
+        mealsData.forEach(m => { mealMap[m.id] = m; });
+        firstMeals = mealIds.map((id, i) => {
+          const sauceId = sauceIds[i];
+          const sauceName = sauceId && mealMap[sauceId] ? mealMap[sauceId].name : null;
+          const name = mealMap[id] ? mealMap[id].name : '';
+          return sauceName ? `${name} (${sauceName})` : name;
+        }).filter(Boolean).join(' + ');
       }
     }
 

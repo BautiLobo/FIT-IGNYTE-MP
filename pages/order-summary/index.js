@@ -93,7 +93,7 @@ Page({
   async loadRenewalOrder(selectedPlan) {
     try {
       const clientId = wx.getStorageSync('clientId');
-      const data = await app.supabase('GET', 'clients', null, `id=eq.${clientId}`);
+      const data = await app.getClient({ clientId });
       const order = data && data.length > 0 ? data[0] : null;
 
       let mealSelections = wx.getStorageSync('mealSelections') || {};
@@ -123,11 +123,16 @@ Page({
       (rows || []).forEach(row => {
         const key = dayKeyMap[row.day];
         if (!key) return;
+        const mealIds = row.meals_json || [];
+        const sauceIds = row.sauce_ids || [];
+        const sauces = {};
+        mealIds.forEach((id, i) => { if (sauceIds[i]) sauces[id] = sauceIds[i]; });
         selections[key] = {
-          meal_ids: row.meals_json || [],
+          meal_ids: mealIds,
           snack_id: row.snack_id || null,
           time: row.delivery_time || '',
           notes: row.note || '',
+          sauces,
         };
       });
     } catch (err) {
@@ -137,7 +142,7 @@ Page({
   },
 
   async buildMealSummary(selections) {
-    // New structure: { mon: { meal_ids, snack_id, time, notes } }
+    // New structure: { mon: { meal_ids, snack_id, time, notes, sauces: { mealId: sauceId } } }
     const allIds = [];
     DAY_ORDER.forEach(day => {
       const sel = selections[day];
@@ -145,6 +150,9 @@ Page({
         sel.meal_ids.forEach(id => { if (id && !allIds.includes(id)) allIds.push(id); });
       }
       if (sel && sel.snack_id && !allIds.includes(sel.snack_id)) allIds.push(sel.snack_id);
+      if (sel && sel.sauces) {
+        Object.values(sel.sauces).forEach(id => { if (id && !allIds.includes(id)) allIds.push(id); });
+      }
     });
 
     let mealMap = {};
@@ -157,6 +165,7 @@ Page({
       .filter(day => selections[day] && selections[day].meal_ids && selections[day].meal_ids.length > 0)
       .map(day => {
         const sel = selections[day];
+        const sauces = sel.sauces || {};
         return {
           day,
           dayLabel: DAY_LABELS[day],
@@ -164,6 +173,7 @@ Page({
           meals: (sel.meal_ids || []).map((id, i) => ({
             slot: i,
             name: mealMap[id] ? mealMap[id].name : id,
+            sauceName: sauces[id] && mealMap[sauces[id]] ? mealMap[sauces[id]].name : null,
           })),
           snack: sel.snack_id ? (mealMap[sel.snack_id] ? mealMap[sel.snack_id].name : 'Snack of the day') : null,
         };
