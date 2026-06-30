@@ -44,11 +44,11 @@ Page({
   },
 
   keepSameMeals() {
-    wx.navigateTo({ url: '/pages/edit-meals/index?from=renewal' });
+    wx.navigateTo({ url: '/pages/start-date/index?from=renewal&next=edit-meals' });
   },
 
   choosNewMeals() {
-    wx.navigateTo({ url: '/pages/meal-select/index?from=renewal' });
+    wx.navigateTo({ url: '/pages/start-date/index?from=renewal&next=meal-select' });
   },
 
   changePlan() {

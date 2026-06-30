@@ -16,6 +16,9 @@ Page({
     fromOrderSummary: false,
     selectedPlan: null,
     days: [],
+    rotationAnchor: null,
+    rotationOrder: [1, 2, 3, 4],
+    startDateStr: null,
     currentDay: 'mon',
     currentDayLabel: 'Monday',
     menuMeals: [],
@@ -78,8 +81,9 @@ Page({
       }
     }
 
+    const startDateStr = wx.getStorageSync('startDate') || null;
     const days = DAYS.map(d => ({ ...d, done: false }));
-    this.setData({ fromRenewal, fromOrderSummary, selectedPlan, days, allSelections });
+    this.setData({ fromRenewal, fromOrderSummary, selectedPlan, days, allSelections, startDateStr });
 
     try {
       const saucesData = await app.supabase('GET', 'meal_library', null, 'item_type=eq.sauce');
@@ -88,6 +92,13 @@ Page({
       this.setData({ saucesById });
     } catch (err) {
       console.error('Load sauces error:', err);
+    }
+
+    try {
+      const { anchor, order } = await app.getMenuRotation();
+      this.setData({ rotationAnchor: anchor, rotationOrder: order });
+    } catch (err) {
+      console.error('Load menu rotation error:', err);
     }
 
     await this.loadMenu('mon');
@@ -99,10 +110,12 @@ Page({
     try {
       const dayLabel = DAYS.find(d => d.key === dayKey)?.label || '';
       const planTier = this.data.selectedPlan ? this.data.selectedPlan.tier : null;
+      const { rotationAnchor, rotationOrder, startDateStr } = this.data;
+      const weekIndex = app.getWeekIndexForDay(dayKey, rotationAnchor, rotationOrder, startDateStr);
 
       const menuQuery = planTier
-        ? `day=eq.${dayLabel}&tier=eq.${planTier}`
-        : `day=eq.${dayLabel}`;
+        ? `day=eq.${dayLabel}&tier=eq.${planTier}&week_index=eq.${weekIndex}`
+        : `day=eq.${dayLabel}&week_index=eq.${weekIndex}`;
       const menuData = await app.supabase('GET', 'menu', null, menuQuery);
       const menu = menuData && menuData.length > 0 ? menuData[0] : null;
 
@@ -344,7 +357,7 @@ Page({
       if (fromOrderSummary) {
         wx.navigateBack();
       } else if (fromRenewal) {
-        wx.navigateTo({ url: '/pages/start-date/index?from=renewal' });
+        wx.navigateTo({ url: '/pages/order-summary/index?from=renewal' });
       } else {
         wx.navigateTo({ url: '/pages/register/index' });
       }

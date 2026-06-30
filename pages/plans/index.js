@@ -57,23 +57,19 @@ Page({
     wx.setStorageSync('selectedPlan', plan);
 
     const url = this.data.fromRenewal
-      ? '/pages/meal-select/index?from=renewal'
-      : '/pages/meal-select/index';
+      ? '/pages/start-date/index?from=renewal&next=meal-select'
+      : '/pages/start-date/index?next=meal-select';
 
-    if (false) {
-      // placeholder
-    } else {
-      wx.navigateTo({
-        url,
-        fail: (err) => {
-          console.error('navigateTo meal-select failed:', err);
-          // Retry once
-          setTimeout(() => {
-            wx.navigateTo({ url: '/pages/meal-select/index' });
-          }, 500);
-        }
-      });
-    }
+    wx.navigateTo({
+      url,
+      fail: (err) => {
+        console.error('navigateTo start-date failed:', err);
+        // Retry once
+        setTimeout(() => {
+          wx.navigateTo({ url });
+        }, 500);
+      }
+    });
   },
 
   goBack() {

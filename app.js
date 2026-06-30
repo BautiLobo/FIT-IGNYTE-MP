@@ -231,6 +231,67 @@ App({
     });
   },
 
+  // ── MENU ROTATION (rotación de 4 semanas) ───────────────────────
+  // Trae el ancla de fecha y el orden de rotación desde `settings`.
+  // Se pide una vez por carga de pantalla (no cachear de más, el staff
+  // puede reordenar `menu_rotation_order` en cualquier momento).
+  async getMenuRotation() {
+    const data = await this.supabase('GET', 'settings', null, `key=in.(menu_rotation_anchor,menu_rotation_order)`);
+    const map = {};
+    (data || []).forEach(row => { map[row.key] = row.value; });
+
+    const anchor = map.menu_rotation_anchor || null;
+    let order = [1, 2, 3, 4];
+    if (map.menu_rotation_order) {
+      try {
+        order = typeof map.menu_rotation_order === 'string'
+          ? JSON.parse(map.menu_rotation_order)
+          : map.menu_rotation_order;
+      } catch (err) {
+        console.error('[getMenuRotation] invalid menu_rotation_order:', map.menu_rotation_order);
+      }
+    }
+    return { anchor, order };
+  },
+
+  // Calcula a qué week_index corresponde un día (mon..fri) según la fecha
+  // calendario real de entrega. Si ese día de "esta semana" ya pasó (ej.
+  // hoy es miércoles y se pregunta por lunes/martes), se usa la fecha del
+  // lunes/martes de la PRÓXIMA semana, porque esos días ya no se pueden
+  // entregar en la semana actual.
+  // startDateStr (YYYY-MM-DD) es la referencia real: el primer día de
+  // entrega que eligió el cliente. Si no se pasa, se usa "hoy" (caso del
+  // cliente activo editando la semana en curso desde home, donde no hay
+  // una decisión de start_date futura involucrada).
+  getWeekIndexForDay(dayKey, anchor, order, startDateStr) {
+    if (!anchor || !order || order.length !== 4) return 1; // fallback si la rotación no está configurada
+
+    const dayNumMap = { mon: 1, tue: 2, wed: 3, thu: 4, fri: 5 };
+    const targetDow = dayNumMap[dayKey];
+
+    const refDate = startDateStr ? new Date(startDateStr + 'T00:00:00') : new Date();
+    refDate.setHours(0, 0, 0, 0);
+    const refDow = refDate.getDay(); // 0=Sun..6=Sat
+
+    const diffToMonday = refDow === 0 ? -6 : 1 - refDow;
+    const refMonday = new Date(refDate);
+    refMonday.setDate(refMonday.getDate() + diffToMonday);
+
+    let targetDate = new Date(refMonday);
+    targetDate.setDate(refMonday.getDate() + (targetDow - 1));
+
+    if (targetDate < refDate) {
+      targetDate.setDate(targetDate.getDate() + 7);
+    }
+
+    const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+    const anchorDate = new Date(anchor + 'T00:00:00');
+    const weeksSinceAnchor = Math.floor((targetDate - anchorDate) / msPerWeek);
+    const slot = ((weeksSinceAnchor % 4) + 4) % 4;
+
+    return order[slot];
+  },
+
   // ── SUPABASE HELPER ──────────────────────────────────────────
   // Si hay un JWT de admin guardado (obtenido via wx-login cuando el openid
   // esta en la allowlist), se usa como Authorization en vez de la anon key,

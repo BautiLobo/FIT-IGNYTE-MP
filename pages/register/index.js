@@ -148,7 +148,7 @@ Page({
         wx.setStorageSync('pendingOrderId', result[0].id);
         // Clear selections from storage — no longer needed
         wx.removeStorageSync('mealSelections');
-        wx.navigateTo({ url: '/pages/start-date/index' });
+        wx.navigateTo({ url: '/pages/order-summary/index' });
       } else {
         throw new Error('No result from Supabase');
       }

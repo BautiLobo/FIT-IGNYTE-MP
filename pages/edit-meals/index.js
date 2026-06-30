@@ -18,6 +18,9 @@ Page({
     clientId: null,
     fromRenewal: false,
     days: [],
+    rotationAnchor: null,
+    rotationOrder: [1, 2, 3, 4],
+    startDateStr: null,
     currentDay: 'mon',
     currentDayLabel: 'Monday',
     menuMeals: [],
@@ -39,7 +42,12 @@ Page({
     const clientId = wx.getStorageSync('clientId');
     if (!clientId) { wx.navigateBack(); return; }
     const fromRenewal = options.from === 'renewal';
-    this.setData({ fromRenewal });
+    // En el flujo de renovación "Keep same meals", start-date ya corrió antes
+    // y dejó la fecha real en storage; para el cliente activo editando su
+    // semana en curso desde home no hay start_date futura, así que usamos
+    // "hoy" como referencia (comportamiento de getWeekIndexForDay sin 4to arg).
+    const startDateStr = fromRenewal ? (wx.getStorageSync('startDate') || null) : null;
+    this.setData({ fromRenewal, startDateStr });
 
     try {
       // Load client + plan
@@ -85,6 +93,14 @@ Page({
       }
 
       this.setData({ clientId, plan, allSelections, days });
+
+      try {
+        const { anchor, order } = await app.getMenuRotation();
+        this.setData({ rotationAnchor: anchor, rotationOrder: order });
+      } catch (err) {
+        console.error('Load menu rotation error:', err);
+      }
+
       await this.loadMenu('mon');
 
     } catch (err) {
@@ -97,10 +113,11 @@ Page({
     this.setData({ loading: true, selectedMealIds: [], lastSelectedPhoto: '', lastSelectedName: '' });
 
     try {
-      const { plan, allSelections } = this.data;
+      const { plan, allSelections, rotationAnchor, rotationOrder, startDateStr } = this.data;
       const dayLabel = DAYS.find(d => d.key === dayKey)?.label || '';
+      const weekIndex = app.getWeekIndexForDay(dayKey, rotationAnchor, rotationOrder, startDateStr);
 
-      const menuData = await app.supabase('GET', 'menu', null, `day=eq.${dayLabel}&tier=eq.${plan.tier}`);
+      const menuData = await app.supabase('GET', 'menu', null, `day=eq.${dayLabel}&tier=eq.${plan.tier}&week_index=eq.${weekIndex}`);
       const menu = menuData && menuData.length > 0 ? menuData[0] : null;
 
       let meals = [];
@@ -303,7 +320,7 @@ Page({
         wx.hideLoading();
         wx.showToast({ title: 'Meals updated!', icon: 'success' });
         const dest = this.data.fromRenewal
-          ? '/pages/start-date/index?from=renewal'
+          ? '/pages/order-summary/index?from=renewal'
           : '/pages/home/index';
         setTimeout(() => wx.reLaunch({ url: dest }), 1000);
       } catch (err) {

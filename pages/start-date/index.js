@@ -4,6 +4,7 @@ const { PUBLIC_HOLIDAYS, MAKEUP_WORKDAYS } = require('./holidays');
 Page({
   data: {
     fromRenewal: false,
+    next: 'meal-select',
     selectedDate: '',
     selectedDateFormatted: '',
     expiryDateFormatted: '',
@@ -12,7 +13,8 @@ Page({
 
   onLoad(options) {
     const fromRenewal = options.from === 'renewal';
-    this.setData({ fromRenewal });
+    const next = options.next === 'edit-meals' ? 'edit-meals' : 'meal-select';
+    this.setData({ fromRenewal, next });
     // Min date = next business day
     const min = this.getNextBusinessDay(new Date());
     const minStr = this.toDateString(min);
@@ -97,12 +99,10 @@ Page({
     const expiry = this.addBusinessDays(startDate, 4);
     wx.setStorageSync('expiryDate', this.toDateString(expiry));
 
-    const { fromRenewal } = this.data;
-    if (fromRenewal) {
-      wx.navigateTo({ url: '/pages/order-summary/index?from=renewal' });
-    } else {
-      wx.navigateTo({ url: '/pages/order-summary/index' });
-    }
+    const { fromRenewal, next } = this.data;
+    const target = next === 'edit-meals' ? '/pages/edit-meals/index' : '/pages/meal-select/index';
+    const url = fromRenewal ? `${target}?from=renewal` : target;
+    wx.navigateTo({ url });
   },
 
   goBack() {
