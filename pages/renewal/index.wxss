@@ -57,7 +57,7 @@ page { background: #0b0b0c; }
 /* ── SECTION LABEL ── */
 .section-label {
   font-size: 22rpx;
-  color: #5d5d65;
+  color: #beb6b6;
   font-weight: 700;
   letter-spacing: 3rpx;
   display: block;
@@ -80,10 +80,10 @@ page { background: #0b0b0c; }
 .plan-card-left { display: flex; flex-direction: column; gap: 8rpx; }
 .plan-tier { font-size: 22rpx; color: #A78BFA; font-weight: 800; letter-spacing: 2rpx; display: block; }
 .plan-name { font-size: 44rpx; font-weight: 900; color: #f3f3f4; display: block; }
-.plan-desc { font-size: 26rpx; color: #5d5d65; display: block; }
+.plan-desc { font-size: 26rpx; color: #beb6b6; display: block; }
 .plan-price-wrap { display: flex; align-items: flex-end; gap: 4rpx; flex-shrink: 0; }
 .plan-price { font-size: 56rpx; font-weight: 900; color: #A78BFA; }
-.plan-price-sub { font-size: 26rpx; color: #5d5d65; padding-bottom: 10rpx; }
+.plan-price-sub { font-size: 26rpx; color: #beb6b6; padding-bottom: 10rpx; }
 
 /* ── BUTTONS ── */
 .buttons { display: flex; flex-direction: column; gap: 16rpx; width: 100%; box-sizing: border-box; }

@@ -56,7 +56,7 @@
 
 /* ── SUB ── */
 .sub-wrap { width: 100%; text-align: center; }
-.hero-sub { font-size: 28rpx; color: #6b6b75; display: block; }
+.hero-sub { font-size: 28rpx; color: #beb6b6; display: block; }
 
 /* ── DELIVERY CARD ── */
 .delivery-card-wrap { width: 100%; box-sizing: border-box; }
@@ -86,7 +86,7 @@
 
 .delivery-body { flex: 1; display: flex; flex-direction: column; gap: 4rpx; overflow: hidden; }
 .delivery-day { font-size: 32rpx; font-weight: 800; color: #f3f3f4; display: block; }
-.delivery-meals { font-size: 24rpx; color: #5d5d65; display: block; line-height: 1.4; }
+.delivery-meals { font-size: 24rpx; color: #beb6b6; display: block; line-height: 1.4; }
 
 .delivery-time-badge { background: #e8342a; border-radius: 100rpx; padding: 10rpx 20rpx; flex-shrink: 0; }
 .delivery-time-text { font-size: 24rpx; font-weight: 700; color: #fff; }
@@ -124,7 +124,7 @@ button { margin: 0 !important; padding: 0 !important; background: transparent; b
   line-height: 88rpx;
   font-size: 28rpx !important;
   font-weight: 600 !important;
-  color: #6b6b75 !important;
+  color: #beb6b6 !important;
   width: 100% !important;
   text-align: center;
   box-sizing: border-box;

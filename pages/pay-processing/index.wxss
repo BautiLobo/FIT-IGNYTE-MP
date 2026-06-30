@@ -72,7 +72,7 @@
 
 .sub {
   font-size:24rpx;
-  color:#666;
+  color:#beb6b6;
   text-align:center;
 }
 

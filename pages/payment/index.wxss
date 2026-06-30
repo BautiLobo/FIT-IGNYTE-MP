@@ -25,7 +25,7 @@
 
 .card-label {
   font-size: 20rpx;
-  color: #9f9fa8;
+  color: #beb6b6;
   font-weight: 700;
   letter-spacing: 3rpx;
   display: block;
@@ -35,10 +35,10 @@
 /* ── ROWS ── */
 .row { display:flex; justify-content:space-between; align-items:center; padding:14rpx 0; width:100%; box-sizing:border-box; }
 .row-border { border-bottom:1rpx solid #1a1a22; }
-.row-key { font-size:26rpx; color:#9f9fa8; flex:1; }
+.row-key { font-size:26rpx; color:#beb6b6; flex:1; }
 .row-key-green { font-size:26rpx; color:#4ade80; font-weight:600; }
 .row-val { font-size:26rpx; color:#f3f3f4; font-weight:600; flex-shrink:0; }
-.row-val-strike { text-decoration:line-through; color:#9f9fa8; }
+.row-val-strike { text-decoration:line-through; color:#beb6b6; }
 .row-val-green { font-size:26rpx; color:#4ade80; font-weight:700; }
 .row-total-key { font-size:32rpx; font-weight:800; color:#f3f3f4; }
 .row-total-val { font-size:52rpx; font-weight:900; color:#e8342a; }
@@ -46,7 +46,7 @@
 /* ── SECTION LABEL ── */
 .section-label {
   font-size: 20rpx;
-  color: #9f9fa8;
+  color: #beb6b6;
   font-weight: 700;
   letter-spacing: 3rpx;
   display: block;
@@ -84,4 +84,4 @@
 .wechat-pay-amount { font-size: 44rpx; font-weight: 900; color: #fff; }
 
 /* ── HINT ── */
-.pay-hint { font-size:22rpx; color:#9f9fa8; text-align:center; display:block; }
+.pay-hint { font-size:22rpx; color:#beb6b6; text-align:center; display:block; }

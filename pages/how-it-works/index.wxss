@@ -84,7 +84,7 @@ page { background: #0b0b0c; }
 
 .intro {
   font-size: 29rpx;
-  color: #9a9aa3;
+  color: #beb6b6;
   line-height: 1.45;
   display: block;
   text-align: center;
@@ -177,7 +177,7 @@ page { background: #0b0b0c; }
 
 .step-desc {
   font-size: 27rpx;
-  color: #9a9aa3;
+  color: #beb6b6;
   line-height: 1.45;
   display: block;
 }

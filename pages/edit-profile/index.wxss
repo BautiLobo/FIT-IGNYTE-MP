@@ -32,13 +32,13 @@
 .result-banner-text { font-size:24rpx; line-height:1.5; flex:1; }
 .result-banner-approved .result-banner-text { color:#4ade80; }
 .result-banner-rejected .result-banner-text { color:#f87171; }
-.result-banner-close { font-size:24rpx; color:#9f9fa8; flex-shrink:0; padding:0 4rpx; }
+.result-banner-close { font-size:24rpx; color:#beb6b6; flex-shrink:0; padding:0 4rpx; }
 
 .field { margin-bottom:36rpx; }
 
 .field-label {
   font-size:20rpx;
-  color:#9f9fa8;
+  color:#beb6b6;
   font-weight:700;
   letter-spacing:2rpx;
   display:block;

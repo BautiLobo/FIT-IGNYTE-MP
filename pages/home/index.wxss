@@ -35,26 +35,26 @@
 .delivery-banner-upcoming .delivery-banner-title { color:#eab308; }
 .delivery-banner-upcoming .delivery-banner-sub { color:#a08030; }
 .status-check { font-size:20rpx; color:#4ade80; }
-.status-text { font-size:20rpx; font-weight:800; color:#4ade80; letter-spacing:2rpx; }
+.status-text { font-size:25rpx; font-weight:800; color:#4ade80; letter-spacing:2rpx; }
 
 /* ── DELIVERY BANNER ── */
 .delivery-banner { background:#052e16; border:1rpx solid #166534; border-radius:20rpx; padding:24rpx; display:flex; gap:20rpx; align-items:center; margin-bottom:20rpx; }
 .delivery-banner-icon-wrap { width:64rpx; height:64rpx; background:rgba(74,222,128,0.15); border-radius:16rpx; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .delivery-banner-icon { font-size:32rpx; }
 .delivery-banner-title { font-size:30rpx; font-weight:800; color:#4ade80; display:block; }
-.delivery-banner-sub { font-size:24rpx; color:#5d7a5d; display:block; margin-top:4rpx; }
+.delivery-banner-sub { font-size:28rpx; color:#5d7a5d; display:block; margin-top:4rpx; }
 
 /* ── MEALS CARD ── */
 .meals-card { background:#13131a; border:1rpx solid #1a1a22; border-radius:20rpx; overflow:hidden; margin-bottom:20rpx; }
 .meals-card-header { padding:20rpx 24rpx; border-bottom:1rpx solid #1a1a22; display:flex; justify-content:space-between; align-items:center; }
-.meals-card-label { font-size:20rpx; color:#5d5d65; letter-spacing:3rpx; font-weight:700; }
+.meals-card-label { font-size:20rpx; color:#beb6b6; letter-spacing:3rpx; font-weight:700; }
 .meals-card-view { display:flex; align-items:center; }
 .meals-card-view-text { font-size:26rpx; color:#e8342a; font-weight:700; }
 .meals-card-view-arrow { font-size:32rpx; color:#e8342a; font-weight:300; }
 
 .week-row { display:flex; align-items:flex-start; gap:16rpx; padding:22rpx 24rpx; border-bottom:1rpx solid #1a1a22; }
 .week-row-last { border-bottom:none; }
-.week-day { font-size:24rpx; font-weight:700; color:#5d5d65; width:72rpx; flex-shrink:0; letter-spacing:1rpx; padding-top:4rpx; }
+.week-day { font-size:24rpx; font-weight:700; color:#beb6b6; width:72rpx; flex-shrink:0; letter-spacing:1rpx; padding-top:4rpx; }
 .week-day-today { color:#e8342a; }
 .week-meal-photo { display:none; }
 .week-meal-names { flex:1; display:flex; flex-direction:column; gap:4rpx; }
@@ -62,22 +62,22 @@
 .week-meal-name { font-size:28rpx; color:#f3f3f4; font-weight:600; line-height:1.4; display:block; }
 .week-sauce-tag { display:flex; align-items:center; gap:6rpx; }
 .week-sauce-dot { width:10rpx; height:10rpx; border-radius:50%; background:#5d5d65; flex-shrink:0; }
-.week-sauce-text { font-size:21rpx; color:#9f9fa8; font-weight:600; }
+.week-sauce-text { font-size:21rpx; color:#beb6b6; font-weight:600; }
 .week-snack-row { display:flex; align-items:center; gap:8rpx; margin-top:2rpx; }
-.week-snack-label { color:#5d5d65; font-weight:700; font-size:22rpx; letter-spacing:0.5rpx; }
+.week-snack-label { color:#beb6b6; font-weight:700; font-size:22rpx; letter-spacing:0.5rpx; }
 .week-snack-name { color:#e8342a; font-weight:600; font-size:25rpx; }
-.week-time { font-size:28rpx; color:#5d5d65; font-weight:700; flex-shrink:0; margin-left:12rpx; padding-top:4rpx; }
+.week-time { font-size:28rpx; color:#beb6b6; font-weight:700; flex-shrink:0; margin-left:12rpx; padding-top:4rpx; }
 .week-time-today { color:#e8342a; }
 
 /* ── RENEWAL CARD ── */
 .renewal-card { background:#13131a; border:1rpx solid #2a2a33; border-radius:20rpx; padding:24rpx; display:flex; align-items:center; justify-content:space-between; margin-bottom:20rpx; }
 .renewal-body { flex:1; }
 .renewal-title { font-size:28rpx; color:#f3f3f4; font-weight:800; display:block; }
-.renewal-sub { font-size:22rpx; color:#5d5d65; display:block; margin-top:6rpx; }
+.renewal-sub { font-size:22rpx; color:#beb6b6; display:block; margin-top:6rpx; }
 .renewal-btn { background:transparent; border:2rpx solid #e8342a; border-radius:100rpx; padding:14rpx 28rpx; flex-shrink:0; }
 .renewal-btn-text { font-size:24rpx; font-weight:700; color:#e8342a; }
 
 /* ── CONTACT ── */
 .btn-wrap { width:100%; box-sizing:border-box; margin-bottom:60rpx; }
 button { margin:0 !important; padding:0 !important; background:transparent; border:none; }
-.btn-contact { background:#13131a !important; border:1rpx solid #1a1a22 !important; color:#6b6b75 !important; border-radius:20rpx !important; height:88rpx; line-height:88rpx; font-size:28rpx !important; font-weight:600 !important; width:100% !important; text-align:center; box-sizing:border-box; display:block; }
+.btn-contact { background:#13131a !important; border:1rpx solid #1a1a22 !important; color:#beb6b6 !important; border-radius:20rpx !important; height:88rpx; line-height:88rpx; font-size:28rpx !important; font-weight:600 !important; width:100% !important; text-align:center; box-sizing:border-box; display:block; }

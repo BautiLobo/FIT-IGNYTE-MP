@@ -81,7 +81,7 @@
     </view>
 
     <view class="btn-wrap">
-      <button class="btn-start" bindtap="getStarted">Get started  →</button>
+      <button class="btn-start" bindtap="getStarted">Choose your goal  →</button>
     </view>
 
    </view>

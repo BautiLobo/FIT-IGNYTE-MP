@@ -54,7 +54,7 @@
       <button class="btn-primary {{submitting ? 'btn-disabled' : ''}}" bindtap="submit" disabled="{{submitting}}">
         {{submitting ? 'Submitting...' : (editing ? 'Save changes' : 'Next →')}}
       </button>
-      <text class="btn-hint">{{editing ? 'Your delivery details will be updated' : 'We\'ll verify your delivery area before payment'}}</text>
+      <text class="btn-hint">{{editing ? 'Your delivery details will be updated' : 'We will verify your delivery area before payment'}}</text>
     </view>
 
   </scroll-view>
