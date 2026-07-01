@@ -1,12 +1,25 @@
 // pages/discovery/index.js
 const app = getApp();
+const t = require('../../i18n/index');
 
 Page({
   data: {
     checking: true,
+    lbl_tagline1: '',
+    lbl_tagline2: '',
+    lbl_sub_tagline: '',
+    lbl_see_plans: '',
+    lbl_get_started: '',
   },
 
   async onLoad() {
+    this.setData({
+      lbl_tagline1: t('discovery_tagline1'),
+      lbl_tagline2: t('discovery_tagline2'),
+      lbl_sub_tagline: t('discovery_sub_tagline'),
+      lbl_see_plans: t('discovery_see_plans'),
+      lbl_get_started: t('discovery_get_started'),
+    });
     await this.checkSession();
   },
 
@@ -56,7 +69,7 @@ Page({
               // Tiene plan asignado pero el storage se perdió — reconstruir selectedPlan
               const planData = await app.supabase('GET', 'plans', null, `id=eq.${client.plan_id}`);
               if (planData && planData.length > 0) {
-                wx.setStorageSync('selectedPlan', planData[0]);
+                wx.setStorageSync('selectedPlan', app.getDisplayPlan(planData[0]));
                 wx.setStorageSync('clientId', clientId);
               }
               wx.reLaunch({ url: '/pages/payment/index' }); return;
@@ -94,7 +107,7 @@ Page({
   },
 
   openBrochure() {
-    wx.showLoading({ title: 'Loading...' });
+    wx.showLoading({ title: t('loading') });
     app.supabase('GET', 'settings', null, 'key=eq.brochure_en')
       .then(data => {
         wx.hideLoading();
@@ -107,15 +120,15 @@ Page({
                 showMenu: true,
               });
             },
-            fail: () => wx.showToast({ title: 'Failed to open', icon: 'none' })
+            fail: () => wx.showToast({ title: t('failed_open'), icon: 'none' })
           });
         } else {
-          wx.showToast({ title: 'Brochure not found', icon: 'none' });
+          wx.showToast({ title: t('brochure_not_found'), icon: 'none' });
         }
       })
       .catch(() => {
         wx.hideLoading();
-        wx.showToast({ title: 'Failed to load', icon: 'none' });
+        wx.showToast({ title: t('failed_load'), icon: 'none' });
       });
   },
 

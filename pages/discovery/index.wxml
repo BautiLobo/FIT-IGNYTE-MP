@@ -5,10 +5,10 @@
     <view class="logo-glow"></view>
     <image class="logo" src="/images/logo.png" mode="aspectFit" />
     <view class="tagline-wrap">
-      <text class="tagline">Fitness meals,</text>
-      <text class="tagline">ready every morning</text>
+      <text class="tagline">{{lbl_tagline1}}</text>
+      <text class="tagline">{{lbl_tagline2}}</text>
     </view>
-    <text class="sub-tagline">WEEKLY PLANS · MON-FRI</text>
+    <text class="sub-tagline">{{lbl_sub_tagline}}</text>
   </view>
 
   <!-- Promo banner -->
@@ -18,8 +18,8 @@
 
   <!-- Buttons -->
   <view class="btn-wrap">
-    <button class="btn-plans" bindtap="openBrochure">☰  See our plans</button>
-    <button class="btn-start" bindtap="goToTiers">Get started  →</button>
+    <button class="btn-plans" bindtap="openBrochure">{{lbl_see_plans}}</button>
+    <button class="btn-start" bindtap="goToTiers">{{lbl_get_started}}</button>
   </view>
 
 </view>

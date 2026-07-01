@@ -2,7 +2,7 @@
 
   <view class="topbar">
     <view style="width:60rpx;"></view>
-    <text class="topbar-title">Renew your plan</text>
+    <text class="topbar-title">{{lbl_title}}</text>
     <view style="width:60rpx;"></view>
   </view>
 
@@ -11,34 +11,34 @@
     <view class="alert-box">
       <view class="alert-top-row">
         <text class="alert-icon">⏰</text>
-        <text class="alert-label">{{expired ? 'PLAN EXPIRED' : 'DUE FRIDAY'}}</text>
+        <text class="alert-label">{{expired ? lbl_expired : lbl_due}}</text>
       </view>
-      <text class="alert-text">{{expired ? 'Renew to start receiving meals again' : 'Renew to keep receiving your meals'}}</text>
+      <text class="alert-text">{{expired ? lbl_cta_expired : lbl_cta_active}}</text>
     </view>
 
-    <text class="section-label">CURRENT PLAN</text>
+    <text class="section-label">{{lbl_current_plan}}</text>
 
     <view class="plan-card">
       <view class="plan-card-left">
         <text class="plan-tier">{{planTier}}</text>
         <text class="plan-name">{{planName}}</text>
-        <text class="plan-desc">{{planMeals}} meals/day · Mon-Fri</text>
+        <text class="plan-desc">{{planMeals}} {{lbl_meals_info}}</text>
       </view>
       <view class="plan-price-wrap">
         <text class="plan-price">¥{{currentPlanPrice}}</text>
-        <text class="plan-price-sub">/wk</text>
+        <text class="plan-price-sub">{{lbl_per_week}}</text>
       </view>
     </view>
 
     <view class="buttons">
-      <view class="btn-primary" bindtap="keepSameMeals"><text>✓  Renew this plan</text></view>
-      <view class="btn-outline" bindtap="changePlan"><text>Choose a different plan</text></view>
+      <view class="btn-primary" bindtap="keepSameMeals"><text>{{lbl_renew_btn}}</text></view>
+      <view class="btn-outline" bindtap="changePlan"><text>{{lbl_change_plan}}</text></view>
     </view>
 
   </scroll-view>
 
   <view class="footer">
-    <button class="btn-feedback" open-type="contact"><text>💬  Leave us feedback</text></button>
+    <button class="btn-feedback" open-type="contact"><text>{{lbl_feedback}}</text></button>
   </view>
 
 </view>

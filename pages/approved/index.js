@@ -1,14 +1,24 @@
 // pages/approved/index.js
 const app = getApp();
+const t = require('../../i18n/index');
 
 Page({
   data: {
     firstName: '',
     firstMeals: '',
     firstTime: '',
+    lbl_title: '',
+    lbl_welcome: '',
+    lbl_payment_btn: '',
+    lbl_contact: '',
   },
 
   async onLoad() {
+    this.setData({
+      lbl_welcome: t('approved_welcome'),
+      lbl_payment_btn: t('approved_payment_btn'),
+      lbl_contact: t('approved_contact'),
+    });
     const pendingOrderId = wx.getStorageSync('pendingOrderId');
     if (!pendingOrderId) return;
 
@@ -37,14 +47,14 @@ Page({
         }
       }
 
-      this.setData({ firstName, firstMeals, firstTime });
+      this.setData({ firstName, firstMeals, firstTime, lbl_title: t('approved_title', firstName) });
     } catch (err) {
       console.error('approved onLoad error:', err);
     }
   },
 
   goToPayment() {
-    wx.showLoading({ title: 'Loading...' });
+    wx.showLoading({ title: t('loading') });
     setTimeout(() => {
       wx.hideLoading();
       wx.navigateTo({ url: '/pages/payment/index' });

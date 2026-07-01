@@ -12,18 +12,18 @@
       <view class="hero-circle">
         <text class="hero-clock">◷</text>
       </view>
-      <text class="hero-title">Reviewing your order</text>
-      <text class="hero-sub">We're checking delivery coverage in your area. We'll notify you on WeChat shortly.</text>
+      <text class="hero-title">{{lbl_title}}</text>
+      <text class="hero-sub">{{lbl_body}}</text>
     </view>
 
     <!-- Order summary -->
     <view class="card">
       <view class="summary-row summary-border">
-        <text class="summary-key">Plan</text>
+        <text class="summary-key">{{lbl_plan}}</text>
         <text class="summary-val">{{order.plan_name}} · ¥{{order.plan_price}}/wk</text>
       </view>
       <view class="summary-row">
-        <text class="summary-key">District</text>
+        <text class="summary-key">{{lbl_district}}</text>
         <text class="summary-val">{{order.district}}</text>
       </view>
     </view>
@@ -34,19 +34,19 @@
         <view class="step-dot step-done-dot">
           <text class="step-check">✓</text>
         </view>
-        <text class="step-label step-done">Order received</text>
+        <text class="step-label step-done">{{lbl_step1}}</text>
       </view>
       <view class="step-divider"></view>
       <view class="step-row">
         <view class="step-dot step-active-dot">
           <view class="step-inner-dot"></view>
         </view>
-        <text class="step-label step-active">Checking area</text>
+        <text class="step-label step-active">{{lbl_step2}}</text>
       </view>
       <view class="step-divider"></view>
       <view class="step-row">
         <view class="step-dot step-idle-dot"></view>
-        <text class="step-label step-idle">Payment — pending</text>
+        <text class="step-label step-idle">{{lbl_step3}}</text>
       </view>
     </view>
 
@@ -54,8 +54,8 @@
 
   <!-- Fixed bottom -->
   <view class="bottom-bar">
-    <button class="btn-contact" open-type="contact">Contact us while you wait</button>
-    <text class="hint">Usually reviewed in under 1 hour</text>
+    <button class="btn-contact" open-type="contact">{{lbl_contact}}</button>
+    <text class="hint">{{lbl_eta}}</text>
   </view>
 
 </view>

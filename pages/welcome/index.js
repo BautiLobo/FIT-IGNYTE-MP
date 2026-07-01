@@ -1,5 +1,6 @@
 // pages/welcome/index.js
 const app = getApp();
+const t = require('../../i18n/index');
 
 const DAY_LABELS = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday' };
 
@@ -9,9 +10,12 @@ Page({
     firstDay: 'Monday',
     firstTime: '09:45',
     firstMeals: '',
+    lbl_title: '',
+    lbl_go_home: '',
   },
 
   async onLoad() {
+    this.setData({ lbl_go_home: t('welcome_go_home') });
     // Limpiar storage de orden pendiente
     wx.removeStorageSync('pendingOrderId');
     wx.removeStorageSync('selectedPlan');
@@ -60,14 +64,14 @@ Page({
         mealsData.forEach(m => { mealMap[m.id] = m; });
         firstMeals = mealIds.map((id, i) => {
           const sauceId = sauceIds[i];
-          const sauceName = sauceId && mealMap[sauceId] ? mealMap[sauceId].name : null;
-          const name = mealMap[id] ? mealMap[id].name : '';
+          const sauceName = sauceId && mealMap[sauceId] ? app.getMealName(mealMap[sauceId]) : null;
+          const name = mealMap[id] ? app.getMealName(mealMap[id]) : '';
           return sauceName ? `${name} (${sauceName})` : name;
         }).filter(Boolean).join(' + ');
       }
     }
 
-    this.setData({ clientName: firstName, firstDay, firstTime, firstMeals });
+    this.setData({ clientName: firstName, firstDay, firstTime, firstMeals, lbl_title: t('welcome_title', firstName) });
   },
 
   goToHome() {

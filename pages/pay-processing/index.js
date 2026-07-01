@@ -1,16 +1,24 @@
 // pages/pay-processing/index.js
-// This page is navigated to by payment.js before calling wx.requestPayment
-// The payment result is handled back in payment.js via success/fail callbacks
-// This page just shows the animation while payment is processing
+const t = require('../../i18n/index');
 
 Page({
   data: {
     done: false,
+    lbl_title_processing: '',
+    lbl_title_done: '',
+    lbl_sub_processing: '',
+    lbl_sub_done: '',
   },
 
-  onLoad() {},
+  onLoad() {
+    this.setData({
+      lbl_title_processing: t('pay_processing_title'),
+      lbl_title_done: t('pay_confirmed_title'),
+      lbl_sub_processing: t('pay_processing_sub'),
+      lbl_sub_done: t('pay_confirmed_sub'),
+    });
+  },
 
-  // Called by payment.js after successful payment
   setDone() {
     this.setData({ done: true });
     setTimeout(() => {

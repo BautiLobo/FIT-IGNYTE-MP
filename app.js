@@ -292,6 +292,28 @@ App({
     return order[slot];
   },
 
+  // ── MEAL NAME (i18n) ─────────────────────────────────────────
+  // Devuelve name_zh si el dispositivo está en chino y el campo tiene valor,
+  // de lo contrario devuelve el name en inglés (fallback siempre disponible).
+  getMealName(meal) {
+    if (!meal) return '';
+    try {
+      const lang = wx.getAppBaseInfo().language || 'en';
+      if (lang.startsWith('zh') && meal.name_zh) return meal.name_zh;
+    } catch (e) {}
+    return meal.name || '';
+  },
+
+  // Enriches a plan object with displayName and displayTier for i18n display.
+  // Call this whenever a plan is loaded from DB or storage before showing to user.
+  getDisplayPlan(plan) {
+    if (!plan) return plan;
+    return Object.assign({}, plan, {
+      displayName: this.getMealName(plan),
+      displayTier: this.getMealName({ name: plan.tier, name_zh: plan.tier_zh }),
+    });
+  },
+
   // ── SUPABASE HELPER ──────────────────────────────────────────
   // Si hay un JWT de admin guardado (obtenido via wx-login cuando el openid
   // esta en la allowlist), se usa como Authorization en vez de la anon key,

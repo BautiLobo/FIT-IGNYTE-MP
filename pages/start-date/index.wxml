@@ -2,7 +2,7 @@
 
   <view class="topbar">
     <view class="back-btn" bindtap="goBack"><text class="back-arrow">‹</text></view>
-    <text class="topbar-title">When do you start?</text>
+    <text class="topbar-title">{{lbl_topbar}}</text>
     <view style="width:60rpx;"></view>
   </view>
 
@@ -11,15 +11,15 @@
     <view class="center-block">
 
       <view class="heading-wrap">
-        <text class="heading">Choose your start date</text>
-        <text class="heading-sub">Mon–Fri delivery · 5 business days</text>
+        <text class="heading">{{lbl_heading}}</text>
+        <text class="heading-sub">{{lbl_subtitle}}</text>
       </view>
 
       <!-- Date picker -->
       <picker mode="date" value="{{selectedDate}}" start="{{minDate}}" bindchange="onDateChange">
         <view class="date-display">
           <view class="date-left">
-            <text class="date-label">START DATE</text>
+            <text class="date-label">{{lbl_start_label}}</text>
             <text class="date-value">{{selectedDateFormatted}}</text>
           </view>
           <text class="date-arrow">›</text>
@@ -28,12 +28,12 @@
 
       <!-- Expiry info -->
       <view class="expiry-card" wx:if="{{expiryDateFormatted}}">
-        <text class="expiry-label">PLAN ENDS</text>
+        <text class="expiry-label">{{lbl_plan_ends}}</text>
         <text class="expiry-value">{{expiryDateFormatted}}</text>
-        <text class="expiry-sub">5 business days</text>
+        <text class="expiry-sub">{{lbl_5_days}}</text>
       </view>
 
-      <button class="btn-primary" bindtap="goNext">Continue →</button>
+      <button class="btn-primary" bindtap="goNext">{{lbl_continue}}</button>
 
     </view>
 

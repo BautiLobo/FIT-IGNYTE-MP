@@ -2,7 +2,7 @@
 
   <view class="topbar">
     <view class="back-btn" bindtap="goBack"><text class="back-arrow">‹</text></view>
-    <text class="topbar-title">Order summary</text>
+    <text class="topbar-title">{{lbl_title}}</text>
     <view style="width:60rpx;"></view>
   </view>
 
@@ -10,11 +10,11 @@
 
     <!-- Plan -->
     <view class="card">
-      <text class="card-label">YOUR PLAN</text>
+      <text class="card-label">{{lbl_your_plan}}</text>
       <view class="plan-row">
         <view>
-          <text class="plan-name">{{selectedPlan.name}}</text>
-          <text class="plan-sub">{{selectedPlan.meals}} meal(s)/day · Mon–Fri</text>
+          <text class="plan-name">{{selectedPlan.displayName}}</text>
+          <text class="plan-sub">{{selectedPlan.meals}} {{lbl_meals_day}}</text>
         </view>
         <text class="plan-price" style="color:#A78BFA;">¥{{selectedPlan.price}}</text>
       </view>
@@ -23,8 +23,8 @@
     <!-- Meals -->
     <view class="card">
       <view class="card-header-row">
-        <text class="card-label">CHOSEN MEALS</text>
-        <view class="btn-edit" bindtap="editMeals"><text>Edit ›</text></view>
+        <text class="card-label">{{lbl_chosen_meals}}</text>
+        <view class="btn-edit" bindtap="editMeals"><text>{{lbl_edit}}</text></view>
       </view>
       <view wx:for="{{mealSummary}}" wx:key="day">
         <view class="day-header">
@@ -46,36 +46,36 @@
     <view class="card address-card">
       <view class="address-icon">📍</view>
       <view class="address-info">
-        <text class="card-label">ADDRESS</text>
+        <text class="card-label">{{lbl_address}}</text>
         <text class="address-text">{{order.address}}{{order.district ? ' · ' + order.district : ''}}</text>
       </view>
-      <view class="btn-edit" bindtap="editAddress"><text>Edit ›</text></view>
+      <view class="btn-edit" bindtap="editAddress"><text>{{lbl_edit}}</text></view>
     </view>
 
     <!-- Price -->
     <view class="price-card">
       <view class="price-row price-row-border">
-        <text class="price-label">Plan</text>
+        <text class="price-label">{{lbl_plan}}</text>
         <text class="price-val {{discount > 0 ? 'price-val-strike' : ''}}">¥{{selectedPlan.price}}</text>
       </view>
       <view class="price-row price-row-border" wx:if="{{discount > 0}}">
-        <text class="price-label" style="color:#e8342a;">25% first week discount</text>
+        <text class="price-label" style="color:#e8342a;">{{lbl_discount}}</text>
         <text class="price-val" style="color:#e8342a;">-¥{{discount}}</text>
       </view>
       <view class="price-row price-row-border">
-        <text class="price-label">Delivery (5 days)</text>
+        <text class="price-label">{{lbl_delivery}}</text>
         <text class="price-val">¥35</text>
       </view>
       <view class="price-row">
-        <text class="price-total-label">Total</text>
+        <text class="price-total-label">{{lbl_total}}</text>
         <text class="price-total-val">¥{{total}}</text>
       </view>
     </view>
 
     <button class="btn-submit {{submitting ? 'btn-disabled' : ''}}" bindtap="submitOrder" disabled="{{submitting}}">
-      {{submitting ? 'Submitting...' : (fromRenewal ? 'Continue to payment  →' : 'Place order  →')}}
+      {{submitting ? lbl_submitting : (fromRenewal ? lbl_continue_payment : lbl_place_order)}}
     </button>
-    <text class="hint">{{fromRenewal ? 'Review your renewal before paying' : 'We verify your delivery zone and confirm shortly'}}</text>
+    <text class="hint">{{fromRenewal ? lbl_renewal_note : lbl_review_note}}</text>
 
   </scroll-view>
 

@@ -1,5 +1,6 @@
 // pages/edit-meals/index.js
 const app = getApp();
+const t = require('../../i18n/index');
 
 const DAYS = [
   { key: 'mon', label: 'Monday',    short: 'Mon' },
@@ -36,9 +37,33 @@ Page({
     lastSelectedName: '',
     saucesById: {},
     currentSauces: {},
+    lbl_title: '',
+    lbl_select_sauce: '',
+    lbl_add_snack: '',
+    lbl_snack_added: '',
+    lbl_delivery_time: '',
+    lbl_tap_to_change: '',
+    lbl_notes: '',
+    lbl_notes_placeholder: '',
+    lbl_save: '',
+    lbl_save_next: '',
+    lbl_kcal: '',
   },
 
   async onLoad(options) {
+    this.setData({
+      lbl_title: t('edit_meals_title'),
+      lbl_select_sauce: t('meal_select_select_sauce'),
+      lbl_add_snack: t('meal_select_add_snack'),
+      lbl_snack_added: t('meal_select_snack_added'),
+      lbl_delivery_time: t('meal_select_delivery_time'),
+      lbl_tap_to_change: t('meal_select_tap_to_change'),
+      lbl_notes: t('meal_select_notes'),
+      lbl_notes_placeholder: t('meal_select_notes_placeholder'),
+      lbl_save: t('edit_meals_save'),
+      lbl_save_next: t('edit_meals_save_next'),
+      lbl_kcal: t('meal_select_kcal'),
+    });
     const clientId = wx.getStorageSync('clientId');
     if (!clientId) { wx.navigateBack(); return; }
     const fromRenewal = options.from === 'renewal';
@@ -56,7 +81,7 @@ Page({
       const client = clientData[0];
 
       const planData = await app.supabase('GET', 'plans', null, `id=eq.${client.plan_id}`);
-      const plan = planData && planData.length > 0 ? planData[0] : null;
+      const plan = planData && planData.length > 0 ? app.getDisplayPlan(planData[0]) : null;
       if (!plan) { wx.navigateBack(); return; }
 
       // Load existing meal selections
@@ -163,6 +188,7 @@ Page({
         const selectedSauceName = selectedSauceId ? (saucesById[selectedSauceId] || '') : '';
         return {
           ...m,
+          displayName: app.getMealName(m),
           qty: existingMealIds.filter(id => id === m.id).length,
           sauceOptions,
           selectedSauceId,
@@ -201,7 +227,7 @@ Page({
     const maxMeals = plan.meals;
 
     if (selectedMealIds.length >= maxMeals) {
-      wx.showToast({ title: `Max ${maxMeals} meal(s) for this plan`, icon: 'none' });
+      wx.showToast({ title: t('meal_select_max_meals', maxMeals), icon: 'none' });
       return;
     }
 
@@ -303,7 +329,7 @@ Page({
     const { selectedMealIds, plan } = this.data;
 
     if (selectedMealIds.length < plan.meals) {
-      wx.showToast({ title: `Select ${plan.meals} meal(s) first`, icon: 'none' }); return;
+      wx.showToast({ title: t('meal_select_select_first', plan.meals), icon: 'none' }); return;
     }
 
     this.persistCurrentDay();
@@ -314,11 +340,11 @@ Page({
     const { currentDay, isLastDay, allSelections, clientId } = this.data;
 
     if (isLastDay) {
-      wx.showLoading({ title: 'Saving...' });
+      wx.showLoading({ title: t('loading') });
       try {
         await this.saveMealSelections(clientId, allSelections);
         wx.hideLoading();
-        wx.showToast({ title: 'Meals updated!', icon: 'success' });
+        wx.showToast({ title: t('edit_meals_updated'), icon: 'success' });
         const dest = this.data.fromRenewal
           ? '/pages/order-summary/index?from=renewal'
           : '/pages/home/index';
@@ -326,7 +352,7 @@ Page({
       } catch (err) {
         wx.hideLoading();
         console.error('Save error:', err);
-        wx.showToast({ title: 'Failed to save', icon: 'none' });
+        wx.showToast({ title: t('edit_meals_failed'), icon: 'none' });
       }
     } else {
       const dayIndex = DAYS.findIndex(d => d.key === currentDay);

@@ -1,5 +1,6 @@
 // pages/payment/index.js
 const app = getApp();
+const t = require('../../i18n/index');
 
 Page({
   data: {
@@ -7,9 +8,35 @@ Page({
     selectedPlan: null,
     total: 0,
     fromRenewal: false,
+    lbl_title: '',
+    lbl_order_summary: '',
+    lbl_plan: '',
+    lbl_meals_day: '',
+    lbl_plan_price: '',
+    lbl_first_week: '',
+    lbl_delivery: '',
+    lbl_total: '',
+    lbl_method: '',
+    lbl_wechat_pay: '',
+    lbl_tap_to_pay: '',
+    lbl_renewal_note: '',
   },
 
   async onLoad(options) {
+    this.setData({
+      lbl_title: t('payment_title'),
+      lbl_order_summary: t('payment_order_summary'),
+      lbl_plan: t('payment_plan'),
+      lbl_meals_day: t('payment_meals_day'),
+      lbl_plan_price: t('payment_plan_price'),
+      lbl_first_week: t('payment_first_week'),
+      lbl_delivery: t('payment_delivery'),
+      lbl_total: t('payment_total'),
+      lbl_method: t('payment_method'),
+      lbl_wechat_pay: t('payment_wechat_pay'),
+      lbl_tap_to_pay: t('payment_tap_to_pay'),
+      lbl_renewal_note: t('payment_renewal_note'),
+    });
     const fromRenewal = options.from === 'renewal';
     const selectedPlan = wx.getStorageSync('selectedPlan');
 
@@ -56,10 +83,10 @@ Page({
   payNow() {
     // Simulate payment — replace with real WeChat Pay when AppSecret is ready
     wx.showModal({
-      title: 'Simulate payment?',
-      content: 'WeChat Pay not configured yet. Simulate success?',
-      confirmText: 'Yes',
-      cancelText: 'Cancel',
+      title: t('payment_simulate_title'),
+      content: t('payment_simulate_content'),
+      confirmText: t('payment_simulate_yes'),
+      cancelText: t('payment_simulate_cancel'),
       success: (res) => {
         if (res.confirm) {
           wx.navigateTo({ url: '/pages/pay-processing/index' });
@@ -97,7 +124,7 @@ Page({
         wx.removeStorageSync('mealSelections');
         wx.removeStorageSync('expiryDate');
         wx.removeStorageSync('startDate');
-        wx.showToast({ title: 'Plan renewed!', icon: 'success' });
+        wx.showToast({ title: t('payment_renewed'), icon: 'success' });
         setTimeout(() => wx.reLaunch({ url: '/pages/home/index' }), 1000);
 
       } else {
@@ -150,8 +177,8 @@ Page({
     } catch (err) {
       console.error('Payment success handler error:', JSON.stringify(err), err.message);
       wx.showModal({
-        title: 'Payment error',
-        content: err.message || 'Something went wrong saving your data.',
+        title: t('payment_error_title'),
+        content: err.message || t('payment_error_content'),
         showCancel: false,
       });
     }
@@ -192,8 +219,8 @@ Page({
 
   contactUs() {
     wx.showModal({
-      title: 'Contact us on WeChat',
-      content: 'Search for: fitignyte_shanghai',
+      title: t('payment_contact_title'),
+      content: t('payment_contact_content'),
       showCancel: false,
       confirmText: 'OK',
     });

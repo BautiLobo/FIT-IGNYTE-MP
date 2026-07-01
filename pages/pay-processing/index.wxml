@@ -14,8 +14,8 @@
       </view>
     </view>
 
-    <text class="title">{{done ? 'Payment confirmed!' : 'Processing payment...'}}</text>
-    <text class="sub">{{done ? 'Welcome to FIT IGNYTE 🔥' : 'Please do not close this screen'}}</text>
+    <text class="title">{{done ? lbl_title_done : lbl_title_processing}}</text>
+    <text class="sub">{{done ? lbl_sub_done : lbl_sub_processing}}</text>
 
     <!-- Animated dots -->
     <view class="dots" wx:if="{{!done}}">

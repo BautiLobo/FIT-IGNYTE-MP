@@ -2,7 +2,7 @@
 
   <view class="topbar">
     <view class="back-btn" bindtap="goBack"><text class="back-arrow">‹</text></view>
-    <text class="topbar-title">Choose your plan</text>
+    <text class="topbar-title">{{lbl_title}}</text>
     <view style="width:60rpx;"></view>
   </view>
 
@@ -15,12 +15,12 @@
     <block wx:else>
 
       <view class="list-header">
-        <text class="list-sub">All include Mon-Fri delivery</text>
+        <text class="list-sub">{{lbl_subtitle}}</text>
       </view>
 
       <view wx:for="{{plans}}" wx:key="id" class="plan-wrap">
         <view class="popular-badge" wx:if="{{item.is_popular}}">
-          <text>MOST POPULAR</text>
+          <text>{{lbl_most_popular}}</text>
         </view>
         <view
           class="plan-card {{item.is_popular ? 'plan-card-popular' : ''}}"
@@ -29,21 +29,21 @@
           style="border-left-color:{{item.color}};"
         >
           <view class="plan-left">
-            <text class="plan-category" style="color:{{item.color}};">{{item.tier}}</text>
-            <text class="plan-name">{{item.name}}</text>
-            <text class="plan-meals">{{item.meals}} meal(s) / day</text>
-            <text class="plan-kcal" wx:if="{{item.kcal}}">~{{item.kcal}} kcal/day</text>
+            <text class="plan-category" style="color:{{item.color}};">{{item.displayTier}}</text>
+            <text class="plan-name">{{item.displayName}}</text>
+            <text class="plan-meals">{{item.meals}} {{lbl_meals_per_day}}</text>
+            <text class="plan-kcal" wx:if="{{item.kcal}}">{{item.lbl_kcal}}</text>
           </view>
           <view class="plan-right">
             <text class="plan-price" style="color:{{item.color}};">¥{{item.price}}</text>
-            <text class="plan-period">/wk</text>
+            <text class="plan-period">{{lbl_per_week}}</text>
           </view>
         </view>
       </view>
 
       <view class="hint-wrap">
         <text class="hint-line"></text>
-        <text class="hint">Tap a plan to continue</text>
+        <text class="hint">{{lbl_tap_hint}}</text>
         <text class="hint-line"></text>
       </view>
 

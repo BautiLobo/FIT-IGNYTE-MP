@@ -1,8 +1,8 @@
 // pages/tiers/index.js
 const app = getApp();
+const t = require('../../i18n/index');
 
-// Mismos colores base que usa plans/index.js por tier
-const TIER_COLORS = {
+const TIER_COLORS_FALLBACK = {
   'Lean Fit':    '#38BDF8',
   'Muscle Gain': '#FBBF24',
   'Vegetarian':  '#34D399',
@@ -12,31 +12,52 @@ Page({
   data: {
     loading: true,
     tiers: [],
+    lbl_title: '',
+    lbl_heading: '',
+    lbl_subtitle: '',
+    lbl_tap_hint: '',
+    lbl_brochure: '',
+    lbl_plans_available: '',
   },
 
   async onLoad() {
+    this.setData({
+      lbl_title: t('tiers_title'),
+      lbl_heading: t('tiers_heading'),
+      lbl_subtitle: t('tiers_subtitle'),
+      lbl_tap_hint: t('tiers_tap_hint'),
+      lbl_brochure: t('tiers_brochure'),
+      lbl_plans_available: t('tiers_plans_available'),
+    });
     await this.loadTiers();
   },
 
   async loadTiers() {
     try {
-      const data = await app.supabase('GET', 'plans', null, 'status=eq.Active');
-      const plans = data || [];
+      const [tiersData, plansData] = await Promise.all([
+        app.supabase('GET', 'tiers', null, 'order=name.asc'),
+        app.supabase('GET', 'plans', null, 'status=eq.Active&select=tier'),
+      ]);
 
-      // Group by tier and count plans per tier
-      const tierMap = {};
-      plans.forEach(p => {
+      // Count active plans per tier name
+      const countMap = {};
+      (plansData || []).forEach(p => {
         if (!p.tier) return;
-        if (!tierMap[p.tier]) tierMap[p.tier] = 0;
-        tierMap[p.tier]++;
+        countMap[p.tier] = (countMap[p.tier] || 0) + 1;
       });
 
-      const tiers = Object.entries(tierMap).map(([name, count]) => ({
-        name,
-        tag: name.toUpperCase(),
-        planCount: count,
-        color: TIER_COLORS[name] || '#e8342a',
-      }));
+      const tiers = (tiersData || [])
+        .filter(tier => countMap[tier.name] > 0)
+        .map(tier => {
+          const displayName = app.getMealName({ name: tier.name, name_zh: tier.name_zh });
+          return {
+            name: tier.name,
+            displayName,
+            tag: displayName,
+            planCount: countMap[tier.name] || 0,
+            color: tier.color || TIER_COLORS_FALLBACK[tier.name] || '#e8342a',
+          };
+        });
 
       this.setData({ tiers, loading: false });
     } catch (err) {
@@ -46,13 +67,13 @@ Page({
   },
 
   selectTier(e) {
-    const tier = e.currentTarget.dataset.tier;
+    const { tier, tierZh } = e.currentTarget.dataset;
     if (this.data.fromRenewal) wx.setStorageSync('flowContext', 'renewal');
-    wx.navigateTo({ url: '/pages/plans/index?tier=' + encodeURIComponent(tier) });
+    wx.navigateTo({ url: '/pages/plans/index?tier=' + encodeURIComponent(tier) + '&tier_zh=' + encodeURIComponent(tierZh || '') });
   },
 
   openBrochure() {
-    wx.showLoading({ title: 'Loading...' });
+    wx.showLoading({ title: t('loading') });
     app.supabase('GET', 'settings', null, 'key=eq.brochure_en')
       .then(data => {
         wx.hideLoading();
@@ -65,22 +86,22 @@ Page({
                 showMenu: true,
                 fail: (err) => {
                   console.error('openDocument error:', err);
-                  wx.showToast({ title: err.errMsg || 'Failed to open', icon: 'none' });
+                  wx.showToast({ title: err.errMsg || t('failed_open'), icon: 'none' });
                 }
               });
             },
             fail: (err) => {
               console.error('downloadFile error:', err);
-              wx.showToast({ title: err.errMsg || 'Failed to download', icon: 'none' });
+              wx.showToast({ title: err.errMsg || t('failed_download'), icon: 'none' });
             }
           });
         } else {
-          wx.showToast({ title: 'Brochure not found', icon: 'none' });
+          wx.showToast({ title: t('brochure_not_found'), icon: 'none' });
         }
       })
       .catch(() => {
         wx.hideLoading();
-        wx.showToast({ title: 'Failed to load', icon: 'none' });
+        wx.showToast({ title: t('failed_load'), icon: 'none' });
       });
   },
 

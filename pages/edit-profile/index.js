@@ -1,5 +1,6 @@
 // pages/edit-profile/index.js
 const app = getApp();
+const t = require('../../i18n/index');
 
 Page({
   data: {
@@ -9,6 +10,22 @@ Page({
     addressChangeNote: '',
     originalAddress: '',
     originalDistrict: '',
+    lbl_name_label: '',
+    lbl_name_ph: '',
+    lbl_phone_label: '',
+    lbl_phone_ph: '',
+    lbl_district_label: '',
+    lbl_district_ph: '',
+    lbl_address_label: '',
+    lbl_address_ph: '',
+    lbl_access_label: '',
+    lbl_access_ph: '',
+    lbl_allergies_label: '',
+    lbl_allergies_ph: '',
+    lbl_goal_label: '',
+    lbl_goal_ph: '',
+    lbl_save_changes: '',
+    lbl_saving: '',
     form: {
       name: '',
       phone: '',
@@ -21,6 +38,24 @@ Page({
   },
 
   async onLoad() {
+    this.setData({
+      lbl_name_label: t('register_name_label'),
+      lbl_name_ph: t('register_name_placeholder'),
+      lbl_phone_label: t('register_phone_label'),
+      lbl_phone_ph: t('register_phone_placeholder'),
+      lbl_district_label: t('register_district_label'),
+      lbl_district_ph: t('register_district_placeholder'),
+      lbl_address_label: t('register_address_label'),
+      lbl_address_ph: t('register_address_placeholder'),
+      lbl_access_label: t('register_access_label'),
+      lbl_access_ph: t('register_access_placeholder'),
+      lbl_allergies_label: t('register_allergies_label'),
+      lbl_allergies_ph: t('register_allergies_placeholder'),
+      lbl_goal_label: t('register_goal_label'),
+      lbl_goal_ph: t('register_goal_placeholder'),
+      lbl_save_changes: t('register_save_changes'),
+      lbl_saving: t('register_save_changes') + '...',
+    });
     const clientId = wx.getStorageSync('clientId');
     if (!clientId) return;
 
@@ -130,16 +165,16 @@ Page({
             status: 'pending',
           });
         }
-        wx.showToast({ title: 'Saved. Address pending review', icon: 'none' });
+        wx.showToast({ title: t('register_save_changes') + '. ' + t('register_delivery_note'), icon: 'none' });
       } else {
-        wx.showToast({ title: 'Profile updated ✓', icon: 'none' });
+        wx.showToast({ title: t('register_save_changes') + ' ✓', icon: 'none' });
       }
 
       setTimeout(() => wx.navigateBack(), 1000);
 
     } catch (err) {
       console.error('Save profile error:', err);
-      wx.showToast({ title: 'Failed to save', icon: 'none' });
+      wx.showToast({ title: t('edit_meals_failed'), icon: 'none' });
     } finally {
       this.setData({ saving: false });
     }

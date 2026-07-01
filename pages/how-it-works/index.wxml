@@ -4,7 +4,7 @@
     <view class="back-btn" bindtap="goBack">
       <text class="back-arrow">‹</text>
     </view>
-    <text class="topbar-title">How it works</text>
+    <text class="topbar-title">{{lbl_title}}</text>
     <view style="width:64rpx;"></view>
   </view>
 
@@ -12,12 +12,12 @@
    <view class="scroll-inner">
 
     <view class="header-block">
-    <text class="kicker">FIT IGNYTE · FOUR STEPS</text>
+    <text class="kicker">{{lbl_kicker}}</text>
     <view class="headline-wrap">
-      <text class="headline">Goal to door,</text>
-      <text class="headline">handled.</text>
+      <text class="headline">{{lbl_headline1}}</text>
+      <text class="headline">{{lbl_headline2}}</text>
     </view>
-    <text class="intro">Fresh fitness meals, delivered to your door. No shopping, no cooking.</text>
+    <text class="intro">{{lbl_intro}}</text>
     <view class="header-divider"></view>
     </view>
 
@@ -30,10 +30,10 @@
         </view>
         <view class="step-content">
           <view class="step-head">
-            <text class="step-title">Choose your plan</text>
-            <text class="step-tag">YOUR GOAL</text>
+            <text class="step-title">{{lbl_step1_title}}</text>
+            <text class="step-tag">{{lbl_step1_tag}}</text>
           </view>
-          <text class="step-desc">Pick a plan based on your goal: lose fat, build muscle, or maintain.</text>
+          <text class="step-desc">{{lbl_step1_desc}}</text>
         </view>
       </view>
 
@@ -44,10 +44,10 @@
         </view>
         <view class="step-content">
           <view class="step-head">
-            <text class="step-title">Build your menu</text>
-            <text class="step-tag">MON-FRI</text>
+            <text class="step-title">{{lbl_step2_title}}</text>
+            <text class="step-tag">{{lbl_step2_tag}}</text>
           </view>
-          <text class="step-desc">Choose your meals and delivery time for each weekday.</text>
+          <text class="step-desc">{{lbl_step2_desc}}</text>
         </view>
       </view>
 
@@ -58,10 +58,10 @@
         </view>
         <view class="step-content">
           <view class="step-head">
-            <text class="step-title">Get approved & pay</text>
-            <text class="step-tag">FAST</text>
+            <text class="step-title">{{lbl_step3_title}}</text>
+            <text class="step-tag">{{lbl_step3_tag}}</text>
           </view>
-          <text class="step-desc">We review your order, then you confirm with payment.</text>
+          <text class="step-desc">{{lbl_step3_desc}}</text>
         </view>
       </view>
 
@@ -71,17 +71,17 @@
         </view>
         <view class="step-content">
           <view class="step-head">
-            <text class="step-title">Delivered & renewed weekly</text>
-            <text class="step-tag">FLEXIBLE</text>
+            <text class="step-title">{{lbl_step4_title}}</text>
+            <text class="step-tag">{{lbl_step4_tag}}</text>
           </view>
-          <text class="step-desc">Meals arrive at your chosen time. Renew each week — no auto-renewal.</text>
+          <text class="step-desc">{{lbl_step4_desc}}</text>
         </view>
       </view>
 
     </view>
 
     <view class="btn-wrap">
-      <button class="btn-start" bindtap="getStarted">Choose your goal  →</button>
+      <button class="btn-start" bindtap="getStarted">{{lbl_get_started}}</button>
     </view>
 
    </view>

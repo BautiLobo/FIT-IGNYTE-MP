@@ -13,20 +13,20 @@
     </view>
 
     <view class="title-wrap">
-      <text class="hero-title">You're all set, {{firstName}}!</text>
+      <text class="hero-title">{{lbl_title}}</text>
     </view>
 
     <view class="sub-wrap">
-      <text class="hero-sub">Welcome to FIT IGNYTE</text>
+      <text class="hero-sub">{{lbl_welcome}}</text>
     </view>
 
 
     <view class="btn-wrap">
-      <button class="btn-primary" bindtap="goToPayment">Complete payment →</button>
+      <button class="btn-primary" bindtap="goToPayment">{{lbl_payment_btn}}</button>
     </view>
 
     <view class="btn-wrap">
-      <button class="btn-secondary" open-type="contact" style="position: relative; left: 0rpx; top: -22rpx; width: 656rpx; height: 93rpx; display: block; box-sizing: border-box"> Contact FIT IGNYTE</button>
+      <button class="btn-secondary" open-type="contact" style="position: relative; left: 0rpx; top: -22rpx; width: 656rpx; height: 93rpx; display: block; box-sizing: border-box">{{lbl_contact}}</button>
     </view>
 
   </view>

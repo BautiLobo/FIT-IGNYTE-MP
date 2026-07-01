@@ -1,13 +1,34 @@
 // pages/under-review/index.js
 const app = getApp();
+const t = require('../../i18n/index');
 
 Page({
   data: {
     order: null,
     plan_price: 0,
+    lbl_title: '',
+    lbl_body: '',
+    lbl_plan: '',
+    lbl_district: '',
+    lbl_step1: '',
+    lbl_step2: '',
+    lbl_step3: '',
+    lbl_contact: '',
+    lbl_eta: '',
   },
 
   async onLoad() {
+    this.setData({
+      lbl_title: t('under_review_title'),
+      lbl_body: t('under_review_body'),
+      lbl_plan: t('under_review_plan'),
+      lbl_district: t('under_review_district'),
+      lbl_step1: t('under_review_step1'),
+      lbl_step2: t('under_review_step2'),
+      lbl_step3: t('under_review_step3'),
+      lbl_contact: t('under_review_contact'),
+      lbl_eta: t('under_review_eta'),
+    });
     const pendingOrderId = wx.getStorageSync('pendingOrderId');
     const selectedPlan = wx.getStorageSync('selectedPlan');
 
@@ -17,8 +38,9 @@ Page({
       const data = await app.supabase('GET', 'new_orders', null, `id=eq.${pendingOrderId}`);
       if (data && data.length > 0) {
         const order = data[0];
-        order.plan_price = selectedPlan ? selectedPlan.price : 0;
-        order.plan_name = selectedPlan ? selectedPlan.name : (order.plan || '');
+        const displayPlan = selectedPlan ? app.getDisplayPlan(selectedPlan) : null;
+        order.plan_price = displayPlan ? displayPlan.price : 0;
+        order.plan_name = displayPlan ? displayPlan.displayName : (order.plan || '');
         this.setData({ order });
       }
     } catch (err) {

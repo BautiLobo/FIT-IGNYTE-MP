@@ -1,5 +1,6 @@
 // pages/home/index.js
 const app = getApp();
+const t = require('../../i18n/index');
 
 const DAYS = [
   { key: 'mon', short: 'MON', full: 'Monday', idx: 1 },
@@ -19,9 +20,29 @@ Page({
     showRenewal: false,
     daysLeft: 0,
     notifications: [],
+    lbl_hi: '',
+    lbl_active: '',
+    lbl_upcoming: '',
+    lbl_plan_starts_soon: '',
+    lbl_first_delivery: '',
+    lbl_on_the_way: '',
+    lbl_this_weeks_meals: '',
+    lbl_edit: '',
+    lbl_snack: '',
+    lbl_contact: '',
   },
 
   async onLoad() {
+    this.setData({
+      lbl_active: t('home_active'),
+      lbl_upcoming: t('home_upcoming'),
+      lbl_plan_starts_soon: t('home_plan_starts_soon'),
+      lbl_on_the_way: t('home_on_the_way'),
+      lbl_this_weeks_meals: t('home_this_weeks_meals'),
+      lbl_edit: t('home_edit'),
+      lbl_snack: t('home_snack'),
+      lbl_contact: t('home_contact'),
+    });
     await this.loadClientData();
     await this.loadNotifications();
     const clientId = wx.getStorageSync('clientId');
@@ -135,6 +156,8 @@ Page({
         isUpcoming,
         startDateFormatted,
         loading: false,
+        lbl_hi: t('home_hi', firstName),
+        lbl_first_delivery: t('home_first_delivery', startDateFormatted),
       });
 
     } catch (err) {
@@ -185,13 +208,13 @@ Page({
       const mealNames = mealIds.map((id, i) => {
         if (!mealMap[id]) return null;
         const sauceId = sauceIds[i];
-        const sauceName = sauceId && mealMap[sauceId] ? mealMap[sauceId].name : null;
-        return { name: mealMap[id].name, sauceName };
+        const sauceName = sauceId && mealMap[sauceId] ? app.getMealName(mealMap[sauceId]) : null;
+        return { name: app.getMealName(mealMap[id]), sauceName };
       }).filter(Boolean);
       const photo = mealIds.length > 0 && mealMap[mealIds[0]] ? mealMap[mealIds[0]].photo_url || '' : '';
       const time = row ? row.delivery_time : '';
       const isToday = d.key === planDayKey;
-      const snack = row && row.snack_id && mealMap[row.snack_id] ? mealMap[row.snack_id].name : null;
+      const snack = row && row.snack_id && mealMap[row.snack_id] ? app.getMealName(mealMap[row.snack_id]) : null;
       return { day: d.full, dayShort: d.short, mealNames, time, snack, isToday, photo };
     });
   },
@@ -212,7 +235,7 @@ Page({
   },
 
   goToMealSelect() {
-    wx.showLoading({ title: 'Loading...' });
+    wx.showLoading({ title: t('loading') });
     setTimeout(() => {
       wx.hideLoading();
       wx.navigateTo({ url: '/pages/edit-meals/index' });

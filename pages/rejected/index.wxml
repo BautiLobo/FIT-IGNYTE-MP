@@ -11,24 +11,24 @@
       <view class="hero-circle">
         <text class="hero-glyph">📍</text>
       </view>
-      <text class="hero-title">We're not in your area yet</text>
-      <text class="hero-sub">We don't deliver to your location yet, but we're growing fast!</text>
+      <text class="hero-title">{{lbl_title}}</text>
+      <text class="hero-sub">{{lbl_body}}</text>
     </view>
 
     <!-- Outside radius info -->
     <view class="info-card">
       <text class="info-icon">⚠</text>
-      <text class="info-text">Outside our current delivery radius</text>
+      <text class="info-text">{{lbl_reason}}</text>
     </view>
 
     <!-- Notify card -->
     <view class="notify-card">
-      <text class="notify-label">NOTIFY ME WHEN YOU ARRIVE</text>
-      <button class="btn-notify" bindtap="requestNotify">  Notify me when available</button>
+      <text class="notify-label">{{lbl_notify_label}}</text>
+      <button class="btn-notify" bindtap="requestNotify">  {{lbl_notify_btn}}</button>
     </view>
 
     <!-- Contact -->
-    <button class="btn-secondary" open-type="contact">  Contact us anyway</button>
+    <button class="btn-secondary" open-type="contact">  {{lbl_contact}}</button>
 
   </view>
 

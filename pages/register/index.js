@@ -1,11 +1,33 @@
 // pages/register/index.js
 const app = getApp();
+const t = require('../../i18n/index');
 
 Page({
   data: {
     selectedPlan: null,
     submitting: false,
     editing: false,
+    lbl_title: '',
+    lbl_change: '',
+    lbl_name_label: '',
+    lbl_name_ph: '',
+    lbl_phone_label: '',
+    lbl_phone_ph: '',
+    lbl_district_label: '',
+    lbl_district_ph: '',
+    lbl_address_label: '',
+    lbl_address_ph: '',
+    lbl_access_label: '',
+    lbl_access_ph: '',
+    lbl_allergies_label: '',
+    lbl_allergies_ph: '',
+    lbl_goal_label: '',
+    lbl_goal_ph: '',
+    lbl_submitting: '',
+    lbl_save_changes: '',
+    lbl_next: '',
+    lbl_delivery_note: '',
+    lbl_area_note: '',
     form: {
       name: '',
       phone: '',
@@ -18,6 +40,29 @@ Page({
   },
 
   async onLoad(options) {
+    this.setData({
+      lbl_title: t('register_title'),
+      lbl_change: t('register_change'),
+      lbl_name_label: t('register_name_label'),
+      lbl_name_ph: t('register_name_placeholder'),
+      lbl_phone_label: t('register_phone_label'),
+      lbl_phone_ph: t('register_phone_placeholder'),
+      lbl_district_label: t('register_district_label'),
+      lbl_district_ph: t('register_district_placeholder'),
+      lbl_address_label: t('register_address_label'),
+      lbl_address_ph: t('register_address_placeholder'),
+      lbl_access_label: t('register_access_label'),
+      lbl_access_ph: t('register_access_placeholder'),
+      lbl_allergies_label: t('register_allergies_label'),
+      lbl_allergies_ph: t('register_allergies_placeholder'),
+      lbl_goal_label: t('register_goal_label'),
+      lbl_goal_ph: t('register_goal_placeholder'),
+      lbl_submitting: t('register_submitting'),
+      lbl_save_changes: t('register_save_changes'),
+      lbl_next: t('register_next'),
+      lbl_delivery_note: t('register_delivery_note'),
+      lbl_area_note: t('register_area_note'),
+    });
     const selectedPlan = wx.getStorageSync('selectedPlan');
     if (!selectedPlan) {
       wx.navigateTo({ url: '/pages/plans/index' });
@@ -60,24 +105,24 @@ Page({
     const { name, phone, district, address, goal } = this.data.form;
 
     if (!name.trim() || name.trim().length < 2) {
-      wx.showToast({ title: 'Please enter your full name', icon: 'none' });
+      wx.showToast({ title: t('register_error_name'), icon: 'none' });
       return false;
     }
     if (/\d/.test(name)) {
-      wx.showToast({ title: 'Name should not contain numbers', icon: 'none' });
+      wx.showToast({ title: t('register_error_name_numbers'), icon: 'none' });
       return false;
     }
     const normalizedPhone = phone.trim().replace(/[\s-]/g, '');
     if (!normalizedPhone || !/^\+?\d{7,15}$/.test(normalizedPhone)) {
-      wx.showToast({ title: 'Please enter a valid phone number', icon: 'none' });
+      wx.showToast({ title: t('register_error_phone'), icon: 'none' });
       return false;
     }
     if (!district.trim() || district.trim().length < 2) {
-      wx.showToast({ title: 'Please enter your district', icon: 'none' });
+      wx.showToast({ title: t('register_error_district'), icon: 'none' });
       return false;
     }
     if (!address.trim() || address.trim().length < 10) {
-      wx.showToast({ title: 'Please enter your full delivery address', icon: 'none' });
+      wx.showToast({ title: t('register_error_address'), icon: 'none' });
       return false;
     }
     return true;
@@ -155,7 +200,7 @@ Page({
 
     } catch (err) {
       console.error('Register error:', err);
-      wx.showToast({ title: 'Something went wrong, please try again', icon: 'none' });
+      wx.showToast({ title: t('register_error_generic'), icon: 'none' });
     } finally {
       this.setData({ submitting: false });
     }

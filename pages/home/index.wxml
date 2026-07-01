@@ -28,19 +28,19 @@
 
       <view class="greeting-row">
         <view>
-          <text class="greeting-name">Hi, {{firstName}}</text>
+          <text class="greeting-name">{{lbl_hi}}</text>
           <text class="greeting-sub plan-color">{{planLabel}}</text>
         </view>
         <view class="status-badge {{isUpcoming ? 'status-badge-upcoming' : ''}}">
           <text class="status-check" wx:if="{{!isUpcoming}}">✓</text>
-          <text class="status-text">{{isUpcoming ? 'UPCOMING' : 'ACTIVE'}}</text>
+          <text class="status-text">{{isUpcoming ? lbl_upcoming : lbl_active}}</text>
         </view>
       </view>
 
       <view class="delivery-banner delivery-banner-upcoming" wx:if="{{isUpcoming}}">
         <view class="delivery-banner-body">
-          <text class="delivery-banner-title">Your plan starts soon</text>
-          <text class="delivery-banner-sub">First delivery on {{startDateFormatted}}</text>
+          <text class="delivery-banner-title">{{lbl_plan_starts_soon}}</text>
+          <text class="delivery-banner-sub">{{lbl_first_delivery}}</text>
         </view>
       </view>
 
@@ -49,16 +49,16 @@
           <text class="delivery-banner-icon">›</text>
         </view>
         <view class="delivery-banner-body">
-          <text class="delivery-banner-title">On the way!</text>
+          <text class="delivery-banner-title">{{lbl_on_the_way}}</text>
           <text class="delivery-banner-sub">{{todayDelivery.day}} delivery · ETA {{todayDelivery.time}}</text>
         </view>
       </view>
 
       <view class="meals-card">
         <view class="meals-card-header">
-          <text class="meals-card-label">THIS WEEK'S MEALS</text>
+          <text class="meals-card-label">{{lbl_this_weeks_meals}}</text>
           <view class="meals-card-view" bindtap="goToMealSelect">
-            <text class="meals-card-view-text">Edit ›</text>
+            <text class="meals-card-view-text">{{lbl_edit}}</text>
           </view>
         </view>
 
@@ -73,7 +73,7 @@
               </view>
             </view>
             <view wx:if="{{item.snack}}" class="week-snack-row">
-              <text class="week-snack-label">Snack</text>
+              <text class="week-snack-label">{{lbl_snack}}</text>
               <text class="week-snack-name">{{item.snack}}</text>
             </view>
           </view>
@@ -82,7 +82,7 @@
       </view>
 
 <view class="btn-wrap">
-        <button class="btn-contact" open-type="contact">Contact FIT IGNYTE</button>
+        <button class="btn-contact" open-type="contact">{{lbl_contact}}</button>
       </view>
 
     </block>

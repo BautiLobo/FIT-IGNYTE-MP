@@ -1,5 +1,6 @@
 // pages/start-date/index.js
 const { PUBLIC_HOLIDAYS, MAKEUP_WORKDAYS } = require('./holidays');
+const t = require('../../i18n/index');
 
 Page({
   data: {
@@ -9,9 +10,25 @@ Page({
     selectedDateFormatted: '',
     expiryDateFormatted: '',
     minDate: '',
+    lbl_topbar: '',
+    lbl_heading: '',
+    lbl_subtitle: '',
+    lbl_start_label: '',
+    lbl_plan_ends: '',
+    lbl_5_days: '',
+    lbl_continue: '',
   },
 
   onLoad(options) {
+    this.setData({
+      lbl_topbar: t('start_date_topbar'),
+      lbl_heading: t('start_date_heading'),
+      lbl_subtitle: t('start_date_subtitle'),
+      lbl_start_label: t('start_date_label'),
+      lbl_plan_ends: t('start_date_plan_ends'),
+      lbl_5_days: t('start_date_5_days'),
+      lbl_continue: t('start_date_continue'),
+    });
     const fromRenewal = options.from === 'renewal';
     const next = options.next === 'edit-meals' ? 'edit-meals' : 'meal-select';
     this.setData({ fromRenewal, next });
@@ -35,7 +52,7 @@ Page({
     const date = new Date(dateStr + 'T00:00:00');
 
     if (this.isNonWorkingDay(date)) {
-      wx.showToast({ title: 'No deliveries on weekends or public holidays — pick another date', icon: 'none', duration: 2500 });
+      wx.showToast({ title: t('start_date_no_delivery'), icon: 'none', duration: 2500 });
       return; // keep the previously selected date
     }
 

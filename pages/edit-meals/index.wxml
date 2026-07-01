@@ -3,7 +3,7 @@
   <!-- Top Bar -->
   <view class="topbar">
     <view class="back-btn" bindtap="goBack"><text class="back-arrow">‹</text></view>
-    <text class="topbar-title">Edit your meals</text>
+    <text class="topbar-title">{{lbl_title}}</text>
     <view style="width:60rpx;"></view>
   </view>
 
@@ -31,7 +31,7 @@
 
       <!-- Plan Badge -->
       <view class="plan-badge">
-        <text class="plan-badge-text">{{plan.name}} — {{plan.meals}} meal(s)/day</text>
+        <text class="plan-badge-text">{{plan.displayName}} — {{plan.meals}} meal(s)/day</text>
       </view>
 
 
@@ -55,15 +55,15 @@
             <view class="meal-thumb-wrap">
               <image wx:if="{{item.photo_url}}" class="meal-thumb" src="{{item.photo_url}}" mode="aspectFill" />
               <view wx:else class="meal-thumb-placeholder">
-                <text class="meal-thumb-label">{{item.name.substring(0,2).toUpperCase()}}</text>
+                <text class="meal-thumb-label">{{item.displayName.substring(0,2).toUpperCase()}}</text>
               </view>
             </view>
             <view class="meal-info">
-              <text class="meal-name {{item.qty > 0 ? 'meal-name-active' : ''}}">{{item.name}}</text>
+              <text class="meal-name {{item.qty > 0 ? 'meal-name-active' : ''}}">{{item.displayName}}</text>
               <view class="meal-desc-row">
-                <text class="meal-desc">{{item.kcal}} kcal</text>
+                <text class="meal-desc">{{item.kcal}} {{lbl_kcal}}</text>
                 <view wx:if="{{item.qty > 0 && item.sauceOptions.length > 0}}" class="sauce-btn" bindtap="openSaucePicker" data-meal-id="{{item.id}}">
-                  <text class="sauce-btn-text">{{item.selectedSauceName ? item.selectedSauceName : 'Select sauce'}}</text>
+                  <text class="sauce-btn-text">{{item.selectedSauceName ? item.selectedSauceName : lbl_select_sauce}}</text>
                 </view>
               </view>
             </view>
@@ -87,28 +87,28 @@
           <view class="snack-inner {{snackAdded ? 'snack-inner-added' : ''}}" bindtap="toggleSnack">
             <text class="snack-name">{{snackOfDay}}</text>
             <view class="snack-badge {{snackAdded ? 'snack-badge-added' : ''}}">
-              <text>{{snackAdded ? 'Added' : '+ Add snack'}}</text>
+              <text>{{snackAdded ? lbl_snack_added : lbl_add_snack}}</text>
             </view>
           </view>
         </view>
 
         <view class="time-picker">
-          <text class="time-picker-label">DELIVERY TIME</text>
+          <text class="time-picker-label">{{lbl_delivery_time}}</text>
           <picker mode="time" value="{{selectedTime}}" start="07:00" end="20:00" bindchange="onTimeChange">
             <view class="time-picker-display">
               <text class="time-picker-value">{{selectedTime}}</text>
-              <text class="time-picker-tap">Tap to change</text>
+              <text class="time-picker-tap">{{lbl_tap_to_change}}</text>
             </view>
           </picker>
         </view>
 
         <view class="notes-wrap">
-          <text class="notes-label">Notes (optional)</text>
-          <textarea class="notes-input" placeholder="e.g. no onion, extra sauce..." value="{{currentNotes}}" bindinput="onNotesInput" auto-height />
+          <text class="notes-label">{{lbl_notes}}</text>
+          <textarea class="notes-input" placeholder="{{lbl_notes_placeholder}}" value="{{currentNotes}}" bindinput="onNotesInput" auto-height />
         </view>
 
         <button class="btn-save-next" bindtap="saveAndNext">
-          {{isLastDay ? 'Save changes →' : 'Save & Next →'}}
+          {{isLastDay ? lbl_save : lbl_save_next}}
         </button>
 
       </block>

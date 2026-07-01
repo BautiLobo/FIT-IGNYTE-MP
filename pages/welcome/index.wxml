@@ -7,12 +7,12 @@
   <view class="content">
 
     <view class="text-block">
-      <text class="hero-title">Welcome, {{clientName}}!</text>
+      <text class="hero-title">{{lbl_title}}</text>
       <text class="hero-sub"></text>
     </view>
 
     <view class="btn-wrap">
-      <button class="btn-primary" bindtap="goToHome">Go to home →</button>
+      <button class="btn-primary" bindtap="goToHome">{{lbl_go_home}}</button>
     </view>
 
   </view>

@@ -1,5 +1,6 @@
 // pages/meal-select/index.js
 const app = getApp();
+const t = require('../../i18n/index');
 
 const DAYS = [
   { key: 'mon', label: 'Monday',    short: 'Mon' },
@@ -41,14 +42,40 @@ Page({
     lastSelectedName: '',
     saucesById: {},
     currentSauces: {},
+    lbl_title: '',
+    lbl_change_plan: '',
+    lbl_kcal: '',
+    lbl_select_sauce: '',
+    lbl_add_snack: '',
+    lbl_snack_added: '',
+    lbl_delivery_time: '',
+    lbl_tap_to_change: '',
+    lbl_notes: '',
+    lbl_notes_placeholder: '',
+    lbl_continue: '',
+    lbl_save_next: '',
   },
 
   async onLoad(options) {
+    this.setData({
+      lbl_title: t('meal_select_title'),
+      lbl_change_plan: t('meal_select_change_plan'),
+      lbl_kcal: t('meal_select_kcal'),
+      lbl_select_sauce: t('meal_select_select_sauce'),
+      lbl_add_snack: t('meal_select_add_snack'),
+      lbl_snack_added: t('meal_select_snack_added'),
+      lbl_delivery_time: t('meal_select_delivery_time'),
+      lbl_tap_to_change: t('meal_select_tap_to_change'),
+      lbl_notes: t('meal_select_notes'),
+      lbl_notes_placeholder: t('meal_select_notes_placeholder'),
+      lbl_continue: t('meal_select_continue'),
+      lbl_save_next: t('meal_select_save_next'),
+    });
     const fromRenewal = options.from === 'renewal' || wx.getStorageSync('flowContext') === 'renewal';
     const fromOrderSummary = options.from === 'order-summary';
     console.log('[meal-select] fromRenewal:', fromRenewal, 'options.from:', options.from, 'storage:', wx.getStorageSync('flowContext'));
     if (fromRenewal) wx.removeStorageSync('flowContext');
-    const selectedPlan = wx.getStorageSync('selectedPlan');
+    const selectedPlan = app.getDisplayPlan(wx.getStorageSync('selectedPlan'));
 
     if (!selectedPlan) {
       wx.navigateBack();
@@ -173,6 +200,7 @@ Page({
         const selectedSauceName = selectedSauceId ? (saucesById[selectedSauceId] || '') : '';
         return {
           ...m,
+          displayName: app.getMealName(m),
           qty: existingMealIds.filter(id => id === m.id).length,
           sauceOptions,
           selectedSauceId,
@@ -203,7 +231,7 @@ Page({
     } catch (err) {
       console.error('Load menu error:', err);
       this.setData({ loading: false });
-      wx.showToast({ title: 'Failed to load menu', icon: 'none' });
+      wx.showToast({ title: t('meal_select_failed'), icon: 'none' });
     }
   },
 
@@ -213,7 +241,7 @@ Page({
     const maxMeals = selectedPlan ? selectedPlan.meals : 1;
 
     if (selectedMealIds.length >= maxMeals) {
-      wx.showToast({ title: `Max ${maxMeals} meal(s) for this plan`, icon: 'none' });
+      wx.showToast({ title: t('meal_select_max_meals', maxMeals), icon: 'none' });
       return;
     }
 
@@ -323,7 +351,7 @@ Page({
     const { selectedMealIds, selectedPlan } = this.data;
 
     if (selectedMealIds.length < selectedPlan.meals) {
-      wx.showToast({ title: `Select ${selectedPlan.meals} meal(s) first`, icon: 'none' });
+      wx.showToast({ title: t('meal_select_select_first', selectedPlan.meals), icon: 'none' });
       return;
     }
 
@@ -349,7 +377,7 @@ Page({
       });
 
       if (incompleteDay) {
-        wx.showToast({ title: `Select your ${incompleteDay.label} meal(s) first`, icon: 'none' });
+        wx.showToast({ title: t('meal_select_incomplete_day', incompleteDay.label), icon: 'none' });
         return;
       }
 
@@ -374,8 +402,8 @@ Page({
 
   contactUs() {
     wx.showModal({
-      title: 'Contact us on WeChat',
-      content: 'Search for: fitignyte_shanghai',
+      title: t('payment_contact_title'),
+      content: t('payment_contact_content'),
       showCancel: false,
       confirmText: 'OK',
     });

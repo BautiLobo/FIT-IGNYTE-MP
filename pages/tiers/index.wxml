@@ -2,7 +2,7 @@
 
   <view class="topbar">
     <view class="back-btn" bindtap="goBack"><text class="back-arrow">‹</text></view>
-    <text class="topbar-title">Tiers</text>
+    <text class="topbar-title">{{lbl_title}}</text>
     <view style="width:60rpx;"></view>
   </view>
 
@@ -15,16 +15,16 @@
     <block wx:else>
 
       <view class="list-header">
-        <text class="list-title"></text>
-    
+        <text class="list-title">{{lbl_heading}}</text>
+        <text class="list-sub">{{lbl_subtitle}}</text>
       </view>
 
       <view wx:for="{{tiers}}" wx:key="name" class="tier-wrap">
-        <view class="tier-card" bindtap="selectTier" data-tier="{{item.name}}" style="border-left-color:{{item.color}};">
+        <view class="tier-card" bindtap="selectTier" data-tier="{{item.name}}" data-tier-zh="{{item.displayName}}" style="border-left-color:{{item.color}};">
           <view class="tier-left">
             <text class="tier-tag" style="color:{{item.color}};">{{item.tag}}</text>
-            <text class="tier-name">{{item.name}}</text>
-            <text class="tier-sub">{{item.planCount}} plans available</text>
+            <text class="tier-name">{{item.displayName}}</text>
+            <text class="tier-sub">{{item.planCount}} {{lbl_plans_available}}</text>
           </view>
           <text class="tier-arrow" style="color:{{item.color}};">›</text>
         </view>
@@ -32,12 +32,12 @@
 
       <view class="hint-wrap">
         <text class="hint-line"></text>
-        <text class="hint">Tap a goal to see plans</text>
+        <text class="hint">{{lbl_tap_hint}}</text>
         <text class="hint-line"></text>
       </view>
 
       <view class="bottom-bar">
-        <button class="btn-pdf" bindtap="openBrochure">☰  View full menu PDF</button>
+        <button class="btn-pdf" bindtap="openBrochure">{{lbl_brochure}}</button>
       </view>
 
     </block>

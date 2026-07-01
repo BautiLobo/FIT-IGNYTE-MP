@@ -1,5 +1,6 @@
 // pages/order-summary/index.js
 const app = getApp();
+const t = require('../../i18n/index');
 
 const DAY_LABELS = {
   mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday',
@@ -16,9 +17,39 @@ Page({
     discount: 0,
     submitting: false,
     fromRenewal: false,
+    lbl_title: '',
+    lbl_your_plan: '',
+    lbl_meals_day: '',
+    lbl_chosen_meals: '',
+    lbl_edit: '',
+    lbl_address: '',
+    lbl_discount: '',
+    lbl_delivery: '',
+    lbl_submitting: '',
+    lbl_place_order: '',
+    lbl_continue_payment: '',
+    lbl_review_note: '',
+    lbl_renewal_note: '',
   },
 
   async onLoad(options) {
+    this.setData({
+      lbl_title: t('order_summary_title'),
+      lbl_your_plan: t('order_summary_your_plan'),
+      lbl_meals_day: t('order_summary_meals_day'),
+      lbl_chosen_meals: t('order_summary_chosen_meals'),
+      lbl_edit: t('order_summary_edit'),
+      lbl_address: t('order_summary_address'),
+      lbl_discount: t('order_summary_discount'),
+      lbl_delivery: t('order_summary_delivery'),
+      lbl_submitting: t('order_summary_submitting'),
+      lbl_place_order: t('order_summary_place_order'),
+      lbl_continue_payment: t('order_summary_continue_payment'),
+      lbl_review_note: t('order_summary_review_note'),
+      lbl_renewal_note: t('order_summary_renewal_note'),
+      lbl_total: t('payment_total'),
+      lbl_plan: t('payment_plan'),
+    });
     const fromRenewal = options.from === 'renewal' || wx.getStorageSync('flowContext') === 'renewal';
     if (fromRenewal) wx.removeStorageSync('flowContext');
     const selectedPlan = wx.getStorageSync('selectedPlan');
@@ -56,7 +87,7 @@ Page({
 
     } catch (err) {
       console.error('Load order error:', err);
-      wx.showToast({ title: 'Failed to load order', icon: 'none' });
+      wx.showToast({ title: t('order_summary_failed'), icon: 'none' });
     }
   },
 
@@ -111,7 +142,7 @@ Page({
 
     } catch (err) {
       console.error('Load renewal order error:', err);
-      wx.showToast({ title: 'Failed to load order', icon: 'none' });
+      wx.showToast({ title: t('order_summary_failed'), icon: 'none' });
     }
   },
 
@@ -172,10 +203,10 @@ Page({
           time: sel.time || '',
           meals: (sel.meal_ids || []).map((id, i) => ({
             slot: i,
-            name: mealMap[id] ? mealMap[id].name : id,
-            sauceName: sauces[id] && mealMap[sauces[id]] ? mealMap[sauces[id]].name : null,
+            name: mealMap[id] ? app.getMealName(mealMap[id]) : id,
+            sauceName: sauces[id] && mealMap[sauces[id]] ? app.getMealName(mealMap[sauces[id]]) : null,
           })),
-          snack: sel.snack_id ? (mealMap[sel.snack_id] ? mealMap[sel.snack_id].name : 'Snack of the day') : null,
+          snack: sel.snack_id ? (mealMap[sel.snack_id] ? app.getMealName(mealMap[sel.snack_id]) : 'Snack of the day') : null,
         };
       });
   },
@@ -195,7 +226,7 @@ Page({
       wx.reLaunch({ url: '/pages/under-review/index' });
     } catch (err) {
       console.error('Submit error:', err);
-      wx.showToast({ title: 'Something went wrong', icon: 'none' });
+      wx.showToast({ title: t('order_summary_error'), icon: 'none' });
       this.setData({ submitting: false });
     }
   },
