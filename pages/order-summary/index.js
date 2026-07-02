@@ -2,10 +2,10 @@
 const app = getApp();
 const t = require('../../i18n/index');
 
-const DAY_LABELS = {
-  mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday',
-  thu: 'Thursday', fri: 'Friday',
-};
+const _isZh = (wx.getAppBaseInfo().language || '').startsWith('zh');
+const DAY_LABELS = _isZh
+  ? { mon: '周一', tue: '周二', wed: '周三', thu: '周四', fri: '周五' }
+  : { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday' };
 const DAY_ORDER = ['mon', 'tue', 'wed', 'thu', 'fri'];
 
 Page({
@@ -105,7 +105,8 @@ Page({
       // Si el usuario edita los meals y vuelve, meal-select dejó los cambios en
       // storage — los persistimos en la orden antes de refrescar.
       const updatedMealSelections = wx.getStorageSync('mealSelections');
-      if (updatedMealSelections) {
+      const hasUpdatedMeals = updatedMealSelections && typeof updatedMealSelections === 'object' && Object.keys(updatedMealSelections).length > 0;
+      if (hasUpdatedMeals) {
         await app.supabase('PATCH', 'new_orders', { meals: updatedMealSelections }, `id=eq.${pendingOrderId}`);
         wx.removeStorageSync('mealSelections');
       }

@@ -2,12 +2,13 @@
 const app = getApp();
 const t = require('../../i18n/index');
 
+const _isZh = (wx.getAppBaseInfo().language || '').startsWith('zh');
 const DAYS = [
-  { key: 'mon', short: 'MON', full: 'Monday', idx: 1 },
-  { key: 'tue', short: 'TUE', full: 'Tuesday', idx: 2 },
-  { key: 'wed', short: 'WED', full: 'Wednesday', idx: 3 },
-  { key: 'thu', short: 'THU', full: 'Thursday', idx: 4 },
-  { key: 'fri', short: 'FRI', full: 'Friday', idx: 5 },
+  { key: 'mon', short: _isZh ? '周一' : 'MON', full: 'Monday', idx: 1 },
+  { key: 'tue', short: _isZh ? '周二' : 'TUE', full: 'Tuesday', idx: 2 },
+  { key: 'wed', short: _isZh ? '周三' : 'WED', full: 'Wednesday', idx: 3 },
+  { key: 'thu', short: _isZh ? '周四' : 'THU', full: 'Thursday', idx: 4 },
+  { key: 'fri', short: _isZh ? '周五' : 'FRI', full: 'Friday', idx: 5 },
 ];
 
 Page({

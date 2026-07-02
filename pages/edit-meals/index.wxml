@@ -31,7 +31,7 @@
 
       <!-- Plan Badge -->
       <view class="plan-badge">
-        <text class="plan-badge-text">{{plan.displayName}} — {{plan.meals}} meal(s)/day</text>
+        <text class="plan-badge-text">{{plan.displayName}} — {{plan.meals}} {{lbl_meals_day}}</text>
       </view>
 
 
@@ -116,5 +116,23 @@
     </block>
 
   </scroll-view>
+
+  <!-- Sauce Modal -->
+  <view wx:if="{{sauceModal.visible}}" class="sauce-modal-mask" bindtap="closeSauceModal">
+    <view class="sauce-modal-sheet" catchtap="">
+      <view
+        wx:for="{{sauceModal.options}}"
+        wx:key="id"
+        class="sauce-modal-item"
+        bindtap="pickSauce"
+        data-idx="{{index}}"
+      >
+        <text class="sauce-modal-item-text">{{item.name}}</text>
+      </view>
+      <view class="sauce-modal-cancel" bindtap="closeSauceModal">
+        <text class="sauce-modal-cancel-text">{{lbl_cancel}}</text>
+      </view>
+    </view>
+  </view>
 
 </view>

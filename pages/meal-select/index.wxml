@@ -31,7 +31,7 @@
 
       <!-- Plan Badge -->
       <view class="plan-badge" wx:if="{{!fromHome}}">
-        <text class="plan-badge-text">{{selectedPlan.displayName}} — {{selectedPlan.meals}} meal(s)/day</text>
+        <text class="plan-badge-text">{{selectedPlan.displayName}} — {{selectedPlan.meals}} {{lbl_meals_day}}</text>
         <text class="plan-badge-change" bindtap="goBack">{{lbl_change_plan}}</text>
       </view>
 
@@ -122,5 +122,23 @@
     </block>
 
   </scroll-view>
+
+  <!-- Sauce Modal -->
+  <view wx:if="{{sauceModal.visible}}" class="sauce-modal-mask" bindtap="closeSauceModal">
+    <view class="sauce-modal-sheet" catchtap="">
+      <view
+        wx:for="{{sauceModal.options}}"
+        wx:key="id"
+        class="sauce-modal-item"
+        bindtap="pickSauce"
+        data-idx="{{index}}"
+      >
+        <text class="sauce-modal-item-text">{{item.name}}</text>
+      </view>
+      <view class="sauce-modal-cancel" bindtap="closeSauceModal">
+        <text class="sauce-modal-cancel-text">{{lbl_cancel}}</text>
+      </view>
+    </view>
+  </view>
 
 </view>

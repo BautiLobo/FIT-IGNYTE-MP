@@ -154,6 +154,25 @@ Page({
 
       // Get meal selections saved from meal-select
       const mealSelections = wx.getStorageSync('mealSelections') || {};
+      const existingPendingOrderId = wx.getStorageSync('pendingOrderId');
+
+      // Si ya existe una orden draft y las meals ya fueron guardadas (storage vacío),
+      // solo actualizar los datos personales en la orden existente.
+      if (existingPendingOrderId && Object.keys(mealSelections).length === 0) {
+        await app.supabase('PATCH', 'new_orders', {
+          name: form.name.trim(),
+          phone: form.phone.trim(),
+          district: form.district.trim(),
+          address: form.address.trim(),
+          access: form.access.trim(),
+          allergies: form.allergies.trim(),
+          goal: form.goal.trim(),
+          plan_id: selectedPlan.id,
+        }, `id=eq.${existingPendingOrderId}`);
+        wx.navigateTo({ url: '/pages/order-summary/index' });
+        this.setData({ submitting: false });
+        return;
+      }
 
       // Evitar colisión: si el teléfono ya pertenece a un cliente existente,
       // no crear una orden nueva — eso pisaría los datos de ese cliente al aprobar.

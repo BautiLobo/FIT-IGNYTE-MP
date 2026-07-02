@@ -2,12 +2,13 @@
 const app = getApp();
 const t = require('../../i18n/index');
 
+const _isZh = (wx.getAppBaseInfo().language || '').startsWith('zh');
 const DAYS = [
-  { key: 'mon', label: 'Monday',    short: 'Mon' },
-  { key: 'tue', label: 'Tuesday',   short: 'Tue' },
-  { key: 'wed', label: 'Wednesday', short: 'Wed' },
-  { key: 'thu', label: 'Thursday',  short: 'Thu' },
-  { key: 'fri', label: 'Friday',    short: 'Fri' },
+  { key: 'mon', label: 'Monday',    short: _isZh ? '周一' : 'Mon' },
+  { key: 'tue', label: 'Tuesday',   short: _isZh ? '周二' : 'Tue' },
+  { key: 'wed', label: 'Wednesday', short: _isZh ? '周三' : 'Wed' },
+  { key: 'thu', label: 'Thursday',  short: _isZh ? '周四' : 'Thu' },
+  { key: 'fri', label: 'Friday',    short: _isZh ? '周五' : 'Fri' },
 ];
 
 Page({
@@ -42,6 +43,7 @@ Page({
     lastSelectedName: '',
     saucesById: {},
     currentSauces: {},
+    sauceModal: { visible: false, mealId: null, options: [] },
     lbl_title: '',
     lbl_change_plan: '',
     lbl_kcal: '',
@@ -54,6 +56,7 @@ Page({
     lbl_notes_placeholder: '',
     lbl_continue: '',
     lbl_save_next: '',
+    lbl_cancel: '',
   },
 
   async onLoad(options) {
@@ -70,6 +73,8 @@ Page({
       lbl_notes_placeholder: t('meal_select_notes_placeholder'),
       lbl_continue: t('meal_select_continue'),
       lbl_save_next: t('meal_select_save_next'),
+      lbl_meals_day: t('plans_meals_per_day'),
+      lbl_cancel: t('payment_simulate_cancel'),
     });
     const fromRenewal = options.from === 'renewal' || wx.getStorageSync('flowContext') === 'renewal';
     const fromOrderSummary = options.from === 'order-summary';
@@ -115,7 +120,7 @@ Page({
     try {
       const saucesData = await app.supabase('GET', 'meal_library', null, 'item_type=eq.sauce');
       const saucesById = {};
-      (saucesData || []).forEach(s => { saucesById[s.id] = s.name; });
+      (saucesData || []).forEach(s => { saucesById[s.id] = s; });
       this.setData({ saucesById });
     } catch (err) {
       console.error('Load sauces error:', err);
@@ -157,7 +162,7 @@ Page({
       if (menu && menu.snack_id) {
         const snackData = await app.supabase('GET', 'meal_library', null, `id=eq.${menu.snack_id}`);
         if (snackData && snackData.length > 0) {
-          snackOfDay = snackData[0].name;
+          snackOfDay = app.getMealName(snackData[0]);
           snackId = menu.snack_id;
         }
       }
@@ -194,10 +199,13 @@ Page({
       const { saucesById } = this.data;
       const updatedMeals = (meals || []).map(m => {
         const sauceIds = m.available_sauce_ids || [];
-        const sauceOptions = sauceIds.map(id => ({ id, name: saucesById[id] || id }));
+        const sauceOptions = sauceIds.map(id => {
+          const s = saucesById[id];
+          return { id, name: s ? app.getMealName(s) : id, name_zh: s ? (s.name_zh || '') : '' };
+        });
         const candidateSauceId = existingSauces[m.id];
         const selectedSauceId = (candidateSauceId && sauceIds.includes(candidateSauceId)) ? candidateSauceId : null;
-        const selectedSauceName = selectedSauceId ? (saucesById[selectedSauceId] || '') : '';
+        const selectedSauceName = selectedSauceId && saucesById[selectedSauceId] ? app.getMealName(saucesById[selectedSauceId]) : '';
         return {
           ...m,
           displayName: app.getMealName(m),
@@ -294,19 +302,23 @@ Page({
     const mealId = e.currentTarget.dataset.mealId;
     const meal = this.data.menuMeals.find(m => m.id === mealId);
     if (!meal || !meal.sauceOptions || meal.sauceOptions.length === 0) return;
+    this.setData({ sauceModal: { visible: true, mealId, options: meal.sauceOptions } });
+  },
 
-    wx.showActionSheet({
-      itemList: meal.sauceOptions.map(s => s.name),
-      success: (res) => {
-        const sauce = meal.sauceOptions[res.tapIndex];
-        if (!sauce) return;
-        const currentSauces = { ...this.data.currentSauces, [mealId]: sauce.id };
-        const menuMeals = this.data.menuMeals.map(m =>
-          m.id === mealId ? { ...m, selectedSauceId: sauce.id, selectedSauceName: sauce.name } : m
-        );
-        this.setData({ currentSauces, menuMeals }, () => this.persistCurrentDay());
-      },
-    });
+  closeSauceModal() {
+    this.setData({ sauceModal: { visible: false, mealId: null, options: [] } });
+  },
+
+  pickSauce(e) {
+    const { mealId, options } = this.data.sauceModal;
+    const idx = e.currentTarget.dataset.idx;
+    const sauce = options[idx];
+    if (!sauce) return;
+    const currentSauces = { ...this.data.currentSauces, [mealId]: sauce.id };
+    const menuMeals = this.data.menuMeals.map(m =>
+      m.id === mealId ? { ...m, selectedSauceId: sauce.id, selectedSauceName: app.getMealName(sauce) } : m
+    );
+    this.setData({ currentSauces, menuMeals, sauceModal: { visible: false, mealId: null, options: [] } }, () => this.persistCurrentDay());
   },
 
   onTimeChange(e) {

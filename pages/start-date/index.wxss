@@ -44,7 +44,7 @@
 
 .heading-sub {
   font-size: 27rpx;
-  color: #beb6b6;
+  color: #a0a0aa;
   line-height: 1.5;
   display: block;
   font-weight: 600;
@@ -62,7 +62,7 @@
 }
 
 .date-left { display:flex; flex-direction:column; gap:8rpx; }
-.date-label { font-size:20rpx; color:#beb6b6; font-weight:700; letter-spacing:3rpx; }
+.date-label { font-size:20rpx; color:#5d5d65; font-weight:700; letter-spacing:3rpx; }
 .date-value { font-size:40rpx; font-weight:800; color:#f3f3f4; }
 .date-arrow { font-size:52rpx; color:#e8342a; font-weight:300; }
 
@@ -79,7 +79,7 @@
 
 .expiry-label { font-size:20rpx; color:#4ade80; font-weight:700; letter-spacing:3rpx; display:block; }
 .expiry-value { font-size:40rpx; font-weight:800; color:#4ade80; display:block; }
-.expiry-sub { font-size:22rpx; color:#beb6b6; display:block; }
+.expiry-sub { font-size:22rpx; color:#5d5d65; display:block; }
 
 /* ── BUTTON ── */
 button { margin:0 !important; padding:0 !important; background:transparent; border:none; }

@@ -103,6 +103,13 @@ Page({
   },
 
   formatDate(date) {
+    try {
+      const lang = wx.getAppBaseInfo().language || 'en';
+      if (lang.startsWith('zh')) {
+        const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+        return `${date.getMonth() + 1}月${date.getDate()}日 ${days[date.getDay()]}`;
+      }
+    } catch (e) {}
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return `${days[date.getDay()]}, ${date.getDate()} ${months[date.getMonth()]}`;
