@@ -17,6 +17,7 @@ module.exports = {
   home_this_weeks_meals: '本周餐食',
   home_edit: '编辑 ›',
   home_snack: '零食',
+  sauce: '酱料',
   home_contact: '联系 FIT IGNYTE',
 
   // ── TIER NAMES ─────────────────────────────────────────────

@@ -67,9 +67,9 @@
           <view class="week-meal-names">
             <view wx:for="{{item.mealNames}}" wx:for-item="mealName" wx:key="name" class="week-meal-row">
               <text class="week-meal-name">{{mealName.name}}</text>
-              <view wx:if="{{mealName.sauceName}}" class="week-sauce-tag">
-                <view class="week-sauce-dot"></view>
-                <text class="week-sauce-text">{{mealName.sauceName}}</text>
+              <view wx:if="{{mealName.sauceName}}" class="week-sauce-row">
+                <text class="week-sauce-label">{{lbl_sauce}}</text>
+                <text class="week-sauce-name">{{mealName.sauceName}}</text>
               </view>
             </view>
             <view wx:if="{{item.snack}}" class="week-snack-row">

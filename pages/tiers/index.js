@@ -20,7 +20,9 @@ Page({
     lbl_plans_available: '',
   },
 
-  async onLoad() {
+  async onLoad(options) {
+    const fromRenewal = (options && options.from === 'renewal') || wx.getStorageSync('flowContext') === 'renewal';
+    this.setData({ fromRenewal });
     this.setData({
       lbl_title: t('tiers_title'),
       lbl_heading: t('tiers_heading'),
@@ -68,8 +70,10 @@ Page({
 
   selectTier(e) {
     const { tier, tierZh } = e.currentTarget.dataset;
-    if (this.data.fromRenewal) wx.setStorageSync('flowContext', 'renewal');
-    wx.navigateTo({ url: '/pages/plans/index?tier=' + encodeURIComponent(tier) + '&tier_zh=' + encodeURIComponent(tierZh || '') });
+    const fromRenewal = this.data.fromRenewal;
+    if (fromRenewal) wx.setStorageSync('flowContext', 'renewal');
+    const renewalParam = fromRenewal ? '&from=renewal' : '';
+    wx.navigateTo({ url: '/pages/plans/index?tier=' + encodeURIComponent(tier) + '&tier_zh=' + encodeURIComponent(tierZh || '') + renewalParam });
   },
 
   openBrochure() {

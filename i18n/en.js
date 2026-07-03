@@ -17,6 +17,7 @@ module.exports = {
   home_this_weeks_meals: "THIS WEEK'S MEALS",
   home_edit: 'Edit ›',
   home_snack: 'Snack',
+  sauce: 'Sauce',
   home_contact: 'Contact FIT IGNYTE',
 
   // ── TIER NAMES ─────────────────────────────────────────────

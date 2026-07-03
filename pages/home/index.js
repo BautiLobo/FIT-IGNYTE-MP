@@ -42,6 +42,7 @@ Page({
       lbl_this_weeks_meals: t('home_this_weeks_meals'),
       lbl_edit: t('home_edit'),
       lbl_snack: t('home_snack'),
+      lbl_sauce: t('sauce'),
       lbl_contact: t('home_contact'),
     });
     await this.loadClientData();

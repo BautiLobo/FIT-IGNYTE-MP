@@ -264,29 +264,42 @@ App({
   // cliente activo editando la semana en curso desde home, donde no hay
   // una decisión de start_date futura involucrada).
   getWeekIndexForDay(dayKey, anchor, order, startDateStr) {
-    if (!anchor || !order || order.length !== 4) return 1; // fallback si la rotación no está configurada
+    if (!anchor || !order || order.length !== 4) return 1;
 
     const dayNumMap = { mon: 1, tue: 2, wed: 3, thu: 4, fri: 5 };
     const targetDow = dayNumMap[dayKey];
 
+    const toMonday = (d) => {
+      const dow = d.getDay();
+      const m = new Date(d);
+      m.setDate(d.getDate() + (dow === 0 ? -6 : 1 - dow));
+      return m;
+    };
+
     const refDate = startDateStr ? new Date(startDateStr + 'T00:00:00') : new Date();
     refDate.setHours(0, 0, 0, 0);
-    const refDow = refDate.getDay(); // 0=Sun..6=Sat
-
-    const diffToMonday = refDow === 0 ? -6 : 1 - refDow;
-    const refMonday = new Date(refDate);
-    refMonday.setDate(refMonday.getDate() + diffToMonday);
-
-    let targetDate = new Date(refMonday);
-    targetDate.setDate(refMonday.getDate() + (targetDow - 1));
-
-    if (targetDate < refDate) {
-      targetDate.setDate(targetDate.getDate() + 7);
-    }
+    const refMonday = toMonday(refDate);
 
     const msPerWeek = 7 * 24 * 60 * 60 * 1000;
-    const anchorDate = new Date(anchor + 'T00:00:00');
-    const weeksSinceAnchor = Math.floor((targetDate - anchorDate) / msPerWeek);
+    // Normalizar el anchor al lunes de su semana para que los slots siempre
+    // empiecen en lunes, sin importar qué día se guardó como ancla.
+    const anchorMonday = toMonday(new Date(anchor + 'T00:00:00'));
+
+    let weekMonday;
+    if (startDateStr) {
+      // Nuevo cliente: si el día de esta semana ya pasó respecto al start, usar la próxima semana
+      const dayDate = new Date(refMonday);
+      dayDate.setDate(refMonday.getDate() + (targetDow - 1));
+      weekMonday = dayDate < refDate
+        ? new Date(refMonday.getTime() + msPerWeek)
+        : refMonday;
+    } else {
+      // Cliente activo: todos los días usan el lunes de la semana actual
+      weekMonday = refMonday;
+    }
+
+    // Math.round absorbe cualquier diferencia de hora (ambos deben ser lunes exactos)
+    const weeksSinceAnchor = Math.round((weekMonday - anchorMonday) / msPerWeek);
     const slot = ((weeksSinceAnchor % 4) + 4) % 4;
 
     return order[slot];

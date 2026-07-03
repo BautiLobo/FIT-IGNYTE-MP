@@ -76,14 +76,21 @@ Page({
     // y dejó la fecha real en storage; para el cliente activo editando su
     // semana en curso desde home no hay start_date futura, así que usamos
     // "hoy" como referencia (comportamiento de getWeekIndexForDay sin 4to arg).
-    const startDateStr = fromRenewal ? (wx.getStorageSync('startDate') || null) : null;
-    this.setData({ fromRenewal, startDateStr });
+    const renewalStartDate = fromRenewal ? (wx.getStorageSync('startDate') || null) : null;
+    this.setData({ fromRenewal });
 
     try {
       // Load client + plan
       const clientData = await app.getClient({ clientId });
       if (!clientData || clientData.length === 0) { wx.navigateBack(); return; }
       const client = clientData[0];
+
+      // Solo pasar startDateStr si la fecha de inicio es futura (cliente upcoming).
+      // Clientes activos usan null → getWeekIndexForDay toma la semana actual.
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const startDateObj = client.start_date ? new Date(client.start_date + 'T00:00:00') : null;
+      const startDateStr = renewalStartDate || (startDateObj && startDateObj > today ? client.start_date : null);
+      this.setData({ startDateStr });
 
       const planData = await app.supabase('GET', 'plans', null, `id=eq.${client.plan_id}`);
       const plan = planData && planData.length > 0 ? app.getDisplayPlan(planData[0]) : null;
