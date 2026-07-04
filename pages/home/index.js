@@ -168,22 +168,27 @@ Page({
     }
   },
 
-  // Devuelve la key de día (mon/tue/wed/thu/fri) que corresponde a "hoy" dentro del ciclo del plan,
-  // o null si hoy cae fuera del rango start_date — expiry_date, o si hoy es fin de semana.
+  // Devuelve la key del próximo día de entrega dentro del ciclo del plan.
+  // Si hoy es lunes-viernes y está dentro del plan → hoy.
+  // Si hoy es sábado o domingo → el lunes próximo (si cae dentro del plan).
   getPlanDayKey(startDateStr, expiryDateStr) {
-    const realToday = new Date();
-    realToday.setHours(0, 0, 0, 0);
-    const dow = realToday.getDay(); // 0=Sun ... 6=Sat
-    if (dow === 0 || dow === 6) return null;
+    const dowToKey = { 1: 'mon', 2: 'tue', 3: 'wed', 4: 'thu', 5: 'fri' };
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dow = today.getDay();
+
+    // Encontrar el próximo día hábil (hoy si ya es semana, si no el lunes siguiente)
+    let candidate = new Date(today);
+    if (dow === 6) candidate.setDate(today.getDate() + 2); // sábado → lunes
+    if (dow === 0) candidate.setDate(today.getDate() + 1); // domingo → lunes
 
     if (startDateStr && expiryDateStr) {
       const start = new Date(startDateStr + 'T00:00:00');
       const expiry = new Date(expiryDateStr + 'T00:00:00');
-      if (realToday < start || realToday > expiry) return null;
+      if (candidate < start || candidate > expiry) return null;
     }
 
-    const map = { 1: 'mon', 2: 'tue', 3: 'wed', 4: 'thu', 5: 'fri' };
-    return map[dow] || null;
+    return dowToKey[candidate.getDay()] || null;
   },
 
   async buildWeekMeals(selections, planDayKey) {

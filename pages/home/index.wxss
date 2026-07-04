@@ -19,14 +19,14 @@
 .notif-banner-icon { font-size:36rpx; flex-shrink:0; line-height:1; margin-top:2rpx; }
 .notif-banner-body { flex:1; }
 .notif-banner-title { font-size:30rpx; font-weight:900; color:#ffffff; display:block; }
-.notif-banner-message { font-size:26rpx; color:#d8c9ca; display:block; margin-top:8rpx; line-height:1.5; }
-.notif-banner-close { font-size:28rpx; color:#d8c9ca; flex-shrink:0; padding:0 4rpx; }
+.notif-banner-message { font-size:26rpx; color:#beb6b6; display:block; margin-top:8rpx; line-height:1.5; }
+.notif-banner-close { font-size:28rpx; color:#beb6b6; flex-shrink:0; padding:0 4rpx; }
 
 /* ── GREETING ── */
 .greeting-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:24rpx; overflow:hidden; }
 .greeting-name { font-size:52rpx; font-weight:900; font-style:italic; color:#f3f3f4; display:block; }
 .greeting-sub { font-size:22rpx; color:#beb6b6; display:block; margin-top:6rpx; letter-spacing:2rpx; }
-.plan-color { color:#A78BFA; font-weight:700; }
+.plan-color { color:#e8342a; font-weight:700; }
 
 .status-badge { background:#052e16; border:1rpx solid #166534; border-radius:100rpx; padding:10rpx 16rpx; display:flex; align-items:center; gap:6rpx; flex-shrink:0; }
 .status-badge-upcoming { background:#2a1a05; border-color:#92660a; }
@@ -52,9 +52,10 @@
 .meals-card-view-text { font-size:26rpx; color:#e8342a; font-weight:700; }
 .meals-card-view-arrow { font-size:32rpx; color:#e8342a; font-weight:300; }
 
-.week-row { display:flex; align-items:flex-start; gap:16rpx; padding:22rpx 24rpx; border-bottom:1rpx solid #1a1a22; }
+.week-row { display:flex; align-items:flex-start; gap:16rpx; padding:22rpx 24rpx; border-bottom:1rpx solid #6d6d72; }
 .week-row-last { border-bottom:none; }
 .week-day { font-size:24rpx; font-weight:700; color:#beb6b6; width:72rpx; flex-shrink:0; letter-spacing:1rpx; padding-top:4rpx; }
+.week-row-today { background:rgba(232,52,42,0.08); border-radius:16rpx; }
 .week-day-today { color:#e8342a; }
 .week-meal-photo { display:none; }
 .week-meal-names { flex:1; display:flex; flex-direction:column; gap:4rpx; }
@@ -62,10 +63,10 @@
 .week-meal-name { font-size:28rpx; color:#f3f3f4; font-weight:600; line-height:1.4; display:block; }
 .week-sauce-row { display:flex; align-items:center; gap:8rpx; margin-top:2rpx; }
 .week-sauce-label { color:#beb6b6; font-weight:700; font-size:22rpx; letter-spacing:0.5rpx; }
-.week-sauce-name { color:#e8342a; font-weight:600; font-size:25rpx; }
+.week-sauce-name { color:#d8ab18; font-weight:600; font-size:25rpx; }
 .week-snack-row { display:flex; align-items:center; gap:8rpx; margin-top:2rpx; }
 .week-snack-label { color:#beb6b6; font-weight:700; font-size:22rpx; letter-spacing:0.5rpx; }
-.week-snack-name { color:#e8342a; font-weight:600; font-size:25rpx; }
+.week-snack-name { color:#559112; font-weight:600; font-size:25rpx; }
 .week-time { font-size:28rpx; color:#beb6b6; font-weight:700; flex-shrink:0; margin-left:12rpx; padding-top:4rpx; }
 .week-time-today { color:#e8342a; }
 
