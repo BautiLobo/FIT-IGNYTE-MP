@@ -44,15 +44,6 @@
         </view>
       </view>
 
-      <view class="delivery-banner" wx:if="{{!isUpcoming && todayDelivery}}">
-        <view class="delivery-banner-icon-wrap">
-          <text class="delivery-banner-icon">›</text>
-        </view>
-        <view class="delivery-banner-body">
-          <text class="delivery-banner-title">{{lbl_on_the_way}}</text>
-          <text class="delivery-banner-sub">{{todayDelivery.day}} delivery · ETA {{todayDelivery.time}}</text>
-        </view>
-      </view>
 
       <view class="meals-card">
         <view class="meals-card-header">
