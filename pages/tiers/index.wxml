@@ -22,8 +22,7 @@
       <view wx:for="{{tiers}}" wx:key="name" class="tier-wrap">
         <view class="tier-card" bindtap="selectTier" data-tier="{{item.name}}" data-tier-zh="{{item.displayName}}" style="border-left-color:{{item.color}};">
           <view class="tier-left">
-            <text class="tier-tag" style="color:{{item.color}};">{{item.tag}}</text>
-            <text class="tier-name">{{item.displayName}}</text>
+            <text class="tier-name" style="color:{{item.color}};">{{item.displayName}}</text>
             <text class="tier-sub">{{item.planCount}} {{lbl_plans_available}}</text>
           </view>
           <text class="tier-arrow" style="color:{{item.color}};">›</text>

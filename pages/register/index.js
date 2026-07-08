@@ -174,22 +174,33 @@ Page({
         return;
       }
 
-      // Evitar colisión: si el teléfono ya pertenece a un cliente existente,
-      // no crear una orden nueva — eso pisaría los datos de ese cliente al aprobar.
-      const existingClient = await app.getClient({ phone: form.phone.trim() });
-      if (existingClient && existingClient.length > 0) {
-        wx.showModal({
-          title: 'Phone already registered',
-          content: 'This phone number already belongs to an existing client. Please use a different number, or contact us if you need to renew/update an existing account.',
-          showCancel: false,
-        });
-        this.setData({ submitting: false });
-        return;
-      }
-
-      // Resolver el openid ahora — el código de wx.login expira en minutos y la
-      // aprobación del admin puede tardar horas, así que no sirve guardarlo crudo.
+      // Resolver el openid antes de crear la orden — el código de wx.login
+      // expira en minutos y la aprobación del admin puede tardar horas.
       const openid = await app.resolveOpenid();
+
+      // Verificar si ya existe un cliente con este openid (mismo usuario de WeChat)
+      if (openid) {
+        const byOpenid = await app.getClient({ openid });
+        if (byOpenid && byOpenid.length > 0) {
+          const existing = byOpenid[0];
+          const status = app.getRealStatus(existing.start_date, existing.expiry_date);
+          wx.showModal({
+            title: t('register_account_exists_title'),
+            content: t('register_account_exists_body'),
+            showCancel: false,
+            success: () => {
+              wx.setStorageSync('clientId', existing.id);
+              if (status === 'Inactive') {
+                wx.reLaunch({ url: '/pages/renewal/index' });
+              } else {
+                wx.reLaunch({ url: '/pages/home/index' });
+              }
+            },
+          });
+          this.setData({ submitting: false });
+          return;
+        }
+      }
 
       const orderData = {
         name: form.name.trim(),

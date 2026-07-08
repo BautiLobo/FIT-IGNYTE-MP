@@ -179,13 +179,13 @@ App({
   // clientes normales (sin adminToken): la Edge Function usa la service_role
   // key del lado del servidor y solo devuelve la fila pedida, en vez de dejar
   // la tabla entera abierta a SELECT con la anon key.
-  getClient({ clientId, phone } = {}) {
+  getClient({ clientId, phone, openid } = {}) {
     return new Promise((resolve, reject) => {
       wx.request({
         url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/get-client',
         method: 'POST',
         header: { 'Content-Type': 'application/json' },
-        data: { clientId, phone },
+        data: { clientId, phone, openid },
         success: (res) => {
           if (res.statusCode >= 200 && res.statusCode < 300) {
             resolve(res.data);

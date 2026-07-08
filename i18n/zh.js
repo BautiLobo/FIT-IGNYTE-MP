@@ -98,6 +98,8 @@ module.exports = {
   register_error_district: '请输入您所在的区域',
   register_error_address: '请输入完整的配送地址',
   register_error_generic: '出现错误，请重试',
+  register_account_exists_title: '账号已存在',
+  register_account_exists_body: '检测到您的微信已关联一个账号，正在跳转…',
 
   // ── START-DATE ─────────────────────────────────────────────
   start_date_topbar: '选择开始日期',

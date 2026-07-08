@@ -98,6 +98,8 @@ module.exports = {
   register_error_district: 'Please enter your district',
   register_error_address: 'Please enter your full delivery address',
   register_error_generic: 'Something went wrong, please try again',
+  register_account_exists_title: 'Account already exists',
+  register_account_exists_body: 'We found an existing account linked to your WeChat. Taking you there now.',
 
   // ── START-DATE ─────────────────────────────────────────────
   start_date_topbar: 'When do you start?',
