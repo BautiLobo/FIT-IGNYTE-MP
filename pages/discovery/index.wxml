@@ -18,7 +18,6 @@
 
   <!-- Buttons -->
   <view class="btn-wrap">
-    <button class="btn-plans" bindtap="openBrochure">{{lbl_see_plans}}</button>
     <button class="btn-start" bindtap="goToTiers">{{lbl_get_started}}</button>
   </view>
 
