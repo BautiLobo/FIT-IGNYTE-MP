@@ -2,12 +2,6 @@
 const app = getApp();
 const t = require('../../i18n/index');
 
-const PLAN_COLORS = {
-  'Lean Fit':     ['#38BDF8', '#A78BFA', '#60A5FA'],
-  'Muscle Gain':  ['#FBBF24', '#FB923C'],
-  'Vegetarian':   ['#34D399'],
-};
-
 Page({
   data: {
     plans: [],
@@ -15,6 +9,7 @@ Page({
     fromRenewal: false,
     tier: null,
     tierZh: null,
+    tierColor: null,
     lbl_title: '',
     lbl_subtitle: '',
     lbl_most_popular: '',
@@ -35,7 +30,8 @@ Page({
     const fromRenewal = options.from === 'renewal';
     const tier = options.tier ? decodeURIComponent(options.tier) : null;
     const tierZh = options.tier_zh ? decodeURIComponent(options.tier_zh) : null;
-    this.setData({ fromRenewal, tier, tierZh });
+    const tierColor = options.tier_color ? decodeURIComponent(options.tier_color) : null;
+    this.setData({ fromRenewal, tier, tierZh, tierColor });
     await this.loadPlans(tier);
   },
 
@@ -46,22 +42,15 @@ Page({
         : 'status=eq.Active&order=price.asc';
       const data = await app.supabase('GET', 'plans', null, query);
 
-      const colorIndex = {};
-      const plans = (data || []).map((plan) => {
-        const cat = plan.tier || 'Lean Fit';
-        if (!colorIndex[cat]) colorIndex[cat] = 0;
-        const colors = PLAN_COLORS[cat] || ['#E8342A'];
-        const color = colors[colorIndex[cat] % colors.length];
-        colorIndex[cat]++;
-        return {
-          ...plan,
-          displayName: app.getMealName(plan),
-          displayTier: app.getMealName({ name: plan.tier, name_zh: this.data.tierZh || '' }),
-          lbl_kcal: plan.kcal ? t('plans_kcal', plan.kcal) : '',
-          color,
-          is_popular: plan.name === 'Small x 2',
-        };
-      });
+      const tierColor = this.data.tierColor || '#E8342A';
+      const plans = (data || []).map((plan) => ({
+        ...plan,
+        displayName: app.getMealName(plan),
+        displayTier: app.getMealName({ name: plan.tier, name_zh: this.data.tierZh || '' }),
+        lbl_kcal: plan.kcal ? t('plans_kcal', plan.kcal) : '',
+        color: tierColor,
+        is_popular: plan.name === 'Small x 2',
+      }));
 
       this.setData({ plans, loading: false });
     } catch (err) {

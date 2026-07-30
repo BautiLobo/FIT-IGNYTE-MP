@@ -40,7 +40,19 @@ Page({
     if (!order) return;
 
     try {
-      await app.supabase('PATCH', 'new_orders', { notify_when_available: true }, `id=eq.${order.id}`);
+      await new Promise((resolve, reject) => {
+        wx.request({
+          url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/set-notify',
+          method: 'POST',
+          header: { 'Content-Type': 'application/json' },
+          data: { orderId: order.id },
+          success: (res) => {
+            if (res.statusCode >= 200 && res.statusCode < 300) resolve(res.data);
+            else reject(new Error(`set-notify error ${res.statusCode}`));
+          },
+          fail: reject,
+        });
+      });
       wx.showToast({ title: t('rejected_notified'), icon: 'none' });
     } catch (err) {
       console.error('Notify request error:', err);

@@ -52,22 +52,14 @@ Page({
     const firstDay = DAY_LABELS[first.day] || first.day || 'Monday';
     const firstTime = first.delivery_time || '09:45';
     const mealIds = first.meals_json || [];
-    const sauceIds = first.sauce_ids || [];
 
-    // Cargar nombres de meals
     let firstMeals = '';
     if (mealIds.length > 0) {
-      const allIds = [...mealIds, ...sauceIds.filter(Boolean)];
-      const mealsData = await app.supabase('GET', 'meal_library', null, `id=in.(${allIds.join(',')})`);
+      const mealsData = await app.supabase('GET', 'meal_library', null, `id=in.(${mealIds.join(',')})`);
       if (mealsData && mealsData.length > 0) {
         const mealMap = {};
         mealsData.forEach(m => { mealMap[m.id] = m; });
-        firstMeals = mealIds.map((id, i) => {
-          const sauceId = sauceIds[i];
-          const sauceName = sauceId && mealMap[sauceId] ? app.getMealName(mealMap[sauceId]) : null;
-          const name = mealMap[id] ? app.getMealName(mealMap[id]) : '';
-          return sauceName ? `${name} (${sauceName})` : name;
-        }).filter(Boolean).join(' + ');
+        firstMeals = mealIds.map(id => mealMap[id] ? app.getMealName(mealMap[id]) : '').filter(Boolean).join(' + ');
       }
     }
 

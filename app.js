@@ -208,13 +208,13 @@ App({
   // UPDATE con anon key matchea 0 filas (PostgREST devuelve 200 con []),
   // dejando `paid`/`status` sin actualizar pero sin lanzar ningún error.
   // Esta función usa la service_role key del lado del servidor.
-  completePayment({ type, clientId, pendingOrderId, status, start_date, expiry_date, plan_id }) {
+  completePayment({ type, clientId, pendingOrderId, status, start_date, expiry_date, plan_id, cutlery }) {
     return new Promise((resolve, reject) => {
       wx.request({
         url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/complete-payment',
         method: 'POST',
         header: { 'Content-Type': 'application/json' },
-        data: { type, clientId, pendingOrderId, status, start_date, expiry_date, plan_id },
+        data: { type, clientId, pendingOrderId, status, start_date, expiry_date, plan_id, cutlery },
         success: (res) => {
           if (res.statusCode >= 200 && res.statusCode < 300 && res.data && res.data.ok) {
             resolve(res.data);
@@ -231,17 +231,17 @@ App({
     });
   },
 
-  // ── MENU ROTATION (rotación de 4 semanas) ───────────────────────
-  // Trae el ancla de fecha y el orden de rotación desde `settings`.
-  // Se pide una vez por carga de pantalla (no cachear de más, el staff
-  // puede reordenar `menu_rotation_order` en cualquier momento).
+  // ── MENU ROTATION (rotación de 2 meses) ─────────────────────────
+  // Cada menú dura 1 mes calendario. El cambio ocurre el primer lunes
+  // de cada mes. `menu_rotation_anchor` es cualquier fecha dentro del
+  // mes que inicia el ciclo. `menu_rotation_order` tiene 2 elementos.
   async getMenuRotation() {
     const data = await this.supabase('GET', 'settings', null, `key=in.(menu_rotation_anchor,menu_rotation_order)`);
     const map = {};
     (data || []).forEach(row => { map[row.key] = row.value; });
 
     const anchor = map.menu_rotation_anchor || null;
-    let order = [1, 2, 3, 4];
+    let order = [1, 2];
     if (map.menu_rotation_order) {
       try {
         order = typeof map.menu_rotation_order === 'string'
@@ -264,10 +264,29 @@ App({
   // cliente activo editando la semana en curso desde home, donde no hay
   // una decisión de start_date futura involucrada).
   getWeekIndexForDay(dayKey, anchor, order, startDateStr) {
-    if (!anchor || !order || order.length !== 4) return 1;
+    if (!anchor || !order || order.length !== 2) return 1;
+
+    // Devuelve el primer lunes del mes dado (year, month 0-based)
+    const firstMondayOfMonth = (year, month) => {
+      const d = new Date(year, month, 1);
+      const dow = d.getDay();
+      const offset = dow === 0 ? 1 : dow === 1 ? 0 : 8 - dow;
+      return new Date(year, month, 1 + offset);
+    };
+
+    // Devuelve {year, month} del "mes de menú" al que pertenece una fecha.
+    // Si la fecha cae antes del primer lunes del mes, pertenece al mes anterior.
+    const menuMonthOf = (date) => {
+      const y = date.getFullYear();
+      const m = date.getMonth();
+      if (date < firstMondayOfMonth(y, m)) {
+        return m === 0 ? { year: y - 1, month: 11 } : { year: y, month: m - 1 };
+      }
+      return { year: y, month: m };
+    };
 
     const dayNumMap = { mon: 1, tue: 2, wed: 3, thu: 4, fri: 5 };
-    const targetDow = dayNumMap[dayKey];
+    const targetDow = dayNumMap[dayKey] || 1;
 
     const toMonday = (d) => {
       const dow = d.getDay();
@@ -280,27 +299,23 @@ App({
     refDate.setHours(0, 0, 0, 0);
     const refMonday = toMonday(refDate);
 
-    const msPerWeek = 7 * 24 * 60 * 60 * 1000;
-    // Normalizar el anchor al lunes de su semana para que los slots siempre
-    // empiecen en lunes, sin importar qué día se guardó como ancla.
-    const anchorMonday = toMonday(new Date(anchor + 'T00:00:00'));
-
     let weekMonday;
     if (startDateStr) {
-      // Nuevo cliente: si el día de esta semana ya pasó respecto al start, usar la próxima semana
       const dayDate = new Date(refMonday);
       dayDate.setDate(refMonday.getDate() + (targetDow - 1));
       weekMonday = dayDate < refDate
-        ? new Date(refMonday.getTime() + msPerWeek)
+        ? new Date(refMonday.getTime() + 7 * 24 * 60 * 60 * 1000)
         : refMonday;
     } else {
-      // Cliente activo: todos los días usan el lunes de la semana actual
       weekMonday = refMonday;
     }
 
-    // Math.round absorbe cualquier diferencia de hora (ambos deben ser lunes exactos)
-    const weeksSinceAnchor = Math.round((weekMonday - anchorMonday) / msPerWeek);
-    const slot = ((weeksSinceAnchor % 4) + 4) % 4;
+    const anchorDate = new Date(anchor + 'T00:00:00');
+    const anchorMenu = menuMonthOf(anchorDate);
+    const targetMenu = menuMonthOf(weekMonday);
+
+    const monthsSinceAnchor = (targetMenu.year - anchorMenu.year) * 12 + (targetMenu.month - anchorMenu.month);
+    const slot = ((monthsSinceAnchor % 2) + 2) % 2;
 
     return order[slot];
   },

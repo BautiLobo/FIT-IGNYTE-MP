@@ -26,10 +26,8 @@ Page({
     lbl_upcoming: '',
     lbl_plan_starts_soon: '',
     lbl_first_delivery: '',
-    lbl_on_the_way: '',
     lbl_this_weeks_meals: '',
     lbl_edit: '',
-    lbl_snack: '',
     lbl_contact: '',
   },
 
@@ -38,11 +36,8 @@ Page({
       lbl_active: t('home_active'),
       lbl_upcoming: t('home_upcoming'),
       lbl_plan_starts_soon: t('home_plan_starts_soon'),
-      lbl_on_the_way: t('home_on_the_way'),
       lbl_this_weeks_meals: t('home_this_weeks_meals'),
       lbl_edit: t('home_edit'),
-      lbl_snack: t('home_snack'),
-      lbl_sauce: t('sauce'),
       lbl_contact: t('home_contact'),
     });
     await this.loadClientData();
@@ -122,7 +117,10 @@ Page({
 
       let startDateFormatted = '';
       if (isUpcoming && client.start_date) {
-        const d = new Date(client.start_date);
+        const d = new Date(client.start_date + 'T00:00:00');
+        const dow = d.getDay();
+        if (dow === 6) d.setDate(d.getDate() + 2);
+        if (dow === 0) d.setDate(d.getDate() + 1);
         startDateFormatted = d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
       }
 
@@ -197,8 +195,6 @@ Page({
     const allIds = [];
     selections.forEach(s => {
       if (s.meals_json) s.meals_json.forEach(id => { if (id && !allIds.includes(id)) allIds.push(id); });
-      if (s.snack_id && !allIds.includes(s.snack_id)) allIds.push(s.snack_id);
-      if (s.sauce_ids) s.sauce_ids.forEach(id => { if (id && !allIds.includes(id)) allIds.push(id); });
     });
 
     let mealMap = {};
@@ -211,18 +207,14 @@ Page({
       const dayLabel = dayLabelMap[d.key];
       const row = selections.find(s => s.day === dayLabel && s.slot === 1);
       const mealIds = row ? (row.meals_json || []) : [];
-      const sauceIds = row ? (row.sauce_ids || []) : [];
-      const mealNames = mealIds.map((id, i) => {
+      const mealNames = mealIds.map(id => {
         if (!mealMap[id]) return null;
-        const sauceId = sauceIds[i];
-        const sauceName = sauceId && mealMap[sauceId] ? app.getMealName(mealMap[sauceId]) : null;
-        return { name: app.getMealName(mealMap[id]), sauceName };
+        return { name: app.getMealName(mealMap[id]) };
       }).filter(Boolean);
       const photo = mealIds.length > 0 && mealMap[mealIds[0]] ? mealMap[mealIds[0]].photo_url || '' : '';
       const time = row ? row.delivery_time : '';
       const isToday = d.key === planDayKey;
-      const snack = row && row.snack_id && mealMap[row.snack_id] ? app.getMealName(mealMap[row.snack_id]) : null;
-      return { day: d.full, dayShort: d.short, mealNames, time, snack, isToday, photo };
+      return { day: d.full, dayShort: d.short, mealNames, time, isToday, photo };
     });
   },
 

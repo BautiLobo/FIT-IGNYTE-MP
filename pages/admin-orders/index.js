@@ -131,16 +131,13 @@ Page({
             const sel = meals[key];
             if (!sel || !sel.meal_ids || sel.meal_ids.length === 0) continue;
 
-            const sauces = sel.sauces || {};
             const mealRow = {
               client_id: clientId,
               day: label,
               slot: 1,
               meals_json: sel.meal_ids,
               delivery_time: sel.time || '',
-              snack_id: sel.snack_id || null,
               note: sel.notes || '',
-              sauce_ids: sel.meal_ids.map(id => sauces[id] || null),
             };
 
             // Ya existe una selección para este día/slot (ej. re-aprobación) — actualizar en vez de insertar.

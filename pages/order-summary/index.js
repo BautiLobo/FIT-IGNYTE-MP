@@ -155,16 +155,10 @@ Page({
       (rows || []).forEach(row => {
         const key = dayKeyMap[row.day];
         if (!key) return;
-        const mealIds = row.meals_json || [];
-        const sauceIds = row.sauce_ids || [];
-        const sauces = {};
-        mealIds.forEach((id, i) => { if (sauceIds[i]) sauces[id] = sauceIds[i]; });
         selections[key] = {
-          meal_ids: mealIds,
-          snack_id: row.snack_id || null,
+          meal_ids: row.meals_json || [],
           time: row.delivery_time || '',
           notes: row.note || '',
-          sauces,
         };
       });
     } catch (err) {
@@ -181,10 +175,6 @@ Page({
       if (sel && sel.meal_ids) {
         sel.meal_ids.forEach(id => { if (id && !allIds.includes(id)) allIds.push(id); });
       }
-      if (sel && sel.snack_id && !allIds.includes(sel.snack_id)) allIds.push(sel.snack_id);
-      if (sel && sel.sauces) {
-        Object.values(sel.sauces).forEach(id => { if (id && !allIds.includes(id)) allIds.push(id); });
-      }
     });
 
     let mealMap = {};
@@ -197,7 +187,6 @@ Page({
       .filter(day => selections[day] && selections[day].meal_ids && selections[day].meal_ids.length > 0)
       .map(day => {
         const sel = selections[day];
-        const sauces = sel.sauces || {};
         return {
           day,
           dayLabel: DAY_LABELS[day],
@@ -205,9 +194,7 @@ Page({
           meals: (sel.meal_ids || []).map((id, i) => ({
             slot: i,
             name: mealMap[id] ? app.getMealName(mealMap[id]) : id,
-            sauceName: sauces[id] && mealMap[sauces[id]] ? app.getMealName(mealMap[sauces[id]]) : null,
           })),
-          snack: sel.snack_id ? (mealMap[sel.snack_id] ? app.getMealName(mealMap[sel.snack_id]) : 'Snack of the day') : null,
         };
       });
   },

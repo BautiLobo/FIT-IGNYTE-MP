@@ -27,22 +27,13 @@ Page({
     currentDayLabel: 'Monday',
     menuMeals: [],
     selectedMealIds: [],
-    snackOfDay: null,
-    snackAdded: false,
-    snackId: null,
     selectedTime: '09:45',
     currentNotes: '',
     allSelections: {},
     isLastDay: false,
     lastSelectedPhoto: '',
     lastSelectedName: '',
-    saucesById: {},
-    currentSauces: {},
-    sauceModal: { visible: false, mealId: null, options: [] },
     lbl_title: '',
-    lbl_select_sauce: '',
-    lbl_add_snack: '',
-    lbl_snack_added: '',
     lbl_delivery_time: '',
     lbl_tap_to_change: '',
     lbl_notes: '',
@@ -56,9 +47,6 @@ Page({
   async onLoad(options) {
     this.setData({
       lbl_title: t('edit_meals_title'),
-      lbl_select_sauce: t('meal_select_select_sauce'),
-      lbl_add_snack: t('meal_select_add_snack'),
-      lbl_snack_added: t('meal_select_snack_added'),
       lbl_delivery_time: t('meal_select_delivery_time'),
       lbl_tap_to_change: t('meal_select_tap_to_change'),
       lbl_notes: t('meal_select_notes'),
@@ -102,16 +90,10 @@ Page({
       (selectionsData || []).forEach(row => {
         const key = DAY_KEY_MAP[row.day];
         if (!key) return;
-        const mealIds = row.meals_json || [];
-        const sauceIds = row.sauce_ids || [];
-        const sauces = {};
-        mealIds.forEach((id, i) => { if (sauceIds[i]) sauces[id] = sauceIds[i]; });
         allSelections[key] = {
-          meal_ids: mealIds,
-          snack_id: row.snack_id || null,
+          meal_ids: row.meals_json || [],
           time: row.delivery_time || '09:45',
           notes: row.note || '',
-          sauces,
         };
       });
 
@@ -119,15 +101,6 @@ Page({
         ...d,
         done: !!(allSelections[d.key] && allSelections[d.key].meal_ids.length >= plan.meals),
       }));
-
-      try {
-        const saucesData = await app.supabase('GET', 'meal_library', null, 'item_type=eq.sauce');
-        const saucesById = {};
-        (saucesData || []).forEach(s => { saucesById[s.id] = s; });
-        this.setData({ saucesById });
-      } catch (err) {
-        console.error('Load sauces error:', err);
-      }
 
       this.setData({ clientId, plan, allSelections, days });
 
@@ -163,23 +136,11 @@ Page({
         meals = await app.supabase('GET', 'meal_library', null, `id=in.(${ids.join(',')})`);
       }
 
-      let snackOfDay = null, snackId = null;
-      if (menu && menu.snack_id) {
-        const snackData = await app.supabase('GET', 'meal_library', null, `id=eq.${menu.snack_id}`);
-        if (snackData && snackData.length > 0) {
-          snackOfDay = snackData[0].name;
-          snackId = menu.snack_id;
-        }
-      }
-
       // Restore existing selections
       const existing = allSelections[dayKey];
       const existingMealIds = existing ? existing.meal_ids : [];
       const existingTime = existing ? existing.time : '09:45';
       const existingNotes = existing ? existing.notes : '';
-      const existingSnack = existing ? !!existing.snack_id : false;
-      const existingSauces = (existing && existing.sauces) || {};
-
       let lastSelectedPhoto = '';
       let lastSelectedName = '';
       if (existingMealIds.length > 0 && meals.length > 0) {
@@ -191,25 +152,11 @@ Page({
         }
       }
 
-      const { saucesById } = this.data;
-      const updatedMeals = (meals || []).map(m => {
-        const sauceIds = m.available_sauce_ids || [];
-        const sauceOptions = sauceIds.map(id => {
-          const s = saucesById[id];
-          return { id, name: s ? app.getMealName(s) : id };
-        });
-        const candidateSauceId = existingSauces[m.id];
-        const selectedSauceId = (candidateSauceId && sauceIds.includes(candidateSauceId)) ? candidateSauceId : null;
-        const selectedSauceName = selectedSauceId && saucesById[selectedSauceId] ? app.getMealName(saucesById[selectedSauceId]) : '';
-        return {
-          ...m,
-          displayName: app.getMealName(m),
-          qty: existingMealIds.filter(id => id === m.id).length,
-          sauceOptions,
-          selectedSauceId,
-          selectedSauceName,
-        };
-      });
+      const updatedMeals = (meals || []).map(m => ({
+        ...m,
+        displayName: app.getMealName(m),
+        qty: existingMealIds.filter(id => id === m.id).length,
+      }));
 
       const dayIndex = DAYS.findIndex(d => d.key === dayKey);
       const isLastDay = dayIndex === DAYS.length - 1;
@@ -219,10 +166,7 @@ Page({
         currentDay: dayKey,
         currentDayLabel: dayLabel,
         menuMeals: updatedMeals,
-        snackOfDay, snackId,
-        snackAdded: existingSnack,
         selectedMealIds: existingMealIds,
-        currentSauces: existingSauces,
         selectedTime: existingTime,
         currentNotes: existingNotes,
         isLastDay,
@@ -238,7 +182,7 @@ Page({
 
   incrementMeal(e) {
     const meal = e.currentTarget.dataset.meal;
-    const { selectedMealIds, plan, menuMeals, currentSauces } = this.data;
+    const { selectedMealIds, plan, menuMeals } = this.data;
     const maxMeals = plan.meals;
 
     if (selectedMealIds.length >= maxMeals) {
@@ -262,7 +206,7 @@ Page({
 
   decrementMeal(e) {
     const meal = e.currentTarget.dataset.meal;
-    const { selectedMealIds, menuMeals, currentSauces } = this.data;
+    const { selectedMealIds, menuMeals } = this.data;
     const idx = selectedMealIds.indexOf(meal.id);
     if (idx < 0) return;
 
@@ -273,50 +217,19 @@ Page({
       qty: m.id === meal.id ? Math.max((m.qty || 0) - 1, 0) : m.qty,
     }));
 
-    const newSauces = { ...currentSauces };
-    if (!newIds.includes(meal.id)) delete newSauces[meal.id];
-
     this.setData({
       selectedMealIds: newIds,
       menuMeals: updatedMeals,
-      currentSauces: newSauces,
       lastSelectedPhoto: meal.photo_url || '',
       lastSelectedName: meal.name,
     }, () => this.persistCurrentDay());
   },
 
-  openSaucePicker(e) {
-    const mealId = e.currentTarget.dataset.mealId;
-    const meal = this.data.menuMeals.find(m => m.id === mealId);
-    if (!meal || !meal.sauceOptions || meal.sauceOptions.length === 0) return;
-    this.setData({ sauceModal: { visible: true, mealId, options: meal.sauceOptions } });
-  },
-
-  closeSauceModal() {
-    this.setData({ sauceModal: { visible: false, mealId: null, options: [] } });
-  },
-
-  pickSauce(e) {
-    const { mealId, options } = this.data.sauceModal;
-    const idx = e.currentTarget.dataset.idx;
-    const sauce = options[idx];
-    if (!sauce) return;
-    const currentSauces = { ...this.data.currentSauces, [mealId]: sauce.id };
-    const menuMeals = this.data.menuMeals.map(m =>
-      m.id === mealId ? { ...m, selectedSauceId: sauce.id, selectedSauceName: sauce.name } : m
-    );
-    this.setData({ currentSauces, menuMeals, sauceModal: { visible: false, mealId: null, options: [] } }, () => this.persistCurrentDay());
-  },
-
   onTimeChange(e) { this.setData({ selectedTime: e.detail.value }, () => this.persistCurrentDay()); },
   onNotesInput(e) { this.setData({ currentNotes: e.detail.value }, () => this.persistCurrentDay()); },
-  toggleSnack() { this.setData({ snackAdded: !this.data.snackAdded }, () => this.persistCurrentDay()); },
 
-  // Guarda en memoria (allSelections) lo del día actual antes de cambiar de
-  // día, sin pegarle a Supabase — así no se pierde nada al cambiar de día
-  // sin tocar un botón explícito de "Save" (mismo patrón que meal-select).
   persistCurrentDay() {
-    const { selectedMealIds, selectedTime, currentNotes, snackAdded, snackId, currentDay, allSelections, plan, days, currentSauces } = this.data;
+    const { selectedMealIds, selectedTime, currentNotes, currentDay, allSelections, plan, days } = this.data;
 
     const updatedSelections = { ...allSelections };
     if (selectedMealIds.length === 0) {
@@ -324,10 +237,8 @@ Page({
     } else {
       updatedSelections[currentDay] = {
         meal_ids: selectedMealIds,
-        snack_id: snackAdded ? snackId : null,
         time: selectedTime,
         notes: currentNotes,
-        sauces: currentSauces,
       };
     }
 
@@ -386,16 +297,13 @@ Page({
       if (!sel || !sel.meal_ids || sel.meal_ids.length === 0) continue;
       // PATCH si existe, POST si no
       const existing = await app.supabase('GET', 'meal_selections', null, `client_id=eq.${clientId}&day=eq.${label}&slot=eq.1`);
-      const sauces = sel.sauces || {};
       const payload = {
         client_id: clientId,
         day: label,
         slot: 1,
         meals_json: sel.meal_ids,
         delivery_time: sel.time,
-        snack_id: sel.snack_id || null,
         note: sel.notes || '',
-        sauce_ids: sel.meal_ids.map(id => sauces[id] || null),
       };
       if (existing && existing.length > 0) {
         await app.supabase('PATCH', 'meal_selections', payload, `client_id=eq.${clientId}&day=eq.${label}&slot=eq.1`);

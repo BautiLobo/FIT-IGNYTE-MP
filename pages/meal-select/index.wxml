@@ -62,9 +62,6 @@
               <text class="meal-name {{item.qty > 0 ? 'meal-name-active' : ''}}">{{item.displayName}}</text>
               <view class="meal-desc-row">
                 <text class="meal-desc">{{item.kcal}} {{lbl_kcal}}</text>
-                <view wx:if="{{item.qty > 0 && item.sauceOptions.length > 0}}" class="sauce-btn" bindtap="openSaucePicker" data-meal-id="{{item.id}}">
-                  <text class="sauce-btn-text">{{item.selectedSauceName ? item.selectedSauceName : lbl_select_sauce}}</text>
-                </view>
               </view>
             </view>
             <view class="meal-stepper">
@@ -80,18 +77,8 @@
         </view>
       </view>
 
-      <!-- Snack + Time + Notes + Confirm — show when all meals selected -->
-      <block wx:if="{{selectedMealIds.length >= selectedPlan.meals}}">
-
-        <!-- Snack -->
-        <view wx:if="{{snackOfDay}}" class="snack-wrap">
-          <view class="snack-inner {{snackAdded ? 'snack-inner-added' : ''}}" bindtap="toggleSnack">
-            <text class="snack-name">{{snackOfDay}}</text>
-            <view class="snack-badge {{snackAdded ? 'snack-badge-added' : ''}}">
-              <text>{{snackAdded ? lbl_snack_added : lbl_add_snack}}</text>
-            </view>
-          </view>
-        </view>
+      <!-- Time + Notes + Confirm — show when all meals selected -->
+      <block wx:if="{{dayConfirmed}}">
 
         <!-- Time picker -->
         <view class="time-picker">
@@ -110,6 +97,29 @@
           <textarea class="notes-input" placeholder="{{lbl_notes_placeholder}}" value="{{currentNotes}}" bindinput="onNotesInput" auto-height />
         </view>
 
+        <!-- Cutlery question — only on Friday -->
+        <block wx:if="{{isLastDay}}">
+          <view class="cutlery-wrap">
+            <text class="cutlery-title">{{lbl_cutlery_title}}</text>
+            <view class="cutlery-options">
+              <view
+                class="cutlery-option {{needsCutlery ? 'cutlery-option-active' : ''}}"
+                bindtap="setCutlery"
+                data-value="{{true}}"
+              >
+                <text class="cutlery-option-text">{{lbl_cutlery_yes}}</text>
+              </view>
+              <view
+                class="cutlery-option {{!needsCutlery ? 'cutlery-option-active' : ''}}"
+                bindtap="setCutlery"
+                data-value="{{false}}"
+              >
+                <text class="cutlery-option-text">{{lbl_cutlery_no}}</text>
+              </view>
+            </view>
+          </view>
+        </block>
+
         <!-- Save & Next combined -->
         <button class="btn-save-next" bindtap="saveAndNext">
           {{isLastDay ? lbl_continue : lbl_save_next}}
@@ -123,22 +133,5 @@
 
   </scroll-view>
 
-  <!-- Sauce Modal -->
-  <view wx:if="{{sauceModal.visible}}" class="sauce-modal-mask" bindtap="closeSauceModal">
-    <view class="sauce-modal-sheet" catchtap="">
-      <view
-        wx:for="{{sauceModal.options}}"
-        wx:key="id"
-        class="sauce-modal-item"
-        bindtap="pickSauce"
-        data-idx="{{index}}"
-      >
-        <text class="sauce-modal-item-text">{{item.name}}</text>
-      </view>
-      <view class="sauce-modal-cancel" bindtap="closeSauceModal">
-        <text class="sauce-modal-cancel-text">{{lbl_cancel}}</text>
-      </view>
-    </view>
-  </view>
 
 </view>

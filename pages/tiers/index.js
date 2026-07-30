@@ -69,11 +69,11 @@ Page({
   },
 
   selectTier(e) {
-    const { tier, tierZh } = e.currentTarget.dataset;
+    const { tier, tierZh, tierColor } = e.currentTarget.dataset;
     const fromRenewal = this.data.fromRenewal;
     if (fromRenewal) wx.setStorageSync('flowContext', 'renewal');
     const renewalParam = fromRenewal ? '&from=renewal' : '';
-    wx.navigateTo({ url: '/pages/plans/index?tier=' + encodeURIComponent(tier) + '&tier_zh=' + encodeURIComponent(tierZh || '') + renewalParam });
+    wx.navigateTo({ url: '/pages/plans/index?tier=' + encodeURIComponent(tier) + '&tier_zh=' + encodeURIComponent(tierZh || '') + '&tier_color=' + encodeURIComponent(tierColor || '') + renewalParam });
   },
 
   openBrochure() {

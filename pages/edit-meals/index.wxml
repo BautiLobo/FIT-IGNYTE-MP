@@ -62,9 +62,6 @@
               <text class="meal-name {{item.qty > 0 ? 'meal-name-active' : ''}}">{{item.displayName}}</text>
               <view class="meal-desc-row">
                 <text class="meal-desc">{{item.kcal}} {{lbl_kcal}}</text>
-                <view wx:if="{{item.qty > 0 && item.sauceOptions.length > 0}}" class="sauce-btn" bindtap="openSaucePicker" data-meal-id="{{item.id}}">
-                  <text class="sauce-btn-text">{{item.selectedSauceName ? item.selectedSauceName : lbl_select_sauce}}</text>
-                </view>
               </view>
             </view>
             <view class="meal-stepper">
@@ -80,17 +77,8 @@
         </view>
       </view>
 
-      <!-- Snack + Time + Notes — show when meals selected -->
+      <!-- Time + Notes — show when meals selected -->
       <block wx:if="{{selectedMealIds.length >= plan.meals}}">
-
-        <view wx:if="{{snackOfDay}}" class="snack-wrap">
-          <view class="snack-inner {{snackAdded ? 'snack-inner-added' : ''}}" bindtap="toggleSnack">
-            <text class="snack-name">{{snackOfDay}}</text>
-            <view class="snack-badge {{snackAdded ? 'snack-badge-added' : ''}}">
-              <text>{{snackAdded ? lbl_snack_added : lbl_add_snack}}</text>
-            </view>
-          </view>
-        </view>
 
         <view class="time-picker">
           <text class="time-picker-label">{{lbl_delivery_time}}</text>
@@ -117,22 +105,5 @@
 
   </scroll-view>
 
-  <!-- Sauce Modal -->
-  <view wx:if="{{sauceModal.visible}}" class="sauce-modal-mask" bindtap="closeSauceModal">
-    <view class="sauce-modal-sheet" catchtap="">
-      <view
-        wx:for="{{sauceModal.options}}"
-        wx:key="id"
-        class="sauce-modal-item"
-        bindtap="pickSauce"
-        data-idx="{{index}}"
-      >
-        <text class="sauce-modal-item-text">{{item.name}}</text>
-      </view>
-      <view class="sauce-modal-cancel" bindtap="closeSauceModal">
-        <text class="sauce-modal-cancel-text">{{lbl_cancel}}</text>
-      </view>
-    </view>
-  </view>
 
 </view>

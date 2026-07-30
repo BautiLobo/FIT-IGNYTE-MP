@@ -24,7 +24,6 @@ Page({
   },
 
   async checkSession() {
-    console.log('[discovery] checking session...');
     try {
       const isAdmin = await app.adminCheckPromise;
       if (isAdmin) { wx.reLaunch({ url: '/pages/admin-home/index' }); return; }
@@ -97,7 +96,6 @@ Page({
     }
 
     // No session — show discovery screen
-    console.log('[discovery] no session — showing discovery');
     this.setData({ checking: false });
   },
 
