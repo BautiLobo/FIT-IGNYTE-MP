@@ -1,9 +1,18 @@
 module.exports = {
   // ── DISCOVERY ──────────────────────────────────────────────
-  discovery_tagline1: 'Fitness meals,',
-  discovery_tagline2: 'ready every morning',
-  discovery_sub_tagline: 'WEEKLY PLANS · MON-FRI',
-  discovery_see_plans: '☰  See our plans',
+  discovery_header: '01 DISCOVERY · INICIO',
+  discovery_headline: 'FINALLY EAT HEALTHY IN SHANGHAI',
+  discovery_headline_red: 'WITHOUT MEAL PREP',
+  discovery_tagline1: 'LOSE FAT · BUILD MUSCLE',
+  discovery_tagline2: 'SAVE YOUR TIME',
+  discovery_feature1: 'Mon-Fri',
+  discovery_feature2: 'No shopping',
+  discovery_feature3: 'No cooking',
+  discovery_trusted: 'Trusted by 100+ athletes in Shanghai',
+  discovery_promo_off: '25% OFF',
+  discovery_promo_trial: 'FIRST WEEK TRIAL',
+  discovery_promo_note: 'New customers only',
+  discovery_pricing: 'From ¥41/meal · Cancel anytime',
   discovery_get_started: 'Get started  →',
 
   // ── HOME ───────────────────────────────────────────────────
@@ -49,6 +58,9 @@ module.exports = {
   meal_select_plan_label: '%s — %s meal(s)/day',
   meal_select_change_plan: 'Change plan',
   meal_select_kcal: 'kcal',
+  meal_select_protein: 'P',
+  meal_select_carbs: 'C',
+  meal_select_fat: 'F',
   meal_select_select_sauce: 'Select sauce',
   meal_select_add_snack: '+ Add snack',
   meal_select_snack_added: 'Added',

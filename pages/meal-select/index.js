@@ -52,6 +52,9 @@ Page({
     lbl_cutlery_title: '',
     lbl_cutlery_yes: '',
     lbl_cutlery_no: '',
+    lbl_protein: '',
+    lbl_carbs: '',
+    lbl_fat: '',
   },
 
   async onLoad(options) {
@@ -68,6 +71,9 @@ Page({
       lbl_meals_day: t('plans_meals_per_day'),
       lbl_cutlery_title: t('meal_select_cutlery_title'),
       lbl_cutlery_yes: t('meal_select_cutlery_yes'),
+      lbl_protein: t('meal_select_protein'),
+      lbl_carbs: t('meal_select_carbs'),
+      lbl_fat: t('meal_select_fat'),
       lbl_cutlery_no: t('meal_select_cutlery_no'),
       lbl_cancel: t('payment_simulate_cancel'),
     });

@@ -42,6 +42,9 @@ Page({
     lbl_save_next: '',
     lbl_kcal: '',
     lbl_cancel: '',
+    lbl_protein: '',
+    lbl_carbs: '',
+    lbl_fat: '',
   },
 
   async onLoad(options) {
@@ -56,6 +59,9 @@ Page({
       lbl_kcal: t('meal_select_kcal'),
       lbl_meals_day: t('plans_meals_per_day'),
       lbl_cancel: t('payment_simulate_cancel'),
+      lbl_protein: t('meal_select_protein'),
+      lbl_carbs: t('meal_select_carbs'),
+      lbl_fat: t('meal_select_fat'),
     });
     const clientId = wx.getStorageSync('clientId');
     if (!clientId) { wx.navigateBack(); return; }
@@ -161,6 +167,9 @@ Page({
       const dayIndex = DAYS.findIndex(d => d.key === dayKey);
       const isLastDay = dayIndex === DAYS.length - 1;
 
+      const maxMeals = Math.max((this.data.plan && this.data.plan.meals) || 1, 1);
+      const dayConfirmed = existingMealIds.length >= maxMeals;
+
       this.setData({
         loading: false,
         currentDay: dayKey,
@@ -172,6 +181,7 @@ Page({
         isLastDay,
         lastSelectedPhoto,
         lastSelectedName,
+        dayConfirmed,
       });
 
     } catch (err) {
@@ -183,7 +193,7 @@ Page({
   incrementMeal(e) {
     const meal = e.currentTarget.dataset.meal;
     const { selectedMealIds, plan, menuMeals } = this.data;
-    const maxMeals = plan.meals;
+    const maxMeals = Math.max((plan && plan.meals) || 1, 1);
 
     if (selectedMealIds.length >= maxMeals) {
       wx.showToast({ title: t('meal_select_max_meals', maxMeals), icon: 'none' });
@@ -242,7 +252,8 @@ Page({
       };
     }
 
-    const dayDone = selectedMealIds.length >= plan.meals;
+    const maxMeals = Math.max((plan && plan.meals) || 1, 1);
+    const dayDone = selectedMealIds.length >= maxMeals;
     const updatedDays = days.map(d => d.key === currentDay ? { ...d, done: dayDone } : d);
 
     this.setData({ allSelections: updatedSelections, days: updatedDays });
@@ -257,9 +268,10 @@ Page({
 
   saveAndNext() {
     const { selectedMealIds, plan } = this.data;
+    const maxMeals = Math.max((plan && plan.meals) || 1, 1);
 
-    if (selectedMealIds.length < plan.meals) {
-      wx.showToast({ title: t('meal_select_select_first', plan.meals), icon: 'none' }); return;
+    if (selectedMealIds.length < maxMeals) {
+      wx.showToast({ title: t('meal_select_select_first', maxMeals), icon: 'none' }); return;
     }
 
     this.persistCurrentDay();

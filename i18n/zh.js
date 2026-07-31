@@ -1,9 +1,18 @@
 module.exports = {
   // ── DISCOVERY ──────────────────────────────────────────────
-  discovery_tagline1: '健身美食，',
-  discovery_tagline2: '每天早晨送达',
-  discovery_sub_tagline: '每周套餐 · 周一至周五',
-  discovery_see_plans: '☰  查看套餐',
+  discovery_header: '01 DISCOVERY · 开始',
+  discovery_headline: '在上海终于可以健康饮食',
+  discovery_headline_red: '无需备餐',
+  discovery_tagline1: '减脂 · 增肌',
+  discovery_tagline2: '省时省力',
+  discovery_feature1: '周一至周五',
+  discovery_feature2: '无需购物',
+  discovery_feature3: '无需烹饪',
+  discovery_trusted: '超100位运动员的选择',
+  discovery_promo_off: '7折优惠',
+  discovery_promo_trial: '首周特价',
+  discovery_promo_note: '仅限新客户',
+  discovery_pricing: '¥41/餐起 · 随时取消',
   discovery_get_started: '立即开始  →',
 
   // ── HOME ───────────────────────────────────────────────────
@@ -49,6 +58,9 @@ module.exports = {
   meal_select_plan_label: '%s — 每天 %s 餐',
   meal_select_change_plan: '更换套餐',
   meal_select_kcal: '千卡',
+  meal_select_protein: 'P',
+  meal_select_carbs: 'C',
+  meal_select_fat: 'F',
   meal_select_select_sauce: '选择酱料',
   meal_select_add_snack: '+ 添加零食',
   meal_select_snack_added: '已添加',

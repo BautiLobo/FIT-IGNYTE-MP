@@ -61,7 +61,7 @@
             <view class="meal-info">
               <text class="meal-name {{item.qty > 0 ? 'meal-name-active' : ''}}">{{item.displayName}}</text>
               <view class="meal-desc-row">
-                <text class="meal-desc">{{item.kcal}} {{lbl_kcal}}</text>
+                <text class="meal-desc">{{item.kcal}} {{lbl_kcal}} · P {{item.protein}}g · C {{item.carbs}}g · F {{item.fat}}g</text>
               </view>
             </view>
             <view class="meal-stepper">

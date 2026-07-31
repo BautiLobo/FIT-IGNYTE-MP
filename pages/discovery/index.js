@@ -5,19 +5,37 @@ const t = require('../../i18n/index');
 Page({
   data: {
     checking: true,
+    lbl_header: '',
+    lbl_headline: '',
+    lbl_headline_red: '',
     lbl_tagline1: '',
     lbl_tagline2: '',
-    lbl_sub_tagline: '',
-    lbl_see_plans: '',
+    lbl_feature1: '',
+    lbl_feature2: '',
+    lbl_feature3: '',
+    lbl_trusted: '',
+    lbl_promo_off: '',
+    lbl_promo_trial: '',
+    lbl_promo_note: '',
+    lbl_pricing: '',
     lbl_get_started: '',
   },
 
   async onLoad() {
     this.setData({
+      lbl_header: t('discovery_header'),
+      lbl_headline: t('discovery_headline'),
+      lbl_headline_red: t('discovery_headline_red'),
       lbl_tagline1: t('discovery_tagline1'),
       lbl_tagline2: t('discovery_tagline2'),
-      lbl_sub_tagline: t('discovery_sub_tagline'),
-      lbl_see_plans: t('discovery_see_plans'),
+      lbl_feature1: t('discovery_feature1'),
+      lbl_feature2: t('discovery_feature2'),
+      lbl_feature3: t('discovery_feature3'),
+      lbl_trusted: t('discovery_trusted'),
+      lbl_promo_off: t('discovery_promo_off'),
+      lbl_promo_trial: t('discovery_promo_trial'),
+      lbl_promo_note: t('discovery_promo_note'),
+      lbl_pricing: t('discovery_pricing'),
       lbl_get_started: t('discovery_get_started'),
     });
     await this.checkSession();

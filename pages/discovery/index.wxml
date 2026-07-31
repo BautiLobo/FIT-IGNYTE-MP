@@ -1,24 +1,72 @@
 <view class="container" wx:if="{{!checking}}">
 
-  <!-- Logo + tagline -->
-  <view class="top-section">
-    <view class="logo-glow"></view>
+  <!-- Header -->
+  <view class="header">
+    <text class="header-text">{{lbl_header}}</text>
+  </view>
+
+  <!-- Logo centered -->
+  <view class="logo-section">
     <image class="logo" src="/images/logo.png" mode="aspectFit" />
-    <view class="tagline-wrap">
-      <text class="tagline">{{lbl_tagline1}}</text>
-      <text class="tagline">{{lbl_tagline2}}</text>
+  </view>
+
+  <!-- Hero image with overlay and text -->
+  <view class="hero-section">
+    <!-- Food image background -->
+    <image class="hero-bg" src="/images/hero-meal.png" mode="aspectFill" />
+
+    <!-- Dark gradient overlay -->
+    <view class="hero-overlay"></view>
+
+    <!-- Content over image -->
+    <view class="hero-content">
+      <!-- Headline -->
+      <view class="headline-section">
+        <text class="headline">{{lbl_headline}}</text>
+        <text class="headline-red">{{lbl_headline_red}}</text>
+      </view>
+
+      <!-- Taglines -->
+      <view class="tagline-section">
+        <text class="tagline">{{lbl_tagline1}}</text>
+        <text class="tagline">{{lbl_tagline2}}</text>
+      </view>
     </view>
-    <text class="sub-tagline">{{lbl_sub_tagline}}</text>
   </view>
 
-  <!-- Promo banner -->
-  <view class="discount-wrap">
-    <image class="discount-banner-img" src="/images/promo-banner.png" mode="aspectFill" />
+  <!-- Features tags -->
+  <view class="features">
+    <view class="feature-tag">
+      <text class="feature-icon">📅</text>
+      <text class="feature-label">{{lbl_feature1}}</text>
+    </view>
+    <view class="feature-tag">
+      <text class="feature-icon">🛒</text>
+      <text class="feature-label">{{lbl_feature2}}</text>
+    </view>
+    <view class="feature-tag">
+      <text class="feature-icon">🍳</text>
+      <text class="feature-label">{{lbl_feature3}}</text>
+    </view>
   </view>
 
-  <!-- Buttons -->
-  <view class="btn-wrap">
-    <button class="btn-start" bindtap="goToTiers">{{lbl_get_started}}</button>
+  <!-- Trusted message -->
+  <text class="trusted-text">{{lbl_trusted}}</text>
+
+  <!-- Promo badge -->
+  <view class="promo-badge">
+    <text class="promo-off">{{lbl_promo_off}}</text>
+    <view class="promo-divider"></view>
+    <view class="promo-right">
+      <text class="promo-trial">{{lbl_promo_trial}}</text>
+      <text class="promo-note">{{lbl_promo_note}}</text>
+    </view>
   </view>
+
+  <!-- CTA button -->
+  <button class="btn-start" bindtap="goToTiers">{{lbl_get_started}}</button>
+
+  <!-- Pricing footer -->
+  <text class="pricing-text">{{lbl_pricing}}</text>
 
 </view>
