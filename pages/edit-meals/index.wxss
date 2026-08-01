@@ -163,7 +163,7 @@
 .photo-preview-wrap {
   border-radius:20rpx;
   overflow:hidden;
-  height:280rpx;
+  height:380rpx;
   margin-bottom:16rpx;
   position:relative;
 }

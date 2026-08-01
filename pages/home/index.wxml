@@ -5,7 +5,7 @@
     <view class="profile-btn" bindtap="goToProfile">
       <text class="profile-icon">P</text>
     </view>
-    <image class="topbar-logo" src="/images/logo.png" mode="aspectFit" />
+    <image style="position: relative; left: 0rpx; top: 11rpx; width: 225rpx; height: 82rpx; display: block; box-sizing: border-box" class="topbar-logo" src="/images/logo.png" mode="aspectFit" />
     <view style="width:60rpx;"></view>
   </view>
 

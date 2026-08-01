@@ -17,6 +17,7 @@
       <view class="list-header">
         <text class="list-title">{{lbl_heading}}</text>
         <text class="list-sub">{{lbl_subtitle}}</text>
+        <view class="header-divider"></view>
       </view>
 
       <view wx:for="{{tiers}}" wx:key="name" class="tier-wrap">

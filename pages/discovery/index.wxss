@@ -206,7 +206,7 @@
 
 /* ── TRUST COPY: prueba social, "100+" resaltado en blanco ── */
 .trust-copy {
-  font-size: 18rpx;
+  font-size: 25rpx;
   font-weight: 600;
   color: var(--t2);
   margin-bottom: 18rpx;

@@ -41,7 +41,7 @@
     </view>
 
     <!-- Trust micro-copy -->
-    <text class="trust-copy" style="width: 302rpx; height: 33rpx; display: block; box-sizing: border-box; position: relative; left: 0rpx; top: 6rpx">{{lbl_trusted_pre}}<text class="trust-bold">{{lbl_trusted_bold}}</text>{{lbl_trusted_post}}</text>
+    <text class="trust-copy" style="width: 459rpx; height: 33rpx; display: block; box-sizing: border-box; position: relative; left: -2rpx; top: 7rpx">{{lbl_trusted_pre}}<text class="trust-bold">{{lbl_trusted_bold}}</text>{{lbl_trusted_post}}</text>
 
     <!-- Promo badge -->
     <view class="promo-badge" style="position: relative; left: 0rpx; top: -12rpx">

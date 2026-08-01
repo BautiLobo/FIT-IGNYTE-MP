@@ -15,7 +15,9 @@
     <block wx:else>
 
       <view class="list-header">
+        <text class="list-title" wx:if="{{tier}}" style="color:{{tierColor || '#f3f3f4'}};">{{tierZh || tier}}</text>
         <text class="list-sub">{{lbl_subtitle}}</text>
+        <view class="header-divider" style="background:{{tierColor || '#e8342a'}};"></view>
       </view>
 
       <view wx:for="{{plans}}" wx:key="id" class="plan-wrap">
