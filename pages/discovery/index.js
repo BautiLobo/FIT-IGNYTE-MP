@@ -1,5 +1,6 @@
 // pages/discovery/index.js
 const app = getApp();
+const t = require('../../i18n/index');
 
 Page({
   data: {
@@ -7,6 +8,27 @@ Page({
   },
 
   async onLoad() {
+    // Textos bilingües (EN/ZH) desde el diccionario i18n
+    this.setData({
+      lbl_headline1: t('discovery_headline1'),
+      lbl_headline2: t('discovery_headline2'),
+      lbl_headline_red: t('discovery_headline_red'),
+      lbl_tagline1: t('discovery_tagline1'),
+      lbl_tagline2: t('discovery_tagline2'),
+      lbl_feature1: t('discovery_feature1'),
+      lbl_feature2: t('discovery_feature2'),
+      lbl_feature3: t('discovery_feature3'),
+      lbl_trusted_pre: t('discovery_trusted_pre'),
+      lbl_trusted_bold: t('discovery_trusted_bold'),
+      lbl_trusted_post: t('discovery_trusted_post'),
+      lbl_promo_off: t('discovery_promo_off'),
+      lbl_promo_trial: t('discovery_promo_trial'),
+      lbl_promo_note: t('discovery_promo_note'),
+      lbl_pricing_pre: t('discovery_pricing_pre'),
+      lbl_pricing_bold: t('discovery_pricing_bold'),
+      lbl_pricing_post: t('discovery_pricing_post'),
+      lbl_get_started: t('discovery_get_started'),
+    });
     await this.checkSession();
   },
 

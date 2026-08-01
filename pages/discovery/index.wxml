@@ -1,7 +1,7 @@
 <view class="container" wx:if="{{!checking}}">
 
   <!-- Hero Image Background (full bleed) -->
-  <image class="hero-bg" src="/images/hero-meal.png" mode="aspectFill" />
+  <image class="hero-bg" src="/images/hero-meal.jpeg" mode="aspectFill" />
 
   <!-- Main content body (flex: 1, anchored to bottom) -->
   <view class="body" style="position: relative; left: 0rpx; top: -31rpx">
@@ -13,43 +13,43 @@
 
     <!-- Headline: 3 lines, last in red -->
     <view class="headline-block">
-      <text class="headline" style="position: relative; left: 0rpx; top: 143rpx">FINALLY EAT<text class="break"></text>HEALTHY IN SHANGHAI<text class="break"></text>WITHOUT MEAL PREP</text>
+      <text class="headline" style="position: relative; left: 0rpx; top: 143rpx">{{lbl_headline1}}<text class="break"></text>{{lbl_headline2}}<text class="break"></text><text class="headline-red">{{lbl_headline_red}}</text></text>
     </view>
 
     <!-- Rule separator -->
-    <view class="rule" style="width: 83rpx; height: -2rpx; display: block; box-sizing: border-box; position: relative; left: -2rpx; top: 125rpx"></view>
+    <view class="rule" style="width: 83rpx; display: block; box-sizing: border-box; position: relative; left: -2rpx; top: 125rpx"></view>
 
     <!-- Tagline: 2 lines split at · -->
     <view class="tagline-block">
-      <text class="tagline" style="position: relative; left: 0rpx; top: 141rpx; width: 389rpx; height: 112rpx; display: block; box-sizing: border-box">LOSE FAT · BUILD MUSCLE<text class="break"></text>SAVE YOUR TIME</text>
+      <text class="tagline" style="position: relative; left: 0rpx; top: 141rpx; width: 389rpx; height: 112rpx; display: block; box-sizing: border-box">{{lbl_tagline1}}<text class="break"></text>{{lbl_tagline2}}</text>
     </view>
 
     <!-- Feature chips: 3 in one row -->
     <view class="chips-row" style="position: relative; left: -2rpx; top: 41rpx">
-        <view class="chip" style="position: relative; left: -22rpx; top: 100rpx; width: 210rpx; display: flex; box-sizing: border-box">
+      <view class="chip" style="position: relative; left: -22rpx; top: 100rpx; width: 210rpx; display: flex; box-sizing: border-box">
         <image style="position: relative; left: 6rpx; top: 0rpx; width: 43rpx; height: 27rpx; display: block; box-sizing: border-box" class="chip-icon" src="/images/icon-delivery.png" mode="aspectFit" />
-        <text class="chip-text" style="position: relative; left: 0rpx; top: 0rpx">Mon–Fri</text>
+        <text class="chip-text" style="position: relative; left: 0rpx; top: 0rpx">{{lbl_feature1}}</text>
       </view>
       <view class="chip" style="position: relative; left: 3rpx; top: 100rpx; width: 210rpx; display: flex; box-sizing: border-box">
         <image class="chip-icon" src="/images/icon-cart.png" mode="aspectFit" />
-        <text class="chip-text">No shopping</text>
+        <text class="chip-text">{{lbl_feature2}}</text>
       </view>
       <view class="chip" style="position: relative; left: 25rpx; top: 100rpx">
         <image class="chip-icon" src="/images/icon-utensils.png" mode="aspectFit" />
-        <text class="chip-text">No cooking</text>
+        <text class="chip-text">{{lbl_feature3}}</text>
       </view>
     </view>
 
     <!-- Trust micro-copy -->
-    <text class="trust-copy" style="width: 302rpx; height: 33rpx; display: block; box-sizing: border-box; position: relative; left: 0rpx; top: 6rpx">Trusted by <text class="trust-bold">100+</text> customers in Shanghai</text>
+    <text class="trust-copy" style="width: 302rpx; height: 33rpx; display: block; box-sizing: border-box; position: relative; left: 0rpx; top: 6rpx">{{lbl_trusted_pre}}<text class="trust-bold">{{lbl_trusted_bold}}</text>{{lbl_trusted_post}}</text>
 
     <!-- Promo badge -->
     <view class="promo-badge" style="position: relative; left: 0rpx; top: -12rpx">
-      <text class="badge-off">25% OFF</text>
+      <text class="badge-off">{{lbl_promo_off}}</text>
       <view class="badge-divider"></view>
       <view class="badge-right">
-        <text class="badge-trial">FIRST WEEK TRIAL</text>
-        <text class="badge-note">New customers only</text>
+        <text class="badge-trial">{{lbl_promo_trial}}</text>
+        <text class="badge-note">{{lbl_promo_note}}</text>
       </view>
     </view>
 
@@ -57,8 +57,8 @@
 
   <!-- CTA Section (fixed at bottom) -->
   <view class="cta-section" style="position: relative; left: 0rpx; top: -31rpx">
-    <button class="btn-cta" bindtap="goToTiers" style="position: relative; left: 0rpx; top: -27rpx">Get started →</button>
-    <text class="cta-footer">From <text class="pricing-bold">¥41/meal</text> · Cancel anytime</text>
+    <button class="btn-cta" bindtap="goToTiers" style="position: relative; left: 0rpx; top: -27rpx">{{lbl_get_started}}</button>
+    <text class="cta-footer">{{lbl_pricing_pre}}<text class="pricing-bold">{{lbl_pricing_bold}}</text>{{lbl_pricing_post}}</text>
   </view>
 
 </view>

@@ -125,6 +125,11 @@
   height: 0;
 }
 
+/* Última línea del headline en rojo */
+.headline-red {
+  color: var(--r);
+}
+
 /* ── RULE: regla roja separadora headline/tagline ── */
 .rule {
   width: 42rpx;
