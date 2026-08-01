@@ -1,72 +1,64 @@
 <view class="container" wx:if="{{!checking}}">
 
-  <!-- Header -->
-  <view class="header">
-    <text class="header-text">{{lbl_header}}</text>
-  </view>
+  <!-- Hero Image Background (full bleed) -->
+  <image class="hero-bg" src="/images/hero-meal.png" mode="aspectFill" />
 
-  <!-- Logo centered -->
-  <view class="logo-section">
-    <image class="logo" src="/images/logo.png" mode="aspectFit" />
-  </view>
+  <!-- Main content body (flex: 1, anchored to bottom) -->
+  <view class="body" style="position: relative; left: 0rpx; top: -31rpx">
 
-  <!-- Hero image with overlay and text -->
-  <view class="hero-section">
-    <!-- Food image background -->
-    <image class="hero-bg" src="/images/hero-meal.png" mode="aspectFill" />
+    <!-- Logo floating in hero zone -->
+    <view class="logo-float">
+      <image style="width: 339rpx; height: 249rpx; display: inline-block; box-sizing: border-box" class="logo" src="/images/logo.png" mode="aspectFit" />
+    </view>
 
-    <!-- Dark gradient overlay -->
-    <view class="hero-overlay"></view>
+    <!-- Headline: 3 lines, last in red -->
+    <view class="headline-block">
+      <text class="headline" style="position: relative; left: 0rpx; top: 143rpx">FINALLY EAT<text class="break"></text>HEALTHY IN SHANGHAI<text class="break"></text>WITHOUT MEAL PREP</text>
+    </view>
 
-    <!-- Content over image -->
-    <view class="hero-content">
-      <!-- Headline -->
-      <view class="headline-section">
-        <text class="headline">{{lbl_headline}}</text>
-        <text class="headline-red">{{lbl_headline_red}}</text>
+    <!-- Rule separator -->
+    <view class="rule" style="width: 83rpx; height: -2rpx; display: block; box-sizing: border-box; position: relative; left: -2rpx; top: 125rpx"></view>
+
+    <!-- Tagline: 2 lines split at · -->
+    <view class="tagline-block">
+      <text class="tagline" style="position: relative; left: 0rpx; top: 141rpx; width: 389rpx; height: 112rpx; display: block; box-sizing: border-box">LOSE FAT · BUILD MUSCLE<text class="break"></text>SAVE YOUR TIME</text>
+    </view>
+
+    <!-- Feature chips: 3 in one row -->
+    <view class="chips-row" style="position: relative; left: -2rpx; top: 41rpx">
+        <view class="chip" style="position: relative; left: -22rpx; top: 100rpx; width: 210rpx; display: flex; box-sizing: border-box">
+        <image style="position: relative; left: 6rpx; top: 0rpx; width: 43rpx; height: 27rpx; display: block; box-sizing: border-box" class="chip-icon" src="/images/icon-delivery.png" mode="aspectFit" />
+        <text class="chip-text" style="position: relative; left: 0rpx; top: 0rpx">Mon–Fri</text>
       </view>
-
-      <!-- Taglines -->
-      <view class="tagline-section">
-        <text class="tagline">{{lbl_tagline1}}</text>
-        <text class="tagline">{{lbl_tagline2}}</text>
+      <view class="chip" style="position: relative; left: 3rpx; top: 100rpx; width: 210rpx; display: flex; box-sizing: border-box">
+        <image class="chip-icon" src="/images/icon-cart.png" mode="aspectFit" />
+        <text class="chip-text">No shopping</text>
+      </view>
+      <view class="chip" style="position: relative; left: 25rpx; top: 100rpx">
+        <image class="chip-icon" src="/images/icon-utensils.png" mode="aspectFit" />
+        <text class="chip-text">No cooking</text>
       </view>
     </view>
+
+    <!-- Trust micro-copy -->
+    <text class="trust-copy" style="width: 302rpx; height: 33rpx; display: block; box-sizing: border-box; position: relative; left: 0rpx; top: 6rpx">Trusted by <text class="trust-bold">100+</text> customers in Shanghai</text>
+
+    <!-- Promo badge -->
+    <view class="promo-badge" style="position: relative; left: 0rpx; top: -12rpx">
+      <text class="badge-off">25% OFF</text>
+      <view class="badge-divider"></view>
+      <view class="badge-right">
+        <text class="badge-trial">FIRST WEEK TRIAL</text>
+        <text class="badge-note">New customers only</text>
+      </view>
+    </view>
+
   </view>
 
-  <!-- Features tags -->
-  <view class="features">
-    <view class="feature-tag">
-      <text class="feature-icon">📅</text>
-      <text class="feature-label">{{lbl_feature1}}</text>
-    </view>
-    <view class="feature-tag">
-      <text class="feature-icon">🛒</text>
-      <text class="feature-label">{{lbl_feature2}}</text>
-    </view>
-    <view class="feature-tag">
-      <text class="feature-icon">🍳</text>
-      <text class="feature-label">{{lbl_feature3}}</text>
-    </view>
+  <!-- CTA Section (fixed at bottom) -->
+  <view class="cta-section" style="position: relative; left: 0rpx; top: -31rpx">
+    <button class="btn-cta" bindtap="goToTiers" style="position: relative; left: 0rpx; top: -27rpx">Get started →</button>
+    <text class="cta-footer">From <text class="pricing-bold">¥41/meal</text> · Cancel anytime</text>
   </view>
-
-  <!-- Trusted message -->
-  <text class="trusted-text">{{lbl_trusted}}</text>
-
-  <!-- Promo badge -->
-  <view class="promo-badge">
-    <text class="promo-off">{{lbl_promo_off}}</text>
-    <view class="promo-divider"></view>
-    <view class="promo-right">
-      <text class="promo-trial">{{lbl_promo_trial}}</text>
-      <text class="promo-note">{{lbl_promo_note}}</text>
-    </view>
-  </view>
-
-  <!-- CTA button -->
-  <button class="btn-start" bindtap="goToTiers">{{lbl_get_started}}</button>
-
-  <!-- Pricing footer -->
-  <text class="pricing-text">{{lbl_pricing}}</text>
 
 </view>

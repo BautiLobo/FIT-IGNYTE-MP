@@ -1,253 +1,324 @@
-/* pages/discovery/index.wxss */
+/* ═══════════════════════════════════════════════════════════════
+   FIT IGNYTE — Discovery Landing
+   Estructura: hero-bg (foto fondo) → body (contenido) → cta-section
+   ═══════════════════════════════════════════════════════════════ */
 
+/* Paleta de colores del sistema */
+:root, page {
+  --r:    #e8342a;   /* rojo primario */
+  --bg:   #0b0b0c;   /* fondo negro */
+  --tx:   #f3f3f4;   /* texto blanco */
+  --t2:   #9f9fa8;   /* texto gris medio */
+  --t3:   #5d5d65;   /* texto gris oscuro */
+}
+
+/* Contenedor de página: columna full-height, sin scroll */
 .container {
-  min-height: 100vh;
-  background: #0b0b0c;
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background: var(--bg);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  box-sizing: border-box;
-  padding-bottom: 20rpx;
 }
 
-/* Header */
-.header {
-  width: 100%;
-  padding: 20rpx 28rpx 16rpx;
-  text-align: left;
-  box-sizing: border-box;
-  border-bottom: 1rpx solid #2a2a33;
-}
-
-.header-text {
-  font-size: 18rpx;
-  font-weight: 600;
-  color: #e8342a;
-  letter-spacing: 3rpx;
-  display: block;
-}
-
-/* Logo section */
-.logo-section {
-  padding: 24rpx 0 20rpx;
-  text-align: center;
-}
-
-.logo {
-  width: 220rpx;
-  height: 120rpx;
-}
-
-/* Hero section — large but not full screen */
-.hero-section {
-  position: relative;
-  width: calc(100% - 56rpx);
-  max-width: 480rpx;
-  height: 380rpx;
-  margin: 0 28rpx 32rpx;
-  overflow: hidden;
-  border-radius: 20rpx;
-}
-
+/* ── HERO: foto a sangre completa detrás del contenido ── */
 .hero-bg {
   position: absolute;
-  width: 100%;
-  height: 100%;
   top: 0;
   left: 0;
-}
-
-.hero-overlay {
-  position: absolute;
+  right: 0;
   width: 100%;
-  height: 100%;
-  background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 100%);
-  top: 0;
-  left: 0;
-}
-
-.hero-content {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 36rpx 28rpx;
-  box-sizing: border-box;
+  height: 840rpx;        /* la foto ocupa la mitad superior de la pantalla */
+  object-fit: cover;
   z-index: 1;
 }
 
-/* Headline section */
-.headline-section {
+/* Overlay de 5 stops: funde la foto a negro arriba y abajo,
+   deja el centro visible; suma dos glows rojos atmosféricos */
+.hero-bg::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    linear-gradient(to bottom,
+      rgba(11,11,12,.90) 0%,
+      rgba(11,11,12,.82) 30%,
+      rgba(11,11,12,.46) 48%,
+      rgba(11,11,12,.82) 76%,
+      #0b0b0c 100%),
+    radial-gradient(circle at 50% 26%, rgba(232,52,42,.20) 0%, transparent 48%),
+    radial-gradient(circle at 50% 92%, rgba(232,52,42,.08) 0%, transparent 40%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Textura de puntos sutiles sobre toda la zona del hero */
+.hero-bg::before {
+  content: '';
+  position: absolute;
+  top: 100px;
+  left: 0;
+  width: 100%;
+  height: 400%;
+  background-image: radial-gradient(rgba(255,255,255,.02) 1px, transparent 1px);
+  background-size: 22rpx 22rpx;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* ── BODY: todo el contenido; flex-end lo ancla al fondo ── */
+.body {
+  position: relative;
+  z-index: 10;
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4rpx;
-  margin-bottom: 16rpx;
+  justify-content: flex-end;   /* el contenido cae al fondo, no queda arriba */
   text-align: center;
+  padding: 84rpx 22rpx 4rpx;   /* 84rpx arriba reserva el safe area / cápsula */
+  overflow: hidden;
+}
+
+/* Logo: flota en la zona de la foto; margin-bottom:auto
+   empuja todo lo demás hacia abajo */
+.logo-float {
+  margin-bottom: auto;
+  padding-top: 54rpx;
+  height: auto;
+}
+
+.logo {
+  width: 302rpx;               /* logo grande centrado sobre la foto */
+  height: auto;
+  aspect-ratio: 1 / .79;
+  filter: drop-shadow(0 10rpx 26rpx rgba(232,52,42,.28));  /* glow rojo */
+}
+
+/* ── HEADLINE: 3 líneas exactas, la tercera en rojo (WXML) ── */
+.headline-block {
+  margin-bottom: 20rpx;
 }
 
 .headline {
-  font-size: 40rpx;
-  font-weight: 900;
+  font-size: 50rpx;
+  font-weight: 800;
   font-style: italic;
-  color: #f3f3f4;
-  line-height: 1.3;
+  color: var(--tx);
+  line-height: 1.2;
+  letter-spacing: -0.7rpx;
+  text-transform: uppercase;
+  text-shadow: 0 2rpx 18rpx rgba(0,0,0,.85);  /* legible sobre la foto */
   display: block;
+  white-space: nowrap;         /* nunca partir a mitad de frase */
 }
 
-.headline-red {
-  font-size: 40rpx;
-  font-weight: 900;
-  font-style: italic;
-  color: #e8342a;
-  line-height: 1.3;
+/* Los <text class="break"> fuerzan el salto de línea exacto */
+.headline .break {
   display: block;
+  height: 0;
 }
 
-/* Taglines */
-.tagline-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4rpx;
-  text-align: center;
+/* ── RULE: regla roja separadora headline/tagline ── */
+.rule {
+  width: 42rpx;
+  height: 3rpx;
+  background: var(--r);
+  border-radius: 3rpx;
+  margin: 12rpx auto;
+}
+
+/* ── TAGLINE: 2 líneas rojas, corta en el · ── */
+.tagline-block {
+  margin-bottom: 24rpx;
 }
 
 .tagline {
-  font-size: 24rpx;
-  font-weight: 700;
+  font-size: 34rpx;
+  font-weight: 800;
   font-style: italic;
-  color: #e8342a;
+  color: var(--r);
   line-height: 1.3;
+  letter-spacing: -0.4rpx;
+  text-transform: uppercase;
+  text-shadow: 0 2rpx 12rpx rgba(0,0,0,.6);
   display: block;
+  white-space: nowrap;
 }
 
-/* Features tags */
-.features {
+.tagline .break {
+  display: block;
+  height: 0;
+}
+
+/* ── CHIPS: 3 en una sola fila, nunca se envuelven ── */
+.chips-row {
   display: flex;
   flex-direction: row;
   justify-content: center;
-  gap: 12rpx;
-  margin-bottom: 28rpx;
-  padding: 0 28rpx;
-  box-sizing: border-box;
+  gap: 6rpx;                   /* separación entre chips */
+  margin-bottom: 220rpx;
+  padding: 0;
+  flex-wrap: nowrap;
 }
 
-.feature-tag {
+.chip {
+  flex: 0 0 auto;              /* tamaño fijo, no se estira ni comprime */
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 6rpx;
-  border: 1rpx solid #2a2a33;
-  border-radius: 20rpx;
-  padding: 8rpx 14rpx;
-  background: rgba(26,26,34,0.6);
+  gap: 6rpx;                   /* espacio icono-texto */
+  background: transparent;
+  border: 2rpx solid rgba(232,52,42,.40);   /* borde rojo translúcido */
+  border-radius: 24rpx;
+  padding: 36rpx 28rpx;
+  font-size: 20rpx;
+  font-weight: 700;
+  color: var(--t2);
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
-.feature-icon {
-  font-size: 18rpx;
+/* Íconos PNG rojos (delivery / cart / utensils) */
+.chip-icon {
+  width: 28rpx;
+  height: 28rpx;
+  flex-shrink: 0;
 }
 
-.feature-label {
+.chip-text {
+  font-size: 20rpx;
+  font-weight: 700;
+  color: var(--t2);
+  white-space: nowrap;
+}
+
+/* ── TRUST COPY: prueba social, "100+" resaltado en blanco ── */
+.trust-copy {
   font-size: 18rpx;
   font-weight: 600;
-  color: #9f9fa8;
+  color: var(--t2);
+  margin-bottom: 18rpx;
   display: block;
+  white-space: nowrap;
 }
 
-/* Trusted text */
-.trusted-text {
-  font-size: 18rpx;
-  font-weight: 600;
-  color: #5d5d65;
-  text-align: center;
-  margin-bottom: 28rpx;
-  display: block;
+.trust-bold {
+  color: var(--tx);
+  font-weight: 700;
 }
 
-/* Promo badge */
+/* ── PROMO BADGE: [25% OFF] │ [FIRST WEEK TRIAL / note] ── */
 .promo-badge {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 16rpx;
-  border: 2rpx solid #e8342a;
-  border-radius: 28rpx;
-  padding: 16rpx 22rpx;
-  background: rgba(232,52,42,0.08);
-  margin-bottom: 32rpx;
-  width: calc(100% - 56rpx);
-  max-width: 360rpx;
+  gap: 14rpx;
+  width: 100%;                 /* full-width dentro del padding del body */
+  background: linear-gradient(100deg, rgba(232,52,42,.16), rgba(232,52,42,.06));
+  border: 2rpx solid rgba(232,52,42,.40);
+  border-radius: 24rpx;        /* mismo radio que el botón de how-it-works */
+  padding: 36rpx 28rpx;
+  margin-bottom: 44rpx;
   box-sizing: border-box;
 }
 
-.promo-off {
-  font-size: 38rpx;
-  font-weight: 900;
+/* "25% OFF" grande en rojo, una línea */
+.badge-off {
+  font-size: 50rpx;
+  font-weight: 800;
   font-style: italic;
-  color: #e8342a;
-  display: block;
-  min-width: 70rpx;
+  color: var(--r);
+  letter-spacing: -0.8rpx;
+  text-transform: uppercase;
   line-height: 1;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.promo-divider {
-  width: 1rpx;
-  height: 48rpx;
-  background: #e8342a;
+/* Barra vertical separadora dentro del badge */
+.badge-divider {
+  width: 2rpx;
+  height: 40rpx;
+  background: rgba(232,52,42,.40);
+  flex-shrink: 0;
 }
 
-.promo-right {
+/* Bloque derecho del badge, alineado a la izquierda */
+.badge-right {
   display: flex;
   flex-direction: column;
-  gap: 3rpx;
+  gap: 4rpx;
   flex: 1;
+  text-align: left;
 }
 
-.promo-trial {
-  font-size: 22rpx;
-  font-weight: 900;
-  font-style: italic;
-  color: #fff;
+.badge-trial {
+  font-size: 36rpx;
+  font-weight: 800;
+  color: var(--tx);
+  text-transform: uppercase;
+  line-height: 1;
   display: block;
-  line-height: 1.1;
+  white-space: nowrap;         /* "FIRST WEEK TRIAL" en una sola línea */
 }
 
-.promo-note {
-  font-size: 16rpx;
+.badge-note {
+  font-size: 26rpx;
   font-weight: 600;
-  color: #7d7d85;
+  color: var(--t3);
   display: block;
+  white-space: nowrap;         /* "New customers only" en una sola línea */
 }
 
-/* Button */
-button { margin: 0 !important; padding: 0 !important; background: transparent; border: none; }
+/* ── CTA SECTION: botón + micro-copy, pegados al fondo ── */
+.cta-section {
+  position: relative;
+  z-index: 20;
+  padding: 19rpx 22rpx 22rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9rpx;                   /* espacio botón ↔ micro-copy */
+  flex-shrink: 0;              /* nunca se comprime */
+}
 
-.btn-start {
+/* Reset de estilos nativos de button en WeChat */
+button { margin: 0 !important; padding: 0 !important; }
+
+/* Botón rojo principal — idéntico a .btn-start de how-it-works */
+.btn-cta {
   background: #e8342a !important;
-  border-radius: 28rpx !important;
-  height: 88rpx;
-  line-height: 88rpx;
+  border-radius: 24rpx !important;
+  height: 96rpx;
+  line-height: 96rpx;
   color: #fff !important;
   font-size: 32rpx !important;
   font-weight: 800 !important;
   text-align: center;
-  width: calc(100% - 56rpx) !important;
-  max-width: 360rpx;
+  width: 100% !important;
   box-sizing: border-box;
   display: block;
-  letter-spacing: 0.5rpx;
-  margin-bottom: 28rpx;
+  box-shadow: 0 8rpx 30rpx rgba(232,52,42,0.35);
 }
 
-/* Pricing footer */
-.pricing-text {
-  font-size: 16rpx;
+/* Micro-copy bajo el botón, "¥41/meal" resaltado en blanco */
+.cta-footer {
+  font-size: 22rpx;
   font-weight: 600;
-  color: #5d5d65;
+  color: var(--t3);
   text-align: center;
   display: block;
+  white-space: nowrap;
+}
+
+.pricing-bold {
+  color: var(--tx);
+  font-weight: 700;
 }

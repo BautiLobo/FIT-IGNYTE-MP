@@ -27,7 +27,7 @@ Page({
     currentDayLabel: 'Monday',
     menuMeals: [],
     selectedMealIds: [],
-    selectedTime: '09:45',
+    selectedTime: '10:00',
     currentNotes: '',
     allSelections: {},
     isLastDay: false,
@@ -98,7 +98,7 @@ Page({
         if (!key) return;
         allSelections[key] = {
           meal_ids: row.meals_json || [],
-          time: row.delivery_time || '09:45',
+          time: row.delivery_time || '10:00',
           notes: row.note || '',
         };
       });
@@ -145,7 +145,7 @@ Page({
       // Restore existing selections
       const existing = allSelections[dayKey];
       const existingMealIds = existing ? existing.meal_ids : [];
-      const existingTime = existing ? existing.time : '09:45';
+      const existingTime = existing ? existing.time : '10:00';
       const existingNotes = existing ? existing.notes : '';
       let lastSelectedPhoto = '';
       let lastSelectedName = '';

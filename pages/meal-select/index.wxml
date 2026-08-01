@@ -83,7 +83,7 @@
         <!-- Time picker -->
         <view class="time-picker">
           <text class="time-picker-label">{{lbl_delivery_time}}</text>
-          <picker mode="time" value="{{selectedTime}}" start="07:00" end="20:00" bindchange="onTimeChange">
+          <picker mode="time" value="{{selectedTime}}" start="10:00" end="19:00" bindchange="onTimeChange">
             <view class="time-picker-display">
               <text class="time-picker-value">{{selectedTime}}</text>
               <text class="time-picker-tap">{{lbl_tap_to_change}}</text>

@@ -28,7 +28,7 @@ Page({
     selectedMealIds: [],   // array of meal IDs selected for this day (can repeat)
     // Snack
     // Time — one per day
-    selectedTime: '09:45',
+    selectedTime: '10:00',
     // Notes
     currentNotes: '',
     // All selections across days: { mon: { meal_ids, time, notes }, ... }
@@ -104,7 +104,7 @@ if (fromRenewal) wx.removeStorageSync('flowContext');
             if (!dayKey) return;
             allSelections[dayKey] = {
               meal_ids: row.meals_json || [],
-              time: row.delivery_time || '09:45',
+              time: row.delivery_time || '10:00',
               notes: row.note || '',
             };
           });
@@ -155,7 +155,7 @@ if (fromRenewal) wx.removeStorageSync('flowContext');
       // Restore existing selections for this day
       const existing = this.data.allSelections[dayKey];
       const existingMealIds = existing ? existing.meal_ids : [];
-      const existingTime = existing ? existing.time : '09:45';
+      const existingTime = existing ? existing.time : '10:00';
       const existingNotes = existing ? existing.notes : '';
       // Last selected meal photo/name for the preview
       let lastSelectedPhoto = '';

@@ -48,7 +48,8 @@ Page({
         displayName: app.getMealName(plan),
         displayTier: app.getMealName({ name: plan.tier, name_zh: this.data.tierZh || '' }),
         lbl_kcal: plan.kcal ? t('plans_kcal', plan.kcal) : '',
-        color: tierColor,
+        // Color propio de cada plan desde la DB; fallback al color del tier
+        color: plan.color || tierColor,
         is_popular: plan.name === 'Small x 2',
       }));
 
