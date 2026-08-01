@@ -8,6 +8,7 @@ module.exports = {
   discovery_feature1: '周一至周五',
   discovery_feature2: '无需购物',
   discovery_feature3: '无需烹饪',
+  discovery_fresh: '每周新鲜餐食计划',
   discovery_trusted_pre: '深受上海',
   discovery_trusted_bold: '100+',
   discovery_trusted_post: '客户信赖',

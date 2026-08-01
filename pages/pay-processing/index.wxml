@@ -1,8 +1,6 @@
 <view class="container">
 
-  <view class="topbar">
-    <view class="brand"><text class="brand-red">FIT</text> IGNYTE</view>
-  </view>
+  
 
   <view class="content">
 

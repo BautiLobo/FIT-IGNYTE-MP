@@ -287,10 +287,15 @@ Page({
         await this.saveMealSelections(clientId, allSelections);
         wx.hideLoading();
         wx.showToast({ title: t('edit_meals_updated'), icon: 'success' });
-        const dest = this.data.fromRenewal
-          ? '/pages/order-summary/index?from=renewal'
-          : '/pages/home/index';
-        setTimeout(() => wx.reLaunch({ url: dest }), 1000);
+        // Renovación: navigateTo (igual que meal-select) para mantener el
+        // historial renewal → start-date → edit-meals → order-summary intacto,
+        // así el botón de volver funciona en cadena sin parches.
+        // Edición fuera de renovación (desde home): reLaunch, no hay historial que preservar.
+        if (this.data.fromRenewal) {
+          setTimeout(() => wx.navigateTo({ url: '/pages/order-summary/index?from=renewal' }), 1000);
+        } else {
+          setTimeout(() => wx.reLaunch({ url: '/pages/home/index' }), 1000);
+        }
       } catch (err) {
         wx.hideLoading();
         console.error('Save error:', err);
@@ -325,5 +330,7 @@ Page({
     }
   },
 
-  goBack() { wx.navigateBack(); },
+  goBack() {
+    wx.navigateBack();
+  },
 });

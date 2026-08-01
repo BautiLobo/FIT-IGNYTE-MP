@@ -204,9 +204,22 @@
   white-space: nowrap;
 }
 
+/* ── FRESH COPY: línea bajo los chips ── */
+.fresh-copy {
+  font-size: 36rpx;
+  font-weight: 800;
+  font-style: italic;
+  color: var(--tx);
+  text-transform: uppercase;
+  letter-spacing: 2rpx;
+  margin-bottom: 12rpx;
+  display: block;
+  white-space: nowrap;
+}
+
 /* ── TRUST COPY: prueba social, "100+" resaltado en blanco ── */
 .trust-copy {
-  font-size: 25rpx;
+  font-size: 22rpx;
   font-weight: 600;
   color: var(--t2);
   margin-bottom: 18rpx;

@@ -220,9 +220,14 @@ Page({
   },
 
   editMeals() {
-    // Precargamos las selecciones actuales para que meal-select no arranque vacío
+    // Precargamos las selecciones actuales para que la página destino no arranque vacía
     wx.setStorageSync('mealSelections', (this.data.order && this.data.order.meals) || {});
-    wx.navigateTo({ url: '/pages/meal-select/index?from=order-summary' });
+    // En renovación llegamos desde edit-meals, así que editar vuelve a edit-meals;
+    // en el flujo normal (alta nueva) viene de meal-select.
+    const url = this.data.fromRenewal
+      ? '/pages/edit-meals/index?from=renewal'
+      : '/pages/meal-select/index?from=order-summary';
+    wx.navigateTo({ url });
   },
 
   editAddress() {

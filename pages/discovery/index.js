@@ -18,6 +18,7 @@ Page({
       lbl_feature1: t('discovery_feature1'),
       lbl_feature2: t('discovery_feature2'),
       lbl_feature3: t('discovery_feature3'),
+      lbl_fresh: t('discovery_fresh'),
       lbl_trusted_pre: t('discovery_trusted_pre'),
       lbl_trusted_bold: t('discovery_trusted_bold'),
       lbl_trusted_post: t('discovery_trusted_post'),

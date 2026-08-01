@@ -38,8 +38,9 @@
       </view>
     </view>
 
-    <!-- Address -->
-    <view class="card address-card">
+    <!-- Address: no se muestra en renovación (la dirección ya está validada
+         del alta original; este flujo no la revalida ni la puede editar) -->
+    <view class="card address-card" wx:if="{{!fromRenewal}}">
       <view class="address-icon">📍</view>
       <view class="address-info">
         <text class="card-label">{{lbl_address}}</text>

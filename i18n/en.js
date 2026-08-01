@@ -8,6 +8,7 @@ module.exports = {
   discovery_feature1: 'Mon–Fri',
   discovery_feature2: 'No shopping',
   discovery_feature3: 'No cooking',
+  discovery_fresh: 'Fresh weekly meal plans',
   discovery_trusted_pre: 'Trusted by ',
   discovery_trusted_bold: '100+',
   discovery_trusted_post: ' customers in Shanghai',
