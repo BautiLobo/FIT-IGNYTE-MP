@@ -21,12 +21,28 @@
       </view>
 
       <view wx:for="{{tiers}}" wx:key="name" class="tier-wrap">
-        <view class="tier-card" bindtap="selectTier" data-tier="{{item.name}}" data-tier-zh="{{item.displayName}}" data-tier-color="{{item.color}}" style="border-left-color:{{item.color}};">
-          <view class="tier-left">
-            <text class="tier-name" style="color:{{item.color}};">{{item.displayName}}</text>
-            <text class="tier-sub">{{item.planCount}} {{lbl_plans_available}}</text>
+        <view class="tier-card" bindtap="selectTier" data-tier="{{item.name}}" data-tier-zh="{{item.displayName}}" data-tier-color="{{item.color}}" style="border-color:{{item.color}};">
+
+          <view class="tier-card-head">
+            <view class="tier-head-left">
+              <text class="tier-icon" style="color:{{item.color}};"></text>
+              <text class="tier-name" style="color:{{item.color}};">{{item.displayName}}</text>
+            </view>
+            <text class="tier-arrow" style="color:{{item.color}};">›</text>
           </view>
-          <text class="tier-arrow" style="color:{{item.color}};">›</text>
+
+          <text class="tier-best-for">{{lbl_best_for}}</text>
+
+          <view class="tier-bullets">
+            <view wx:for="{{item.bestFor}}" wx:for-item="point" wx:key="*this" class="tier-bullet-row">
+              <view class="tier-bullet-check" style="border-color:{{item.color}}; color:{{item.color}};">
+                <text>✓</text>
+              </view>
+              <text class="tier-bullet-text">{{point}}</text>
+            </view>
+          </view>
+
+          <text class="tier-sub">{{item.planCount}} {{lbl_plans_available}}</text>
         </view>
       </view>
 
@@ -37,7 +53,8 @@
       </view>
 
       <view class="bottom-bar">
-        <button class="btn-pdf" bindtap="openBrochure">{{lbl_brochure}}</button>
+        <button class="btn-contact" open-type="contact"><text>{{lbl_contact_us}}</text></button>
+        <button class="btn-pdf" bindtap="openBrochure" style="position: relative; left: 0rpx; top: 16rpx">{{lbl_brochure}}</button>
       </view>
 
     </block>

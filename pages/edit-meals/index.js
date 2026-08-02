@@ -190,6 +190,15 @@ Page({
     }
   },
 
+  previewMeal(e) {
+    // Tap en la fila: muestra la foto grande arriba, sin sumar cantidad.
+    const meal = e.currentTarget.dataset.meal;
+    this.setData({
+      lastSelectedPhoto: meal.photo_url || '',
+      lastSelectedName: meal.name,
+    });
+  },
+
   incrementMeal(e) {
     const meal = e.currentTarget.dataset.meal;
     const { selectedMealIds, plan, menuMeals } = this.data;

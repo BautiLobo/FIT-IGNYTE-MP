@@ -37,7 +37,7 @@
 
 
       <!-- Photo preview -->
-      <view wx:if="{{selectedMealIds.length > 0 && lastSelectedPhoto}}" class="photo-preview-wrap">
+      <view wx:if="{{lastSelectedPhoto}}" class="photo-preview-wrap">
         <image class="photo-preview-img" src="{{lastSelectedPhoto}}" mode="aspectFill" />
         <view class="photo-preview-overlay">
           <text class="photo-preview-name">{{lastSelectedName}}</text>
@@ -50,6 +50,8 @@
           wx:for="{{menuMeals}}"
           wx:key="id"
           class="meal-row {{item.qty > 0 ? 'meal-row-selected' : ''}}"
+          bindtap="previewMeal"
+          data-meal="{{item}}"
         >
           <view class="meal-row-top">
             <view class="meal-thumb-wrap">
@@ -65,11 +67,11 @@
               </view>
             </view>
             <view class="meal-stepper">
-              <view class="stepper-btn stepper-btn-minus {{item.qty === 0 ? 'stepper-btn-disabled' : ''}}" bindtap="decrementMeal" data-meal="{{item}}">
+              <view class="stepper-btn stepper-btn-minus {{item.qty === 0 ? 'stepper-btn-disabled' : ''}}" catchtap="decrementMeal" data-meal="{{item}}">
                 <text class="stepper-btn-text">−</text>
               </view>
               <text class="stepper-qty">{{item.qty}}</text>
-              <view class="stepper-btn stepper-btn-plus" bindtap="incrementMeal" data-meal="{{item}}">
+              <view class="stepper-btn stepper-btn-plus" catchtap="incrementMeal" data-meal="{{item}}">
                 <text class="stepper-btn-text">+</text>
               </view>
             </view>

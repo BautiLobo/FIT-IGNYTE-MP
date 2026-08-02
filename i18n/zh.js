@@ -46,12 +46,25 @@ module.exports = {
   tiers_plans_available: '个套餐可选',
   tiers_tap_hint: '点击目标查看套餐',
   tiers_brochure: '☰  查看完整菜单 PDF',
+  tiers_best_for: '适合：',
+  tiers_performance_1: '活跃生活方式',
+  tiers_performance_2: '增肌训练',
+  tiers_performance_3: '高强度训练',
+  tiers_balance_1: '体重管理',
+  tiers_balance_2: '每日健康饮食',
+  tiers_balance_3: '忙碌的职场人士',
 
   // ── PLANS ──────────────────────────────────────────────────
   plans_title: '选择您的套餐',
   plans_subtitle: '所有套餐均包含周一至周五配送',
   plans_most_popular: '最受欢迎',
   plans_meals_per_day: '餐 / 天',
+  plans_hook_balance_1: '午餐的完美之选',
+  plans_hook_balance_2: '均衡供能，从早到晚',
+  plans_hook_balance_3: '全天营养一站搞定',
+  plans_hook_performance_1: '训练后能量补给',
+  plans_hook_performance_2: '专为训练日打造',
+  plans_hook_performance_3: '增肌能量满格',
   plans_kcal: '约 %s 千卡/天',
   plans_price: '¥%s',
   plans_per_week: '/周',
@@ -91,11 +104,12 @@ module.exports = {
   edit_meals_failed: '保存失败',
 
   // ── REGISTER ───────────────────────────────────────────────
+  edit_profile_title: '编辑资料',
   register_title: '您的信息',
   register_change: '修改',
   register_name_label: '姓名',
   register_name_placeholder: '您的姓名',
-  register_phone_label: '电话 / 微信号',
+  register_phone_label: '电话',
   register_phone_placeholder: '+86 xxx xxxx xxxx',
   register_district_label: '区域',
   register_district_placeholder: '例如：静安、徐汇…',
@@ -233,6 +247,8 @@ module.exports = {
   how_step4_tag: '灵活',
   how_step4_desc: '餐食在您选择的时间送达。每周续费，不自动续订。',
   how_get_started: '立即开始  →',
+  how_any_doubt: '有疑问？',
+  how_contact_us: '💬  联系我们',
 
   // ── PAY-PROCESSING ─────────────────────────────────────────
   pay_processing_title: '支付处理中…',

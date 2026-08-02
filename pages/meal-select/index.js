@@ -29,6 +29,12 @@ Page({
     // Snack
     // Time — one per day
     selectedTime: '10:00',
+    // Horario "default" propagado desde el lunes a los días que el usuario
+    // todavía no cambió manualmente.
+    defaultTime: '10:00',
+    // Días donde el usuario ya eligió un horario propio (no se pisan
+    // cuando el lunes cambia).
+    timeOverridden: {},
     // Notes
     currentNotes: '',
     // All selections across days: { mon: { meal_ids, time, notes }, ... }
@@ -114,9 +120,20 @@ if (fromRenewal) wx.removeStorageSync('flowContext');
       }
     }
 
+    // Si ya había selecciones previas (volviendo a editar), el horario del
+    // lunes pasa a ser el default, y los días con un horario distinto al
+    // del lunes quedan marcados como "override" para no pisarlos.
+    const defaultTime = (allSelections.mon && allSelections.mon.time) || '10:00';
+    const timeOverridden = {};
+    DAYS.forEach(d => {
+      if (d.key !== 'mon' && allSelections[d.key] && allSelections[d.key].time && allSelections[d.key].time !== defaultTime) {
+        timeOverridden[d.key] = true;
+      }
+    });
+
     const startDateStr = wx.getStorageSync('startDate') || null;
     const days = DAYS.map(d => ({ ...d, done: false }));
-    this.setData({ fromRenewal, fromOrderSummary, selectedPlan, days, allSelections, startDateStr });
+    this.setData({ fromRenewal, fromOrderSummary, selectedPlan, days, allSelections, startDateStr, defaultTime, timeOverridden });
 
     try {
       const { anchor, order } = await app.getMenuRotation();
@@ -155,7 +172,7 @@ if (fromRenewal) wx.removeStorageSync('flowContext');
       // Restore existing selections for this day
       const existing = this.data.allSelections[dayKey];
       const existingMealIds = existing ? existing.meal_ids : [];
-      const existingTime = existing ? existing.time : '10:00';
+      const existingTime = existing ? existing.time : this.data.defaultTime;
       const existingNotes = existing ? existing.notes : '';
       // Last selected meal photo/name for the preview
       let lastSelectedPhoto = '';
@@ -203,6 +220,15 @@ if (fromRenewal) wx.removeStorageSync('flowContext');
       this.setData({ loading: false });
       wx.showToast({ title: t('meal_select_failed'), icon: 'none' });
     }
+  },
+
+  previewMeal(e) {
+    // Tap en la fila: muestra la foto grande arriba, sin sumar cantidad.
+    const meal = e.currentTarget.dataset.meal;
+    this.setData({
+      lastSelectedPhoto: meal.photo_url || '',
+      lastSelectedName: meal.name,
+    });
   },
 
   incrementMeal(e) {
@@ -257,7 +283,35 @@ if (fromRenewal) wx.removeStorageSync('flowContext');
   },
 
   onTimeChange(e) {
-    this.setData({ selectedTime: e.detail.value }, () => this.persistCurrentDay());
+    const newTime = e.detail.value;
+    const { currentDay, allSelections, timeOverridden } = this.data;
+
+    let updatedSelections = allSelections;
+    let defaultTime = this.data.defaultTime;
+    let updatedOverrides = timeOverridden;
+
+    if (currentDay === 'mon') {
+      // El lunes define el horario "default": se propaga a los demás días
+      // que el usuario todavía no cambió a mano (esos quedan como están).
+      defaultTime = newTime;
+      updatedSelections = { ...allSelections };
+      DAYS.forEach(d => {
+        if (d.key !== 'mon' && !timeOverridden[d.key] && updatedSelections[d.key]) {
+          updatedSelections[d.key] = { ...updatedSelections[d.key], time: newTime };
+        }
+      });
+    } else {
+      // Cambiar el horario de otro día lo marca como override: de ahí en
+      // más, cambiar el lunes ya no le pisa el horario a este día.
+      updatedOverrides = { ...timeOverridden, [currentDay]: true };
+    }
+
+    this.setData({
+      selectedTime: newTime,
+      defaultTime,
+      timeOverridden: updatedOverrides,
+      allSelections: updatedSelections,
+    }, () => this.persistCurrentDay());
   },
 
   onNotesInput(e) {
@@ -342,6 +396,15 @@ if (fromRenewal) wx.removeStorageSync('flowContext');
 
   goBack() {
     wx.navigateBack();
+  },
+
+  changePlan() {
+    // La pila es .../plans → start-date → meal-select: 2 saltos atrás
+    // devuelve directo a plans, salteando start-date.
+    wx.navigateBack({
+      delta: 2,
+      fail: () => wx.navigateBack(),
+    });
   },
 
   contactUs() {

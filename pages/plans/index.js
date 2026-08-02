@@ -2,6 +2,21 @@
 const app = getApp();
 const t = require('../../i18n/index');
 
+// Frases hook por cantidad de comidas, en vez de "X meal(s)/day".
+// Distintas por tier: Balance (mantenimiento/día a día) vs Performance (rendimiento/músculo).
+const MEALS_HOOK_KEYS = {
+  Balance: {
+    1: 'plans_hook_balance_1',
+    2: 'plans_hook_balance_2',
+    3: 'plans_hook_balance_3',
+  },
+  Performance: {
+    1: 'plans_hook_performance_1',
+    2: 'plans_hook_performance_2',
+    3: 'plans_hook_performance_3',
+  },
+};
+
 Page({
   data: {
     plans: [],
@@ -48,6 +63,11 @@ Page({
         displayName: app.getMealName(plan),
         displayTier: app.getMealName({ name: plan.tier, name_zh: this.data.tierZh || '' }),
         lbl_kcal: plan.kcal ? t('plans_kcal', plan.kcal) : '',
+        // Frase hook por tier + cantidad de comidas, fallback a "X meal(s)/day"
+        mealsHook: (() => {
+          const key = MEALS_HOOK_KEYS[plan.tier] && MEALS_HOOK_KEYS[plan.tier][plan.meals];
+          return key ? t(key) : `${plan.meals} ${t('plans_meals_per_day')}`;
+        })(),
         // Color propio de cada plan desde la DB; fallback al color del tier
         color: plan.color || tierColor,
         is_popular: plan.name === 'Small x 2',

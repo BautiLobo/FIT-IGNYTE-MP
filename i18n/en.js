@@ -46,12 +46,25 @@ module.exports = {
   tiers_plans_available: 'plans available',
   tiers_tap_hint: 'Tap a goal to see plans',
   tiers_brochure: '☰  View full menu PDF',
+  tiers_best_for: 'Best for:',
+  tiers_performance_1: 'Active Lifestyle',
+  tiers_performance_2: 'Building Muscle',
+  tiers_performance_3: 'Intensive Training',
+  tiers_balance_1: 'Weight Control',
+  tiers_balance_2: 'Every Day Clean Eating',
+  tiers_balance_3: 'Busy Professionals',
 
   // ── PLANS ──────────────────────────────────────────────────
   plans_title: 'Choose your plan',
   plans_subtitle: 'All include Mon-Fri delivery',
   plans_most_popular: 'MOST POPULAR',
   plans_meals_per_day: 'meal(s) / day',
+  plans_hook_balance_1: 'Perfect for lunch',
+  plans_hook_balance_2: 'Balanced fuel, morning to night',
+  plans_hook_balance_3: 'Complete daily nutrition',
+  plans_hook_performance_1: 'Post-workout refuel',
+  plans_hook_performance_2: 'Built for training days',
+  plans_hook_performance_3: 'Maximum muscle fuel',
   plans_kcal: '~%s kcal/day',
   plans_price: '¥%s',
   plans_per_week: '/wk',
@@ -91,11 +104,12 @@ module.exports = {
   edit_meals_failed: 'Failed to save',
 
   // ── REGISTER ───────────────────────────────────────────────
+  edit_profile_title: 'Edit Profile',
   register_title: 'Your details',
   register_change: 'Change',
   register_name_label: 'Full name',
   register_name_placeholder: 'Your name',
-  register_phone_label: 'Phone / WeChat ID',
+  register_phone_label: 'Phone',
   register_phone_placeholder: '+86 xxx xxxx xxxx',
   register_district_label: 'District / Area',
   register_district_placeholder: "e.g. Jing'an, Xuhui...",
@@ -233,6 +247,8 @@ module.exports = {
   how_step4_tag: 'FLEXIBLE',
   how_step4_desc: 'Meals arrive at your chosen time. Renew each week — no auto-renewal.',
   how_get_started: 'Get started  →',
+  how_any_doubt: 'Any doubt?',
+  how_contact_us: '💬  Contact us',
 
   // ── PAY-PROCESSING ─────────────────────────────────────────
   pay_processing_title: 'Processing payment...',

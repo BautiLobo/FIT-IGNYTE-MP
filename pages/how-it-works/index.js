@@ -12,6 +12,8 @@ Page({
     lbl_step4_title: '', lbl_step4_tag: '', lbl_step4_desc: '',
     lbl_get_started: '',
     lbl_brochure: '',
+    lbl_any_doubt: '',
+    lbl_contact_us: '',
   },
 
   onLoad() {
@@ -27,6 +29,8 @@ Page({
       lbl_step4_title: t('how_step4_title'), lbl_step4_tag: t('how_step4_tag'), lbl_step4_desc: t('how_step4_desc'),
       lbl_get_started: t('how_get_started'),
       lbl_brochure: t('tiers_brochure'),
+      lbl_any_doubt: t('how_any_doubt'),
+      lbl_contact_us: t('how_contact_us'),
     });
   },
 

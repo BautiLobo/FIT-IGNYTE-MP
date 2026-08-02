@@ -96,7 +96,7 @@ Page({
       if (client.plan_id) {
         const planData = await app.supabase('GET', 'plans', null, `id=eq.${client.plan_id}`);
         if (planData && planData.length > 0) {
-          client.plan_name = planData[0].name;
+          client.plan_name = app.getMealName(planData[0]);
         }
       }
 
@@ -121,20 +121,18 @@ Page({
         const dow = d.getDay();
         if (dow === 6) d.setDate(d.getDate() + 2);
         if (dow === 0) d.setDate(d.getDate() + 1);
-        startDateFormatted = d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+        startDateFormatted = this.formatFullDate(d);
       }
 
       const realToday = new Date().getDay();
       const showRenewal = !isUpcoming && (realToday === 5 || daysLeft <= 1);
 
-      const planLabel = client.plan_name
-        ? client.plan_name.replace('Lean Fit', 'Small').replace('Muscle', 'Big').replace('Vegetarian', 'Veg')
-        : '';
+      const planLabel = client.plan_name || '';
 
       let expiryFormatted = '';
       if (client.expiry_date) {
         const d = new Date(client.expiry_date);
-        expiryFormatted = d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+        expiryFormatted = this.formatFullDate(d);
       }
 
       let planPrice = 0;
@@ -227,6 +225,15 @@ Page({
   getDaysLeft(expiresAt) {
     if (!expiresAt) return 999;
     return Math.ceil((new Date(expiresAt) - new Date()) / 86400000);
+  },
+
+  // Formatea una fecha como "Monday, Aug 3" (EN) o "8月3日 周一" (ZH).
+  formatFullDate(d) {
+    if (_isZh) {
+      const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+      return `${d.getMonth() + 1}月${d.getDate()}日 ${weekdays[d.getDay()]}`;
+    }
+    return d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
   },
 
   goToProfile() {

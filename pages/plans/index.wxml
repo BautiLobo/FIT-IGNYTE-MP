@@ -33,7 +33,7 @@
           <view class="plan-left">
             <text class="plan-category" style="color:{{item.color}};">{{item.displayTier}}</text>
             <text class="plan-name">{{item.displayName}}</text>
-            <text class="plan-meals">{{item.meals}} {{lbl_meals_per_day}}</text>
+            <text class="plan-meals">{{item.mealsHook}}</text>
             <text class="plan-kcal" wx:if="{{item.kcal}}">{{item.lbl_kcal}}</text>
           </view>
           <view class="plan-right">

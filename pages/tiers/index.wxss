@@ -21,27 +21,69 @@
 .list-sub { font-size:26rpx; color:#9a9aa3; line-height:1.45; display:block; text-align:center; max-width:580rpx; }
 .header-divider { width:64rpx; height:5rpx; background:#e8342a; border-radius:4rpx; margin-top:10rpx; }
 
-/* ── TIER CARDS ── */
-.tier-wrap { margin-bottom:16rpx; }
+/* ── TIER CARDS — con "Best for" y bullets, estilo tarjeta enriquecida ── */
+.tier-wrap { margin-bottom:20rpx; }
 
 .tier-card {
   background: #13131a;
-  border: 1rpx solid #2a2a33;
-  border-left: 4rpx solid;
-  border-radius: 20rpx;
+  border: 2rpx solid;
+  border-radius: 24rpx;
   padding: 32rpx 28rpx;
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.tier-card-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-sizing: border-box;
-  width: 100%;
+  margin-bottom: 24rpx;
 }
 
-.tier-left { display:flex; flex-direction:column; gap:6rpx; }
-.tier-tag { font-size:20rpx; font-weight:700; letter-spacing:2rpx; display:block; }
+.tier-head-left { display:flex; align-items:center; gap:14rpx; }
+.tier-icon { font-size: 40rpx; line-height: 1; }
 .tier-name { font-size:38rpx; font-weight:800; color:#f3f3f4; display:block; }
-.tier-sub { font-size:24rpx; color:#beb6b6; display:block; }
 .tier-arrow { font-size:48rpx; font-weight:300; }
+
+.tier-best-for {
+  font-size: 26rpx;
+  font-weight: 800;
+  color: #f3f3f4;
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+.tier-bullets {
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
+  margin-bottom: 20rpx;
+}
+
+.tier-bullet-row {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+}
+
+.tier-bullet-check {
+  width: 34rpx;
+  height: 34rpx;
+  border: 2rpx solid;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 20rpx;
+  line-height: 1;
+}
+
+.tier-bullet-text { font-size: 26rpx; font-weight: 700; color: #e4e4e7; }
+
+.tier-sub { font-size:26rpx; color:#beb6b6; display:block; }
 
 /* ── HINT ── */
 .hint-wrap { display:flex; align-items:center; gap:16rpx; padding:32rpx 4rpx; }
@@ -51,6 +93,20 @@
 /* ── BOTTOM BAR ── */
 .bottom-bar { padding:8rpx 0 40rpx; }
 button { margin:0 !important; padding:0 !important; background:transparent; border:none; }
+.btn-contact {
+  background: transparent !important;
+  border: 2rpx solid #2a2a33 !important;
+  border-radius: 24rpx !important;
+  height: 92rpx;
+  line-height: 92rpx;
+  text-align: center;
+  width: 100% !important;
+  box-sizing: border-box;
+  display: block;
+  margin-bottom: 16rpx;
+}
+.btn-contact::after { border: none; }
+.btn-contact text { font-size: 30rpx; font-weight: 700; color: #9a9aa3; }
 .btn-pdf {
   background: rgba(167,139,250,0.12) !important;
   border: 2rpx solid #e8342a !important;

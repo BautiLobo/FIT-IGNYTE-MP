@@ -8,6 +8,18 @@ const TIER_COLORS_FALLBACK = {
   'Vegetarian':  '#34D399',
 };
 
+// Ícono simple por tier (mismo espíritu que la referencia: rayo / corredor)
+const TIER_ICON = {
+  'Performance': '⚡',
+  'Balance': '🏃',
+};
+
+// "Best for" — 3 bullets por tier, bilingüe vía i18n
+const TIER_BEST_FOR_KEYS = {
+  'Performance': ['tiers_performance_1', 'tiers_performance_2', 'tiers_performance_3'],
+  'Balance': ['tiers_balance_1', 'tiers_balance_2', 'tiers_balance_3'],
+};
+
 Page({
   data: {
     loading: true,
@@ -18,6 +30,8 @@ Page({
     lbl_tap_hint: '',
     lbl_brochure: '',
     lbl_plans_available: '',
+    lbl_contact_us: '',
+    lbl_best_for: '',
   },
 
   async onLoad(options) {
@@ -30,6 +44,8 @@ Page({
       lbl_tap_hint: t('tiers_tap_hint'),
       lbl_brochure: t('tiers_brochure'),
       lbl_plans_available: t('tiers_plans_available'),
+      lbl_contact_us: t('how_contact_us'),
+      lbl_best_for: t('tiers_best_for'),
     });
     await this.loadTiers();
   },
@@ -52,12 +68,15 @@ Page({
         .filter(tier => countMap[tier.name] > 0)
         .map(tier => {
           const displayName = app.getMealName({ name: tier.name, name_zh: tier.name_zh });
+          const bestForKeys = TIER_BEST_FOR_KEYS[tier.name] || [];
           return {
             name: tier.name,
             displayName,
             tag: displayName,
             planCount: countMap[tier.name] || 0,
             color: tier.color || TIER_COLORS_FALLBACK[tier.name] || '#e8342a',
+            icon: TIER_ICON[tier.name] || '🔥',
+            bestFor: bestForKeys.map(key => t(key)),
           };
         });
 
