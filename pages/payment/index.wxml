@@ -32,9 +32,36 @@
         <text class="row-val">¥35</text>
       </view>
 
+      <view class="row row-border" wx:if="{{referralApplied}}">
+        <text class="row-key row-key-green">{{lbl_referral_row}}</text>
+        <text class="row-val row-val-green">−¥{{referralDiscount}}</text>
+      </view>
+
       <view class="row">
         <text class="row-total-key">{{lbl_total}}</text>
         <text class="row-total-val">¥{{total}}</text>
+      </view>
+    </view>
+
+    <!-- Referral code -->
+    <view class="card" wx:if="{{!referralAlreadyUsed}}">
+      <text class="card-label">{{lbl_referral_label}}</text>
+
+      <view class="referral-row" wx:if="{{!referralApplied}}">
+        <input
+          class="referral-input"
+          placeholder="{{lbl_referral_placeholder}}"
+          value="{{referralInput}}"
+          bindinput="onReferralInput"
+        />
+        <view class="referral-btn {{referralChecking ? 'referral-btn-disabled' : ''}}" bindtap="applyReferral">
+          <text>{{lbl_referral_apply}}</text>
+        </view>
+      </view>
+
+      <view class="referral-applied-row" wx:else>
+        <text class="referral-applied-code">{{referralCode}}</text>
+        <text class="referral-applied-check">✓ {{lbl_referral_applied}}</text>
       </view>
     </view>
 

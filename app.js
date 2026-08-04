@@ -208,13 +208,13 @@ App({
   // UPDATE con anon key matchea 0 filas (PostgREST devuelve 200 con []),
   // dejando `paid`/`status` sin actualizar pero sin lanzar ningún error.
   // Esta función usa la service_role key del lado del servidor.
-  completePayment({ type, clientId, pendingOrderId, status, start_date, expiry_date, plan_id, cutlery }) {
+  completePayment({ type, clientId, pendingOrderId, status, start_date, expiry_date, plan_id, cutlery, referralCode }) {
     return new Promise((resolve, reject) => {
       wx.request({
         url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/complete-payment',
         method: 'POST',
         header: { 'Content-Type': 'application/json' },
-        data: { type, clientId, pendingOrderId, status, start_date, expiry_date, plan_id, cutlery },
+        data: { type, clientId, pendingOrderId, status, start_date, expiry_date, plan_id, cutlery, referralCode },
         success: (res) => {
           if (res.statusCode >= 200 && res.statusCode < 300 && res.data && res.data.ok) {
             resolve(res.data);

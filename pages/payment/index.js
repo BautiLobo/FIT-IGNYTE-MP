@@ -5,9 +5,17 @@ const t = require('../../i18n/index');
 Page({
   data: {
     order: null,
+    client: null,
     selectedPlan: null,
     total: 0,
     fromRenewal: false,
+    // Referral code
+    referralInput: '',
+    referralApplied: false,
+    referralCode: '',
+    referralDiscount: 0,
+    referralAlreadyUsed: false,
+    referralChecking: false,
     lbl_title: '',
     lbl_order_summary: '',
     lbl_plan: '',
@@ -20,6 +28,11 @@ Page({
     lbl_wechat_pay: '',
     lbl_tap_to_pay: '',
     lbl_renewal_note: '',
+    lbl_referral_label: '',
+    lbl_referral_placeholder: '',
+    lbl_referral_apply: '',
+    lbl_referral_row: '',
+    lbl_referral_applied: '',
   },
 
   async onLoad(options) {
@@ -36,6 +49,11 @@ Page({
       lbl_wechat_pay: t('payment_wechat_pay'),
       lbl_tap_to_pay: t('payment_tap_to_pay'),
       lbl_renewal_note: t('payment_renewal_note'),
+      lbl_referral_label: t('payment_referral_label'),
+      lbl_referral_placeholder: t('payment_referral_placeholder'),
+      lbl_referral_apply: t('payment_referral_apply'),
+      lbl_referral_row: t('payment_referral_row'),
+      lbl_referral_applied: t('payment_referral_applied'),
     });
     const fromRenewal = options.from === 'renewal';
     const selectedPlan = wx.getStorageSync('selectedPlan');
@@ -54,14 +72,65 @@ Page({
       if (fromRenewal) {
         const clientId = wx.getStorageSync('clientId');
         const data = await app.getClient({ clientId });
-        if (data && data.length > 0) this.setData({ order: data[0] });
+        if (data && data.length > 0) {
+          // En renovación, `order` es directamente la fila de clients:
+          // ahí ya está el flag referral_used del pago anterior.
+          this.setData({ order: data[0], client: data[0], referralAlreadyUsed: !!data[0].referral_used });
+        }
       } else {
         const pendingOrderId = wx.getStorageSync('pendingOrderId');
         const data = await app.supabase('GET', 'new_orders', null, `id=eq.${pendingOrderId}`);
-        if (data && data.length > 0) this.setData({ order: data[0] });
+        if (data && data.length > 0) {
+          const order = data[0];
+          this.setData({ order });
+          // El cliente ya existe (se crea al aprobar la orden): lo buscamos
+          // por teléfono para saber si ya gastó un código de referido antes.
+          const clientData = await app.getClient({ phone: order.phone });
+          if (clientData && clientData.length > 0) {
+            this.setData({ client: clientData[0], referralAlreadyUsed: !!clientData[0].referral_used });
+          }
+        }
       }
     } catch (err) {
       console.error('Load error:', err);
+    }
+  },
+
+  onReferralInput(e) {
+    this.setData({ referralInput: e.detail.value });
+  },
+
+  async applyReferral() {
+    const code = (this.data.referralInput || '').trim().toLowerCase();
+    if (!code) return;
+    if (this.data.referralChecking || this.data.referralApplied) return;
+
+    this.setData({ referralChecking: true });
+    try {
+      const data = await app.supabase('GET', 'coaches', null, `code=eq.${encodeURIComponent(code)}`);
+      if (!data || data.length === 0) {
+        wx.showToast({ title: t('payment_referral_invalid'), icon: 'none' });
+        return;
+      }
+
+      const { selectedPlan, discount } = this.data;
+      const planPrice = selectedPlan.price || 0;
+      const baseTotal = planPrice - discount + 35;
+      const referralDiscount = Math.round(baseTotal * 0.10);
+      const total = baseTotal - referralDiscount;
+
+      this.setData({
+        referralApplied: true,
+        referralCode: code,
+        referralDiscount,
+        total,
+      });
+      wx.showToast({ title: t('payment_referral_success'), icon: 'success' });
+    } catch (err) {
+      console.error('applyReferral error:', err);
+      wx.showToast({ title: t('payment_referral_invalid'), icon: 'none' });
+    } finally {
+      this.setData({ referralChecking: false });
     }
   },
 
@@ -97,7 +166,7 @@ Page({
   },
 
   async handlePaymentSuccess() {
-    const { fromRenewal, selectedPlan } = this.data;
+    const { fromRenewal, selectedPlan, referralApplied, referralCode } = this.data;
     const nextFriday = this.getExpiryDate();
     const clientId = wx.getStorageSync('clientId');
 
@@ -115,6 +184,7 @@ Page({
           expiry_date: expiryDate,
           plan_id: selectedPlan.id,
           cutlery,
+          referralCode: referralApplied ? referralCode : undefined,
         });
 
         const mealSelections = wx.getStorageSync('mealSelections');
@@ -160,6 +230,7 @@ Page({
           start_date: startDate,
           expiry_date: nextFriday,
           cutlery,
+          referralCode: referralApplied ? referralCode : undefined,
         });
 
         if (order.meals && Object.keys(order.meals).length > 0) {
