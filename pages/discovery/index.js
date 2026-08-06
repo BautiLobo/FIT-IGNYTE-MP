@@ -35,9 +35,6 @@ Page({
 
   async checkSession() {
     try {
-      const isAdmin = await app.adminCheckPromise;
-      if (isAdmin) { wx.reLaunch({ url: '/pages/admin-home/index' }); return; }
-
       const pendingOrderId = wx.getStorageSync('pendingOrderId');
       if (pendingOrderId) {
         const orderData = await app.supabase('GET', 'new_orders', null, `id=eq.${pendingOrderId}`);
@@ -94,14 +91,13 @@ Page({
         wx.removeStorageSync('clientId');
       }
     } catch (err) {
-      console.error('[discovery] session check error:', err);
+      // silencioso
     }
 
     this.setData({ checking: false });
   },
 
-  onError(err) {
-    console.error('[discovery] page error:', err);
+  onError() {
     this.setData({ checking: false });
   },
 

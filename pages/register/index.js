@@ -28,6 +28,10 @@ Page({
     lbl_next: '',
     lbl_delivery_note: '',
     lbl_area_note: '',
+    lbl_privacy_policy: '',
+    lbl_privacy_agree_pre: '',
+    lbl_privacy_agree_link: '',
+    privacyAccepted: false,
     form: {
       name: '',
       phone: '',
@@ -62,6 +66,9 @@ Page({
       lbl_next: t('register_next'),
       lbl_delivery_note: t('register_delivery_note'),
       lbl_area_note: t('register_area_note'),
+      lbl_privacy_policy: t('register_privacy_policy'),
+      lbl_privacy_agree_pre: t('register_privacy_agree_pre'),
+      lbl_privacy_agree_link: t('register_privacy_agree_link'),
     });
     const selectedPlan = wx.getStorageSync('selectedPlan');
     if (!selectedPlan) {
@@ -125,7 +132,16 @@ Page({
       wx.showToast({ title: t('register_error_address'), icon: 'none' });
       return false;
     }
+    // Solo se pide al registrarse por primera vez, no al editar un perfil ya existente.
+    if (!this.data.editing && !this.data.privacyAccepted) {
+      wx.showToast({ title: t('register_error_privacy'), icon: 'none' });
+      return false;
+    }
     return true;
+  },
+
+  togglePrivacyAccepted() {
+    this.setData({ privacyAccepted: !this.data.privacyAccepted });
   },
 
   async submit() {
@@ -168,6 +184,8 @@ Page({
           allergies: form.allergies.trim(),
           goal: form.goal.trim(),
           plan_id: selectedPlan.id,
+          start_date: wx.getStorageSync('startDate') || null,
+          expiry_date: wx.getStorageSync('expiryDate') || null,
         }, `id=eq.${existingPendingOrderId}`);
         wx.navigateTo({ url: '/pages/order-summary/index' });
         this.setData({ submitting: false });
@@ -214,6 +232,11 @@ Page({
         meals: mealSelections,
         status: 'draft',
         wechat_openid: openid,
+        // La fecha de inicio que eligió el cliente en start-date; viaja en la
+        // orden para que el admin la vea al aprobar y no se pierda al pasar
+        // por otra sesión/dispositivo (el storage local no le llega al admin).
+        start_date: wx.getStorageSync('startDate') || null,
+        expiry_date: wx.getStorageSync('expiryDate') || null,
       };
 
       const result = await app.supabase('POST', 'new_orders', orderData);

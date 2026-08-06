@@ -132,7 +132,7 @@ if (fromRenewal) wx.removeStorageSync('flowContext');
     });
 
     const startDateStr = wx.getStorageSync('startDate') || null;
-    const days = DAYS.map(d => ({ ...d, done: false }));
+    const days = DAYS.map(d => Object.assign({}, d, { done: false }));
     this.setData({ fromRenewal, fromOrderSummary, selectedPlan, days, allSelections, startDateStr, defaultTime, timeOverridden });
 
     try {
@@ -190,11 +190,10 @@ if (fromRenewal) wx.removeStorageSync('flowContext');
       const dayConfirmed = existingMealIds.length >= maxMeals;
 
       const days = this.data.days.map(d =>
-        d.key === dayKey ? { ...d, done: dayConfirmed } : d
+        d.key === dayKey ? Object.assign({}, d, { done: dayConfirmed }) : d
       );
 
-      const updatedMeals = (meals || []).map(m => ({
-        ...m,
+      const updatedMeals = (meals || []).map(m => Object.assign({}, m, {
         displayName: app.getMealName(m),
         qty: existingMealIds.filter(id => id === m.id).length,
       }));
@@ -241,9 +240,8 @@ if (fromRenewal) wx.removeStorageSync('flowContext');
       return;
     }
 
-    const newIds = [...selectedMealIds, meal.id];
-    const updatedMeals = menuMeals.map(m => ({
-      ...m,
+    const newIds = selectedMealIds.concat([meal.id]);
+    const updatedMeals = menuMeals.map(m => Object.assign({}, m, {
       qty: m.id === meal.id ? (m.qty || 0) + 1 : m.qty,
     }));
     const dayConfirmed = newIds.length >= maxMeals;
@@ -265,10 +263,9 @@ if (fromRenewal) wx.removeStorageSync('flowContext');
     const idx = selectedMealIds.indexOf(meal.id);
     if (idx < 0) return;
 
-    const newIds = [...selectedMealIds];
+    const newIds = selectedMealIds.slice();
     newIds.splice(idx, 1);
-    const updatedMeals = menuMeals.map(m => ({
-      ...m,
+    const updatedMeals = menuMeals.map(m => Object.assign({}, m, {
       qty: m.id === meal.id ? Math.max((m.qty || 0) - 1, 0) : m.qty,
     }));
     const dayConfirmed = newIds.length >= maxMeals;
@@ -294,16 +291,17 @@ if (fromRenewal) wx.removeStorageSync('flowContext');
       // El lunes define el horario "default": se propaga a los demás días
       // que el usuario todavía no cambió a mano (esos quedan como están).
       defaultTime = newTime;
-      updatedSelections = { ...allSelections };
+      updatedSelections = Object.assign({}, allSelections);
       DAYS.forEach(d => {
         if (d.key !== 'mon' && !timeOverridden[d.key] && updatedSelections[d.key]) {
-          updatedSelections[d.key] = { ...updatedSelections[d.key], time: newTime };
+          updatedSelections[d.key] = Object.assign({}, updatedSelections[d.key], { time: newTime });
         }
       });
     } else {
       // Cambiar el horario de otro día lo marca como override: de ahí en
       // más, cambiar el lunes ya no le pisa el horario a este día.
-      updatedOverrides = { ...timeOverridden, [currentDay]: true };
+      updatedOverrides = Object.assign({}, timeOverridden);
+      updatedOverrides[currentDay] = true;
     }
 
     this.setData({
@@ -321,7 +319,7 @@ if (fromRenewal) wx.removeStorageSync('flowContext');
   persistCurrentDay() {
     const { selectedMealIds, selectedTime, currentNotes, currentDay, allSelections, days } = this.data;
 
-    const updatedSelections = { ...allSelections };
+    const updatedSelections = Object.assign({}, allSelections);
     if (selectedMealIds.length === 0) {
       delete updatedSelections[currentDay];
     } else {
@@ -334,7 +332,7 @@ if (fromRenewal) wx.removeStorageSync('flowContext');
 
     const maxMeals = Math.max((this.data.selectedPlan && this.data.selectedPlan.meals) || 1, 1);
     const dayDone = selectedMealIds.length >= maxMeals;
-    const updatedDays = days.map(d => d.key === currentDay ? { ...d, done: dayDone } : d);
+    const updatedDays = days.map(d => d.key === currentDay ? Object.assign({}, d, { done: dayDone }) : d);
 
     this.setData({ allSelections: updatedSelections, days: updatedDays, canGoNext: dayDone });
   },

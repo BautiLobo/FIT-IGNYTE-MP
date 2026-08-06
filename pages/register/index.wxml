@@ -50,11 +50,25 @@
       <input class="field-input" placeholder="{{lbl_goal_ph}}" value="{{form.goal}}" bindinput="onInput" data-field="goal" />
     </view>
 
+    <!-- Aceptación obligatoria de la política de privacidad (solo alta nueva) -->
+    <view class="privacy-consent-row" wx:if="{{!editing}}">
+      <view class="privacy-checkbox {{privacyAccepted ? 'privacy-checkbox-checked' : ''}}" bindtap="togglePrivacyAccepted">
+        <text wx:if="{{privacyAccepted}}">✓</text>
+      </view>
+      <text class="privacy-consent-text" bindtap="togglePrivacyAccepted">{{lbl_privacy_agree_pre}}</text>
+      <button class="privacy-link-inline" open-type="openPrivacyContract">
+        <text>{{lbl_privacy_agree_link}}</text>
+      </button>
+    </view>
+
     <view class="btn-wrap">
       <button class="btn-primary {{submitting ? 'btn-disabled' : ''}}" bindtap="submit" disabled="{{submitting}}">
         {{submitting ? lbl_submitting : (editing ? lbl_save_changes : lbl_next)}}
       </button>
       <text class="btn-hint">{{editing ? lbl_delivery_note : lbl_area_note}}</text>
+      <button class="privacy-link" wx:if="{{editing}}" open-type="openPrivacyContract">
+        <text>{{lbl_privacy_policy}}</text>
+      </button>
     </view>
 
   </scroll-view>

@@ -126,33 +126,26 @@ button { margin: 0 !important; padding: 0 !important; background: transparent; b
 }
 
 .footer {
-  padding: 1rpx 200rpx 32rpx;
+  padding: 1rpx 32rpx 32rpx;
   box-sizing: border-box;
   width: 100%;
 }
 
 .btn-feedback {
-  background: transparent;
-  border: 1rpx solid #2a2a33;
-  border-radius: 20rpx;
+  background: #13131a !important;
+  border: 1rpx solid #1a1a22 !important;
+  color: #beb6b6 !important;
+  border-radius: 20rpx !important;
   height: 96rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  line-height: 96rpx;
+  font-size: 28rpx !important;
+  font-weight: 600 !important;
+  width: 100% !important;
   text-align: center;
-  width: 100%;
   box-sizing: border-box;
-  padding: 100rpx;
-  line-height: normal;
+  display: block;
 }
 
 .btn-feedback::after {
   border: none;
-}
-
-.btn-feedback text {
-  font-size: 32rpx;
-  font-weight: 700;
-  color: #9a9aa3;
-  text-align: center;
 }

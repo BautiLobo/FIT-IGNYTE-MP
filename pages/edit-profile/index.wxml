@@ -3,7 +3,7 @@
   <view class="topbar">
     <view class="back-btn" bindtap="goBack"><text class="back-arrow">‹</text></view>
     <view class="topbar-center">
-      <text class="topbar-title">Edit Profile</text>
+      <text class="topbar-title">{{lbl_title}}</text>
     </view>
     <view style="width:60rpx;"></view>
   </view>

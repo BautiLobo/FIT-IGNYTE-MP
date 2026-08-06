@@ -263,7 +263,8 @@ Page({
   // sincronizara más adelante en el flujo de renovación.
   async saveMealSelections(clientId, allSelections) {
     const dayMap = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday' };
-    for (const [key, label] of Object.entries(dayMap)) {
+    for (const key in dayMap) {
+      const label = dayMap[key];
       const sel = allSelections[key];
       if (!sel || !sel.meal_ids || sel.meal_ids.length === 0) continue;
       const existing = await app.supabase('GET', 'meal_selections', null, `client_id=eq.${clientId}&day=eq.${label}&slot=eq.1`);

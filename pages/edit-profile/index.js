@@ -4,6 +4,7 @@ const t = require('../../i18n/index');
 
 Page({
   data: {
+    lbl_title: '',
     saving: false,
     pendingAddressChange: false,
     addressChangeStatus: '', // 'approved' | 'rejected' shown once
@@ -39,6 +40,7 @@ Page({
 
   async onLoad() {
     this.setData({
+      lbl_title: t('edit_profile_title'),
       lbl_name_label: t('register_name_label'),
       lbl_name_ph: t('register_name_placeholder'),
       lbl_phone_label: t('register_phone_label'),

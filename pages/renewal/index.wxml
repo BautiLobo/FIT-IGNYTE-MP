@@ -38,7 +38,7 @@
   </scroll-view>
 
   <view class="footer">
-    <button class="btn-feedback" open-type="contact"><text>{{lbl_feedback}}</text></button>
+    <button class="btn-feedback" open-type="contact">{{lbl_feedback}}</button>
   </view>
 
 </view>

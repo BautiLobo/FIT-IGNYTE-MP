@@ -17,9 +17,6 @@
     "pages/home/index",
     "pages/renewal/index",
     "pages/edit-profile/index",
-    "pages/admin-home/index",
-    "pages/admin-orders/index",
-    "pages/admin-notify/index",
     "pages/edit-meals/index"
   ],
   "window": {

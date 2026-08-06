@@ -89,3 +89,66 @@ button { margin:0 !important; padding:0 !important; background:transparent; bord
   text-align:center;
   display:block;
 }
+
+/* ── PRIVACY CONSENT — checkbox obligatorio antes de registrarse ── */
+.privacy-consent-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin-bottom: 20rpx;
+}
+
+.privacy-checkbox {
+  width: 34rpx;
+  height: 34rpx;
+  border: 2rpx solid #4a4a52;
+  border-radius: 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.privacy-checkbox-checked {
+  background: #e8342a;
+  border-color: #e8342a;
+}
+.privacy-checkbox text { font-size: 22rpx; color: #fff; line-height: 1; }
+
+.privacy-consent-text {
+  font-size: 22rpx;
+  color: #beb6b6;
+}
+
+.privacy-link-inline {
+  background: transparent !important;
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  height: auto;
+  line-height: normal;
+  width: auto !important;
+}
+.privacy-link-inline::after { border: none; }
+.privacy-link-inline text {
+  font-size: 22rpx;
+  color: #e8342a;
+  text-decoration: underline;
+}
+
+/* Link a la política de privacidad (abre el contrato auto-generado por WeChat) */
+.privacy-link {
+  background: transparent !important;
+  border: none !important;
+  margin: 12rpx 0 0 !important;
+  padding: 0 !important;
+  height: auto;
+  line-height: normal;
+  width: auto !important;
+}
+.privacy-link::after { border: none; }
+.privacy-link text {
+  font-size: 22rpx;
+  color: #e8342a;
+  text-decoration: underline;
+}

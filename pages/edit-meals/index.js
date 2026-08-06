@@ -103,8 +103,7 @@ Page({
         };
       });
 
-      const days = DAYS.map(d => ({
-        ...d,
+      const days = DAYS.map(d => Object.assign({}, d, {
         done: !!(allSelections[d.key] && allSelections[d.key].meal_ids.length >= plan.meals),
       }));
 
@@ -158,8 +157,7 @@ Page({
         }
       }
 
-      const updatedMeals = (meals || []).map(m => ({
-        ...m,
+      const updatedMeals = (meals || []).map(m => Object.assign({}, m, {
         displayName: app.getMealName(m),
         qty: existingMealIds.filter(id => id === m.id).length,
       }));
@@ -209,9 +207,8 @@ Page({
       return;
     }
 
-    const newIds = [...selectedMealIds, meal.id];
-    const updatedMeals = menuMeals.map(m => ({
-      ...m,
+    const newIds = selectedMealIds.concat([meal.id]);
+    const updatedMeals = menuMeals.map(m => Object.assign({}, m, {
       qty: m.id === meal.id ? (m.qty || 0) + 1 : m.qty,
     }));
 
@@ -229,10 +226,9 @@ Page({
     const idx = selectedMealIds.indexOf(meal.id);
     if (idx < 0) return;
 
-    const newIds = [...selectedMealIds];
+    const newIds = selectedMealIds.slice();
     newIds.splice(idx, 1);
-    const updatedMeals = menuMeals.map(m => ({
-      ...m,
+    const updatedMeals = menuMeals.map(m => Object.assign({}, m, {
       qty: m.id === meal.id ? Math.max((m.qty || 0) - 1, 0) : m.qty,
     }));
 
@@ -250,7 +246,7 @@ Page({
   persistCurrentDay() {
     const { selectedMealIds, selectedTime, currentNotes, currentDay, allSelections, plan, days } = this.data;
 
-    const updatedSelections = { ...allSelections };
+    const updatedSelections = Object.assign({}, allSelections);
     if (selectedMealIds.length === 0) {
       delete updatedSelections[currentDay];
     } else {
@@ -263,7 +259,7 @@ Page({
 
     const maxMeals = Math.max((plan && plan.meals) || 1, 1);
     const dayDone = selectedMealIds.length >= maxMeals;
-    const updatedDays = days.map(d => d.key === currentDay ? { ...d, done: dayDone } : d);
+    const updatedDays = days.map(d => d.key === currentDay ? Object.assign({}, d, { done: dayDone }) : d);
 
     this.setData({ allSelections: updatedSelections, days: updatedDays });
   },
@@ -318,7 +314,8 @@ Page({
 
   async saveMealSelections(clientId, allSelections) {
     const dayMap = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday' };
-    for (const [key, label] of Object.entries(dayMap)) {
+    for (const key in dayMap) {
+      const label = dayMap[key];
       const sel = allSelections[key];
       if (!sel || !sel.meal_ids || sel.meal_ids.length === 0) continue;
       // PATCH si existe, POST si no
