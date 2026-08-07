@@ -81,7 +81,7 @@ Page({
       const mealSummary = await this.buildMealSummary(order.meals || {});
       const planPrice = selectedPlan.price || 0;
       const discount = Math.round(planPrice * 0.25);
-      const total = planPrice - discount + 35;
+      const total = planPrice - discount + 0; // TEMP: delivery fee en 0 para pruebas — volver a 35
 
       this.setData({ order, selectedPlan, mealSummary, total, discount, fromRenewal: false });
 
@@ -137,7 +137,7 @@ Page({
       const mealSummary = await this.buildMealSummary(mealSelections);
 
       const planPrice = selectedPlan.price || 0;
-      const total = planPrice + 35;
+      const total = planPrice + 0; // TEMP: delivery fee en 0 para pruebas — volver a 35
 
       this.setData({ order, selectedPlan, mealSummary, total, discount: 0, fromRenewal: true });
 

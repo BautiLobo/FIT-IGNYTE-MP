@@ -65,7 +65,7 @@ Page({
 
     const planPrice = selectedPlan.price || 0;
     const discount = fromRenewal ? 0 : Math.round(planPrice * 0.25);
-    const total = planPrice - discount + 35;
+    const total = planPrice - discount + 0; // TEMP: delivery fee en 0 para pruebas — volver a 35
     this.setData({ selectedPlan, total, fromRenewal, discount });
 
     try {
@@ -115,7 +115,7 @@ Page({
 
       const { selectedPlan, discount } = this.data;
       const planPrice = selectedPlan.price || 0;
-      const baseTotal = planPrice - discount + 35;
+      const baseTotal = planPrice - discount + 0; // TEMP: delivery fee en 0 para pruebas — volver a 35
       const referralDiscount = Math.round(baseTotal * 0.10);
       const total = baseTotal - referralDiscount;
 
@@ -149,112 +149,138 @@ Page({
     return d.toISOString().split('T')[0];
   },
 
-  payNow() {
-    // Simulate payment — replace with real WeChat Pay when AppSecret is ready
-    wx.showModal({
-      title: t('payment_simulate_title'),
-      content: t('payment_simulate_content'),
-      confirmText: t('payment_simulate_yes'),
-      cancelText: t('payment_simulate_cancel'),
-      success: (res) => {
-        if (res.confirm) {
-          wx.navigateTo({ url: '/pages/pay-processing/index' });
-          setTimeout(() => this.handlePaymentSuccess(), 1500);
-        }
+  async payNow() {
+    const { fromRenewal, selectedPlan, referralApplied, referralCode, client } = this.data;
+
+    if (!client || !client.id) {
+      wx.showModal({ title: t('payment_error_title'), content: t('payment_error_content'), showCancel: false });
+      return;
+    }
+
+    wx.showLoading({ title: t('loading') });
+    try {
+      // El pago JSAPI de WeChat exige el openid del pagador; si todavía no
+      // lo capturamos para este cliente, lo resolvemos ahora antes de pagar.
+      let clientId = client.id;
+      if (!client.wechat_openid) {
+        await app.captureOpenid(clientId);
       }
-    });
+
+      const nextFriday = this.getExpiryDate();
+      const expiryDate = wx.getStorageSync('expiryDate') || nextFriday;
+      const startDate = wx.getStorageSync('startDate') || new Date().toISOString().split('T')[0];
+      const cutlery = wx.getStorageSync('cutleryNeeded') === true;
+      const pendingOrderId = fromRenewal ? undefined : wx.getStorageSync('pendingOrderId');
+
+      const payment = await app.createPayment({
+        type: fromRenewal ? 'renewal' : 'new',
+        clientId,
+        pendingOrderId,
+        planId: selectedPlan.id,
+        startDate,
+        expiryDate,
+        cutlery,
+        referralCode: referralApplied ? referralCode : undefined,
+      });
+
+      wx.hideLoading();
+
+      wx.requestPayment({
+        timeStamp: payment.timeStamp,
+        nonceStr: payment.nonceStr,
+        package: payment.package,
+        signType: payment.signType,
+        paySign: payment.paySign,
+        success: () => {
+          wx.navigateTo({ url: '/pages/pay-processing/index' });
+          this.finishAfterPayment(clientId);
+        },
+        fail: (err) => {
+          console.error('wx.requestPayment failed:', err);
+          if (err.errMsg && err.errMsg.indexOf('cancel') === -1) {
+            wx.showModal({ title: t('payment_error_title'), content: t('payment_error_content'), showCancel: false });
+          }
+        },
+      });
+    } catch (err) {
+      wx.hideLoading();
+      console.error('payNow error:', err);
+      wx.showModal({ title: t('payment_error_title'), content: err.message || t('payment_error_content'), showCancel: false });
+    }
   },
 
-  async handlePaymentSuccess() {
-    const { fromRenewal, selectedPlan, referralApplied, referralCode } = this.data;
-    const nextFriday = this.getExpiryDate();
-    const clientId = wx.getStorageSync('clientId');
+  // El pago ya se confirmó del lado del usuario en wx.requestPayment(), pero
+  // quien realmente activa al cliente es el webhook de WeChat Pay (server to
+  // server), que puede tardar un segundo en llegar. Esperamos a que
+  // clients.paid se ponga en true antes de navegar, y guardamos las
+  // selecciones de comida mientras tanto.
+  async finishAfterPayment(clientId) {
+    const { fromRenewal } = this.data;
 
     try {
       if (fromRenewal) {
-        const expiryDate = wx.getStorageSync('expiryDate') || nextFriday;
-        const startDate = wx.getStorageSync('startDate') || new Date().toISOString().split('T')[0];
-        const realStatus = app.getRealStatus(startDate, expiryDate);
-        const cutlery = wx.getStorageSync('cutleryNeeded') === true;
-        await app.completePayment({
-          type: 'renewal',
-          clientId,
-          status: realStatus,
-          start_date: startDate,
-          expiry_date: expiryDate,
-          plan_id: selectedPlan.id,
-          cutlery,
-          referralCode: referralApplied ? referralCode : undefined,
-        });
-
         const mealSelections = wx.getStorageSync('mealSelections');
         if (mealSelections) {
           await this.saveMealSelections(clientId, mealSelections);
         }
-
-        wx.removeStorageSync('mealSelections');
-        wx.removeStorageSync('expiryDate');
-        wx.removeStorageSync('startDate');
-        wx.showToast({ title: t('payment_renewed'), icon: 'success' });
-        setTimeout(() => wx.reLaunch({ url: '/pages/home/index' }), 1000);
-
       } else {
         const pendingOrderId = wx.getStorageSync('pendingOrderId');
         const orderData = await app.supabase('GET', 'new_orders', null, `id=eq.${pendingOrderId}`);
-
-        if (!orderData || orderData.length === 0) {
-          throw new Error('Order not found — cannot complete payment.');
+        const order = orderData && orderData.length > 0 ? orderData[0] : null;
+        if (order && order.meals && Object.keys(order.meals).length > 0) {
+          await this.saveMealSelections(clientId, order.meals);
         }
-
-        const order = orderData[0];
-        const clientData = await app.getClient({ phone: order.phone });
-
-        if (!clientData || clientData.length === 0) {
-          throw new Error('Client not found for this order.');
-        }
-
-        const newClientId = clientData[0].id;
-        // Marcar order como paid + activar cliente (vía Edge Function con
-        // service_role — un PATCH directo con la anon key matcheaba 0 filas
-        // porque `clients` no tiene policy de SELECT para anon, y Postgres
-        // necesita que la fila sea visible para poder matchear el WHERE de
-        // un UPDATE, aun cuando la policy de UPDATE es permisiva).
-        const startDate = wx.getStorageSync('startDate') || new Date().toISOString().split('T')[0];
-        const realStatus = app.getRealStatus(startDate, nextFriday);
-        const cutlery = wx.getStorageSync('cutleryNeeded') === true;
-        await app.completePayment({
-          type: 'new',
-          clientId: newClientId,
-          pendingOrderId,
-          status: realStatus,
-          start_date: startDate,
-          expiry_date: nextFriday,
-          cutlery,
-          referralCode: referralApplied ? referralCode : undefined,
-        });
-
-        if (order.meals && Object.keys(order.meals).length > 0) {
-          await this.saveMealSelections(newClientId, order.meals);
-        }
-
-        wx.removeStorageSync('startDate');
-        wx.removeStorageSync('expiryDate');
-        wx.setStorageSync('clientId', newClientId);
-        wx.removeStorageSync('pendingOrderId');
-        wx.removeStorageSync('selectedPlan');
-
-        // Solo navegamos si todo lo anterior se completó sin lanzar error
-        wx.reLaunch({ url: '/pages/welcome/index' });
       }
 
+      await this.waitForPaymentConfirmation(clientId);
+
+      wx.removeStorageSync('mealSelections');
+      wx.removeStorageSync('startDate');
+      wx.removeStorageSync('expiryDate');
+      wx.removeStorageSync('cutleryNeeded');
+
+      if (fromRenewal) {
+        wx.showToast({ title: t('payment_renewed'), icon: 'success' });
+        setTimeout(() => wx.reLaunch({ url: '/pages/home/index' }), 800);
+      } else {
+        wx.setStorageSync('clientId', clientId);
+        wx.removeStorageSync('pendingOrderId');
+        wx.removeStorageSync('selectedPlan');
+        wx.reLaunch({ url: '/pages/welcome/index' });
+      }
     } catch (err) {
-      console.error('Payment success handler error:', JSON.stringify(err), err.message);
+      console.error('finishAfterPayment error:', err);
       wx.showModal({
         title: t('payment_error_title'),
         content: err.message || t('payment_error_content'),
         showCancel: false,
       });
     }
+  },
+
+  // Sondea clients.paid hasta ~10s. El pago ya se hizo (WeChat lo confirmó
+  // en wx.requestPayment); esto solo espera a que el webhook lo refleje en
+  // la base. Si tarda más, seguimos igual — el webhook lo va a dejar
+  // consistente en cuanto llegue, aunque el usuario ya haya navegado.
+  waitForPaymentConfirmation(clientId) {
+    return new Promise((resolve) => {
+      let attempts = 0;
+      const check = async () => {
+        attempts++;
+        try {
+          const data = await app.getClient({ clientId });
+          if (data && data.length > 0 && data[0].paid) {
+            resolve();
+            return;
+          }
+        } catch (err) {
+          console.error('waitForPaymentConfirmation error:', err);
+        }
+        if (attempts >= 10) { resolve(); return; }
+        setTimeout(check, 1000);
+      };
+      check();
+    });
   },
 
   // Persiste las selecciones de meal-select en meal_selections — necesario

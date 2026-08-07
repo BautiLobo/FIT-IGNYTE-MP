@@ -182,6 +182,32 @@ App({
     });
   },
 
+  // ── CREATE PAYMENT (vía Edge Function create-payment) ────────────
+  // Crea la orden JSAPI real en WeChat Pay y devuelve los parámetros
+  // firmados listos para pasarle directo a wx.requestPayment().
+  createPayment({ type, clientId, pendingOrderId, planId, startDate, expiryDate, cutlery, referralCode }) {
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/create-payment',
+        method: 'POST',
+        header: { 'Content-Type': 'application/json' },
+        data: { type, clientId, pendingOrderId, planId, startDate, expiryDate, cutlery, referralCode },
+        success: (res) => {
+          if (res.statusCode >= 200 && res.statusCode < 300 && res.data && res.data.ok) {
+            resolve(res.data);
+          } else {
+            console.error('[createPayment] failed:', res.statusCode, res.data);
+            reject(new Error(`createPayment error: ${JSON.stringify(res.data)}`));
+          }
+        },
+        fail: (err) => {
+          console.error('[createPayment] network error:', err);
+          reject(err);
+        }
+      });
+    });
+  },
+
   // ── MENU ROTATION (rotación de 2 meses) ─────────────────────────
   // Cada menú dura 1 mes calendario. El cambio ocurre el primer lunes
   // de cada mes. `menu_rotation_anchor` es cualquier fecha dentro del

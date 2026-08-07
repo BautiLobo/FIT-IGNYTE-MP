@@ -259,7 +259,7 @@ module.exports = {
   how_step4_desc: '餐食在您选择的时间送达。每周续费，不自动续订。',
   how_get_started: '立即开始  →',
   how_any_doubt: '有疑问？',
-  how_contact_us: '💬  联系我们',
+  how_contact_us: '联系我们',
 
   // ── PAY-PROCESSING ─────────────────────────────────────────
   pay_processing_title: '支付处理中…',

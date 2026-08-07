@@ -259,7 +259,7 @@ module.exports = {
   how_step4_desc: 'Meals arrive at your chosen time. Renew each week — no auto-renewal.',
   how_get_started: 'Get started  →',
   how_any_doubt: 'Any doubt?',
-  how_contact_us: '💬  Contact us',
+  how_contact_us: 'Contact us',
 
   // ── PAY-PROCESSING ─────────────────────────────────────────
   pay_processing_title: 'Processing payment...',

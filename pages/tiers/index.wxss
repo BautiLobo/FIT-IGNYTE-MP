@@ -94,11 +94,11 @@
 .bottom-bar { padding:8rpx 0 40rpx; }
 button { margin:0 !important; padding:0 !important; background:transparent; border:none; }
 .btn-contact {
-  background: transparent !important;
-  border: 2rpx solid #2a2a33 !important;
-  border-radius: 24rpx !important;
-  height: 92rpx;
-  line-height: 92rpx;
+  background: #13131a !important;
+  border: 1rpx solid #1a1a22 !important;
+  border-radius: 20rpx !important;
+  height: 96rpx;
+  line-height: 96rpx;
   text-align: center;
   width: 100% !important;
   box-sizing: border-box;
@@ -106,7 +106,7 @@ button { margin:0 !important; padding:0 !important; background:transparent; bord
   margin-bottom: 16rpx;
 }
 .btn-contact::after { border: none; }
-.btn-contact text { font-size: 30rpx; font-weight: 700; color: #9a9aa3; }
+.btn-contact text { font-size: 28rpx; font-weight: 600; color: #beb6b6; }
 .btn-pdf {
   background: rgba(167,139,250,0.12) !important;
   border: 2rpx solid #e8342a !important;
