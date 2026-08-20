@@ -20,6 +20,12 @@ const TIER_BEST_FOR_KEYS = {
   'Balance': ['tiers_balance_1', 'tiers_balance_2', 'tiers_balance_3'],
 };
 
+// Rango de kcal / proteína por comida, bilingüe vía i18n
+const TIER_KCAL_KEY = {
+  'Performance': 'tiers_performance_kcal',
+  'Balance': 'tiers_balance_kcal',
+};
+
 Page({
   data: {
     loading: true,
@@ -69,6 +75,7 @@ Page({
         .map(tier => {
           const displayName = app.getMealName({ name: tier.name, name_zh: tier.name_zh });
           const bestForKeys = TIER_BEST_FOR_KEYS[tier.name] || [];
+          const kcalKey = TIER_KCAL_KEY[tier.name];
           return {
             name: tier.name,
             displayName,
@@ -77,6 +84,7 @@ Page({
             color: tier.color || TIER_COLORS_FALLBACK[tier.name] || '#e8342a',
             icon: TIER_ICON[tier.name] || '🔥',
             bestFor: bestForKeys.map(key => t(key)),
+            kcalRange: kcalKey ? t(kcalKey) : '',
           };
         });
 

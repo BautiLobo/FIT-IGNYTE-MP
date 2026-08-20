@@ -42,6 +42,7 @@
             </view>
           </view>
 
+          <text class="tier-kcal" wx:if="{{item.kcalRange}}">{{item.kcalRange}}</text>
           <text class="tier-sub">{{item.planCount}} {{lbl_plans_available}}</text>
         </view>
       </view>

@@ -49,7 +49,7 @@ App({
     const openid = await this.resolveOpenid();
     if (!openid) return null;
     try {
-      await this.supabase('PATCH', 'clients', { wechat_openid: openid }, `id=eq.${clientId}`);
+      await this.updateClient({ clientId, patch: { wechat_openid: openid } });
     } catch (err) {
       console.error('[captureOpenid] save error:', err);
     }
@@ -125,6 +125,39 @@ App({
     return 'Active';
   },
 
+  // ── CREATE ORDER (vía Edge Function create-order) ───────────────
+  // Reemplaza el POST directo a /rest/v1/new_orders con la anon key: el
+  // INSERT en sí seguía permitido por RLS, pero el helper genérico pide
+  // Prefer: return=representation, y Postgres exige que el rol que inserta
+  // también pueda leer la fila devuelta — cosa que la anon key ya no puede
+  // hacer en new_orders. Esta función usa la service_role key del lado del
+  // servidor y no depende de ninguna policy para devolver la fila creada.
+  createOrder(orderData) {
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/create-order',
+        method: 'POST',
+        header: { 'Content-Type': 'application/json' },
+        data: orderData,
+        success: (res) => {
+          // ok:false con reason:'duplicate_pending_order' es un resultado de
+          // negocio válido (ya tenés un pedido sin resolver), no un error —
+          // se resuelve igual para que el caller decida qué mostrar.
+          if (res.statusCode >= 200 && res.statusCode < 300 && res.data) {
+            resolve(res.data);
+          } else {
+            console.error('[createOrder] failed:', res.statusCode, res.data);
+            reject(new Error(`createOrder error: ${JSON.stringify(res.data)}`));
+          }
+        },
+        fail: (err) => {
+          console.error('[createOrder] network error:', err);
+          reject(err);
+        }
+      });
+    });
+  },
+
   // ── GET CLIENT (vía Edge Function get-client) ───────────────────
   // Reemplaza los GET directos a /rest/v1/clients?id=eq./phone=eq. para
   // clientes normales (sin adminToken): la Edge Function usa la service_role
@@ -153,29 +186,78 @@ App({
     });
   },
 
-  // ── COMPLETE PAYMENT (vía Edge Function complete-payment) ──────
-  // Reemplaza los PATCH directos a `clients`/`new_orders` con la anon key:
-  // `clients` solo tiene policy de SELECT para `authenticated`, así que un
-  // UPDATE con anon key matchea 0 filas (PostgREST devuelve 200 con []),
-  // dejando `paid`/`status` sin actualizar pero sin lanzar ningún error.
-  // Esta función usa la service_role key del lado del servidor.
-  completePayment({ type, clientId, pendingOrderId, status, start_date, expiry_date, plan_id, cutlery, referralCode }) {
+  // ── UPDATE CLIENT (vía Edge Function update-client) ─────────────
+  // Reemplaza los PATCH directos a `clients` con la anon key: esa tabla no
+  // tiene (ni debe tener) UPDATE abierto a anon, porque dejaría a cualquiera
+  // con la anon key (pública, va en el bundle del mini-program) marcar
+  // cualquier cliente como pagado o pisarle datos a otro. Esta función solo
+  // permite tocar columnas de perfil no sensibles del lado del servidor.
+  updateClient({ clientId, patch }) {
     return new Promise((resolve, reject) => {
       wx.request({
-        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/complete-payment',
+        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/update-client',
         method: 'POST',
         header: { 'Content-Type': 'application/json' },
-        data: { type, clientId, pendingOrderId, status, start_date, expiry_date, plan_id, cutlery, referralCode },
+        data: { clientId, patch },
         success: (res) => {
           if (res.statusCode >= 200 && res.statusCode < 300 && res.data && res.data.ok) {
-            resolve(res.data);
+            resolve(res.data.client);
           } else {
-            console.error('[completePayment] failed:', res.statusCode, res.data);
-            reject(new Error(`completePayment error: ${JSON.stringify(res.data)}`));
+            console.error('[updateClient] failed:', res.statusCode, res.data);
+            reject(new Error(`updateClient error: ${JSON.stringify(res.data)}`));
           }
         },
         fail: (err) => {
-          console.error('[completePayment] network error:', err);
+          console.error('[updateClient] network error:', err);
+          reject(err);
+        }
+      });
+    });
+  },
+
+  // ── GET / UPDATE ORDER (vía Edge Functions get-order / update-order) ───
+  // Mismo motivo que get-client/update-client, pero para `new_orders`: sin
+  // esto, cualquiera con la anon key podía leer o editar TODOS los pedidos.
+  getOrder({ orderId }) {
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/get-order',
+        method: 'POST',
+        header: { 'Content-Type': 'application/json' },
+        data: { orderId },
+        success: (res) => {
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            resolve(res.data);
+          } else {
+            console.error('[getOrder] failed:', res.statusCode, res.data);
+            reject(new Error(`getOrder error ${res.statusCode}: ${JSON.stringify(res.data)}`));
+          }
+        },
+        fail: (err) => {
+          console.error('[getOrder] network error:', err);
+          reject(err);
+        }
+      });
+    });
+  },
+
+  updateOrder({ orderId, patch }) {
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/update-order',
+        method: 'POST',
+        header: { 'Content-Type': 'application/json' },
+        data: { orderId, patch },
+        success: (res) => {
+          if (res.statusCode >= 200 && res.statusCode < 300 && res.data && res.data.ok) {
+            resolve(res.data.order);
+          } else {
+            console.error('[updateOrder] failed:', res.statusCode, res.data);
+            reject(new Error(`updateOrder error: ${JSON.stringify(res.data)}`));
+          }
+        },
+        fail: (err) => {
+          console.error('[updateOrder] network error:', err);
           reject(err);
         }
       });
@@ -316,6 +398,108 @@ App({
     return Object.assign({}, plan, {
       displayName: this.getMealName(plan),
       displayTier: this.getMealName({ name: plan.tier, name_zh: plan.tier_zh }),
+    });
+  },
+
+  // ── ADDRESS CHANGES (vía Edge Functions get-address-changes /
+  //    submit-address-change) ──────────────────────────────────
+  // Reemplaza el GET/PATCH/POST directo a /rest/v1/address_changes con la
+  // anon key: esa tabla no tiene (ni debe tener) SELECT abierto a anon,
+  // porque expone direcciones (vieja y nueva) de cualquier cliente.
+  getAddressChanges({ clientId }) {
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/get-address-changes',
+        method: 'POST',
+        header: { 'Content-Type': 'application/json' },
+        data: { clientId },
+        success: (res) => {
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            resolve(res.data);
+          } else {
+            console.error('[getAddressChanges] failed:', res.statusCode, res.data);
+            reject(new Error(`getAddressChanges error ${res.statusCode}: ${JSON.stringify(res.data)}`));
+          }
+        },
+        fail: (err) => {
+          console.error('[getAddressChanges] network error:', err);
+          reject(err);
+        }
+      });
+    });
+  },
+
+  submitAddressChange({ clientId, oldDistrict, oldAddress, newDistrict, newAddress }) {
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/submit-address-change',
+        method: 'POST',
+        header: { 'Content-Type': 'application/json' },
+        data: { clientId, oldDistrict, oldAddress, newDistrict, newAddress },
+        success: (res) => {
+          if (res.statusCode >= 200 && res.statusCode < 300 && res.data && res.data.ok) {
+            resolve(res.data.change);
+          } else {
+            console.error('[submitAddressChange] failed:', res.statusCode, res.data);
+            reject(new Error(`submitAddressChange error: ${JSON.stringify(res.data)}`));
+          }
+        },
+        fail: (err) => {
+          console.error('[submitAddressChange] network error:', err);
+          reject(err);
+        }
+      });
+    });
+  },
+
+  // ── NOTIFICATIONS (vía Edge Functions get-notifications /
+  //    mark-notification-read) ───────────────────────────────────
+  // Mismo motivo: notifications.message puede incluir datos sensibles (ej.
+  // la direccion nueva cuando se aprueba un cambio), asi que ya no queda
+  // SELECT abierto a anon.
+  getNotifications({ clientId }) {
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/get-notifications',
+        method: 'POST',
+        header: { 'Content-Type': 'application/json' },
+        data: { clientId },
+        success: (res) => {
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            resolve(res.data);
+          } else {
+            console.error('[getNotifications] failed:', res.statusCode, res.data);
+            reject(new Error(`getNotifications error ${res.statusCode}: ${JSON.stringify(res.data)}`));
+          }
+        },
+        fail: (err) => {
+          console.error('[getNotifications] network error:', err);
+          reject(err);
+        }
+      });
+    });
+  },
+
+  markNotificationRead({ id }) {
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/mark-notification-read',
+        method: 'POST',
+        header: { 'Content-Type': 'application/json' },
+        data: { id },
+        success: (res) => {
+          if (res.statusCode >= 200 && res.statusCode < 300 && res.data && res.data.ok) {
+            resolve(res.data);
+          } else {
+            console.error('[markNotificationRead] failed:', res.statusCode, res.data);
+            reject(new Error(`markNotificationRead error: ${JSON.stringify(res.data)}`));
+          }
+        },
+        fail: (err) => {
+          console.error('[markNotificationRead] network error:', err);
+          reject(err);
+        }
+      });
     });
   },
 

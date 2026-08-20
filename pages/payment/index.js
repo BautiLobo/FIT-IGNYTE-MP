@@ -79,7 +79,8 @@ Page({
         }
       } else {
         const pendingOrderId = wx.getStorageSync('pendingOrderId');
-        const data = await app.supabase('GET', 'new_orders', null, `id=eq.${pendingOrderId}`);
+        if (!pendingOrderId) return;
+        const data = await app.getOrder({ orderId: pendingOrderId });
         if (data && data.length > 0) {
           const order = data[0];
           this.setData({ order });
@@ -225,7 +226,7 @@ Page({
         }
       } else {
         const pendingOrderId = wx.getStorageSync('pendingOrderId');
-        const orderData = await app.supabase('GET', 'new_orders', null, `id=eq.${pendingOrderId}`);
+        const orderData = pendingOrderId ? await app.getOrder({ orderId: pendingOrderId }) : null;
         const order = orderData && orderData.length > 0 ? orderData[0] : null;
         if (order && order.meals && Object.keys(order.meals).length > 0) {
           await this.saveMealSelections(clientId, order.meals);

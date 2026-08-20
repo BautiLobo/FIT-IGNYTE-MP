@@ -81,7 +81,7 @@ Page({
       const pendingOrderId = wx.getStorageSync('pendingOrderId');
       if (!pendingOrderId) return;
       try {
-        const data = await app.supabase('GET', 'new_orders', null, `id=eq.${pendingOrderId}`);
+        const data = await app.getOrder({ orderId: pendingOrderId });
         if (data && data.length > 0) {
           const order = data[0];
           this.setData({
@@ -155,15 +155,18 @@ Page({
 
       if (editing) {
         const pendingOrderId = wx.getStorageSync('pendingOrderId');
-        await app.supabase('PATCH', 'new_orders', {
-          name: form.name.trim(),
-          phone: form.phone.trim(),
-          district: form.district.trim(),
-          address: form.address.trim(),
-          access: form.access.trim(),
-          allergies: form.allergies.trim(),
-          goal: form.goal.trim(),
-        }, `id=eq.${pendingOrderId}`);
+        await app.updateOrder({
+          orderId: pendingOrderId,
+          patch: {
+            name: form.name.trim(),
+            phone: form.phone.trim(),
+            district: form.district.trim(),
+            address: form.address.trim(),
+            access: form.access.trim(),
+            allergies: form.allergies.trim(),
+            goal: form.goal.trim(),
+          },
+        });
         wx.navigateBack();
         return;
       }
@@ -175,18 +178,21 @@ Page({
       // Si ya existe una orden draft y las meals ya fueron guardadas (storage vacío),
       // solo actualizar los datos personales en la orden existente.
       if (existingPendingOrderId && Object.keys(mealSelections).length === 0) {
-        await app.supabase('PATCH', 'new_orders', {
-          name: form.name.trim(),
-          phone: form.phone.trim(),
-          district: form.district.trim(),
-          address: form.address.trim(),
-          access: form.access.trim(),
-          allergies: form.allergies.trim(),
-          goal: form.goal.trim(),
-          plan_id: selectedPlan.id,
-          start_date: wx.getStorageSync('startDate') || null,
-          expiry_date: wx.getStorageSync('expiryDate') || null,
-        }, `id=eq.${existingPendingOrderId}`);
+        await app.updateOrder({
+          orderId: existingPendingOrderId,
+          patch: {
+            name: form.name.trim(),
+            phone: form.phone.trim(),
+            district: form.district.trim(),
+            address: form.address.trim(),
+            access: form.access.trim(),
+            allergies: form.allergies.trim(),
+            goal: form.goal.trim(),
+            plan_id: selectedPlan.id,
+            start_date: wx.getStorageSync('startDate') || null,
+            expiry_date: wx.getStorageSync('expiryDate') || null,
+          },
+        });
         wx.navigateTo({ url: '/pages/order-summary/index' });
         this.setData({ submitting: false });
         return;
@@ -239,16 +245,32 @@ Page({
         expiry_date: wx.getStorageSync('expiryDate') || null,
       };
 
-      const result = await app.supabase('POST', 'new_orders', orderData);
+      const result = await app.createOrder(orderData);
 
-      if (result && result.length > 0) {
+      if (result && result.reason === 'duplicate_pending_order') {
+        // Mismo openid ya tiene un pedido sin resolver (draft/pending) —
+        // pasa antes de que exista fila en `clients`, así que el chequeo de
+        // arriba (por clients) no lo agarra. Lo mandamos a ver ese pedido
+        // en vez de dejarlo crear uno duplicado.
+        wx.setStorageSync('pendingOrderId', result.existingOrderId);
+        wx.showModal({
+          title: t('register_account_exists_title'),
+          content: t('register_account_exists_body'),
+          showCancel: false,
+          success: () => { wx.reLaunch({ url: '/pages/under-review/index' }); },
+        });
+        this.setData({ submitting: false });
+        return;
+      }
+
+      if (result && result.ok && result.order && result.order.id) {
         // Save order id and go to order summary
-        wx.setStorageSync('pendingOrderId', result[0].id);
+        wx.setStorageSync('pendingOrderId', result.order.id);
         // Clear selections from storage — no longer needed
         wx.removeStorageSync('mealSelections');
         wx.navigateTo({ url: '/pages/order-summary/index' });
       } else {
-        throw new Error('No result from Supabase');
+        throw new Error('No result from createOrder');
       }
 
     } catch (err) {

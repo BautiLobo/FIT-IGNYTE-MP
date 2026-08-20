@@ -23,7 +23,7 @@ Page({
     if (!pendingOrderId) return;
 
     try {
-      const data = await app.supabase('GET', 'new_orders', null, `id=eq.${pendingOrderId}`);
+      const data = await app.getOrder({ orderId: pendingOrderId });
       if (!data || data.length === 0) return;
 
       const order = data[0];

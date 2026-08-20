@@ -37,7 +37,7 @@ Page({
     try {
       const pendingOrderId = wx.getStorageSync('pendingOrderId');
       if (pendingOrderId) {
-        const orderData = await app.supabase('GET', 'new_orders', null, `id=eq.${pendingOrderId}`);
+        const orderData = await app.getOrder({ orderId: pendingOrderId });
         if (orderData && orderData.length > 0) {
           const status = orderData[0].status;
           if (status === 'pending') { wx.reLaunch({ url: '/pages/under-review/index' }); return; }

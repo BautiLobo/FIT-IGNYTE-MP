@@ -17,6 +17,11 @@ const MEALS_HOOK_KEYS = {
   },
 };
 
+// Proteína mínima por comida, por tier — igual que el rango mostrado en la
+// pantalla de tiers (35g+/comida Balance, 55g+/comida Performance). La
+// proteína/día de cada plan es ese valor × cantidad de comidas del plan.
+const PROTEIN_PER_MEAL = { Balance: 35, Performance: 55 };
+
 Page({
   data: {
     plans: [],
@@ -62,7 +67,7 @@ Page({
         ...plan,
         displayName: app.getMealName(plan),
         displayTier: app.getMealName({ name: plan.tier, name_zh: this.data.tierZh || '' }),
-        lbl_kcal: plan.kcal ? t('plans_kcal', plan.kcal) : '',
+        lbl_kcal: plan.kcal ? t('plans_kcal', plan.kcal, (PROTEIN_PER_MEAL[plan.tier] || 0) * (plan.meals || 0)) : '',
         // Frase hook por tier + cantidad de comidas, fallback a "X meal(s)/day"
         mealsHook: (() => {
           const key = MEALS_HOOK_KEYS[plan.tier] && MEALS_HOOK_KEYS[plan.tier][plan.meals];

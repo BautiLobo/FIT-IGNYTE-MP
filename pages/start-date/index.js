@@ -32,8 +32,11 @@ Page({
     const fromRenewal = options.from === 'renewal';
     const next = options.next === 'edit-meals' ? 'edit-meals' : 'meal-select';
     this.setData({ fromRenewal, next });
-    // Min date = next business day
-    const min = this.getNextBusinessDay(new Date());
+    // Min date = next business day. After the 8pm cutoff, kitchen prep for
+    // the following day is already closed, so push the minimum one more day out.
+    const now = new Date();
+    const cutoffPassed = now.getHours() >= 20;
+    const min = this.getNextBusinessDay(now, cutoffPassed ? 2 : 1);
     const minStr = this.toDateString(min);
     const formatted = this.formatDate(min);
     const expiry = this.addBusinessDays(min, 4); // 5 days total including start
@@ -76,9 +79,9 @@ Page({
     return false;
   },
 
-  getNextBusinessDay(date) {
+  getNextBusinessDay(date, startOffset = 1) {
     const d = new Date(date);
-    d.setDate(d.getDate() + 1);
+    d.setDate(d.getDate() + startOffset);
     while (this.isNonWorkingDay(d)) {
       d.setDate(d.getDate() + 1);
     }

@@ -58,7 +58,7 @@ Page({
     if (!clientId) return;
 
     try {
-      const data = await app.supabase('GET', 'notifications', null, `client_id=eq.${clientId}&is_read=eq.false&order=created_at.desc`);
+      const data = await app.getNotifications({ clientId });
       this.setData({ notifications: data || [] });
     } catch (err) {
       console.error('Load notifications error:', err);
@@ -71,7 +71,7 @@ Page({
     this.setData({ notifications });
 
     try {
-      await app.supabase('PATCH', 'notifications', { is_read: true }, `id=eq.${id}`);
+      await app.markNotificationRead({ id });
     } catch (err) {
       console.error('Dismiss notification error:', err);
     }

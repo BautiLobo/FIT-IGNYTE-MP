@@ -71,7 +71,7 @@ Page({
     }
 
     try {
-      const data = await app.supabase('GET', 'new_orders', null, `id=eq.${pendingOrderId}`);
+      const data = await app.getOrder({ orderId: pendingOrderId });
       if (!data || data.length === 0) {
         wx.navigateBack();
         return;
@@ -107,11 +107,11 @@ Page({
       const updatedMealSelections = wx.getStorageSync('mealSelections');
       const hasUpdatedMeals = updatedMealSelections && typeof updatedMealSelections === 'object' && Object.keys(updatedMealSelections).length > 0;
       if (hasUpdatedMeals) {
-        await app.supabase('PATCH', 'new_orders', { meals: updatedMealSelections }, `id=eq.${pendingOrderId}`);
+        await app.updateOrder({ orderId: pendingOrderId, patch: { meals: updatedMealSelections } });
         wx.removeStorageSync('mealSelections');
       }
 
-      const data = await app.supabase('GET', 'new_orders', null, `id=eq.${pendingOrderId}`);
+      const data = await app.getOrder({ orderId: pendingOrderId });
       if (data && data.length > 0) {
         const order = data[0];
         const mealSummary = await this.buildMealSummary(order.meals || {});
@@ -210,7 +210,7 @@ Page({
     this.setData({ submitting: true });
     try {
       const pendingOrderId = wx.getStorageSync('pendingOrderId');
-      await app.supabase('PATCH', 'new_orders', { status: 'pending' }, `id=eq.${pendingOrderId}`);
+      await app.updateOrder({ orderId: pendingOrderId, patch: { status: 'pending' } });
       wx.reLaunch({ url: '/pages/under-review/index' });
     } catch (err) {
       console.error('Submit error:', err);

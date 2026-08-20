@@ -26,7 +26,7 @@ Page({
     if (!pendingOrderId) return;
 
     try {
-      const data = await app.supabase('GET', 'new_orders', null, `id=eq.${pendingOrderId}`);
+      const data = await app.getOrder({ orderId: pendingOrderId });
       if (data && data.length > 0) {
         this.setData({ order: data[0] });
       }

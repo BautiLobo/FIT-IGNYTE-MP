@@ -80,7 +80,7 @@ Page({
         }
       });
 
-      const latest = await app.supabase('GET', 'address_changes', null, `client_id=eq.${clientId}&order=created_at.desc&limit=1`);
+      const latest = await app.getAddressChanges({ clientId });
       const latestChange = latest && latest.length > 0 ? latest[0] : null;
 
       if (latestChange && latestChange.status === 'pending') {
@@ -141,32 +141,25 @@ Page({
       // El distrito/dirección no se actualizan directo — quedan pendientes
       // de revisión para chequear que estén en zona de cobertura. El resto
       // de los campos se guarda normal.
-      await app.supabase('PATCH', 'clients', {
-        name:      form.name.trim(),
-        phone:     newPhone,
-        access:    form.access.trim(),
-        allergies: form.allergies.trim(),
-        goal:      form.goal.trim(),
-      }, `id=eq.${clientId}`);
+      await app.updateClient({
+        clientId,
+        patch: {
+          name:      form.name.trim(),
+          phone:     newPhone,
+          access:    form.access.trim(),
+          allergies: form.allergies.trim(),
+          goal:      form.goal.trim(),
+        },
+      });
 
       if (addressChanged) {
-        const existingPending = await app.supabase('GET', 'address_changes', null, `client_id=eq.${clientId}&status=eq.pending`);
-
-        if (existingPending && existingPending.length > 0) {
-          await app.supabase('PATCH', 'address_changes', {
-            new_district: newDistrict,
-            new_address: newAddress,
-          }, `id=eq.${existingPending[0].id}`);
-        } else {
-          await app.supabase('POST', 'address_changes', {
-            client_id: clientId,
-            old_district: originalDistrict,
-            old_address: originalAddress,
-            new_district: newDistrict,
-            new_address: newAddress,
-            status: 'pending',
-          });
-        }
+        await app.submitAddressChange({
+          clientId,
+          oldDistrict: originalDistrict,
+          oldAddress: originalAddress,
+          newDistrict,
+          newAddress,
+        });
         wx.showToast({ title: t('register_save_changes') + '. ' + t('register_delivery_note'), icon: 'none' });
       } else {
         wx.showToast({ title: t('register_save_changes') + ' ✓', icon: 'none' });

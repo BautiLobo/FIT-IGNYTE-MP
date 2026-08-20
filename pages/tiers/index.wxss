@@ -83,6 +83,8 @@
 
 .tier-bullet-text { font-size: 26rpx; font-weight: 700; color: #e4e4e7; }
 
+.tier-kcal { font-size:24rpx; font-weight:700; color:#beb6b6; display:block; margin-bottom: 10rpx; }
+
 .tier-sub { font-size:26rpx; color:#beb6b6; display:block; }
 
 /* ── HINT ── */

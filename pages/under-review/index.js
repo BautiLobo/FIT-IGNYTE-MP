@@ -35,7 +35,7 @@ Page({
     if (!pendingOrderId) return;
 
     try {
-      const data = await app.supabase('GET', 'new_orders', null, `id=eq.${pendingOrderId}`);
+      const data = await app.getOrder({ orderId: pendingOrderId });
       if (data && data.length > 0) {
         const order = data[0];
         const displayPlan = selectedPlan ? app.getDisplayPlan(selectedPlan) : null;
@@ -60,7 +60,7 @@ Page({
     if (!pendingOrderId) return;
 
     try {
-      const data = await app.supabase('GET', 'new_orders', null, `id=eq.${pendingOrderId}`);
+      const data = await app.getOrder({ orderId: pendingOrderId });
       if (!data || data.length === 0) return;
 
       const status = data[0].status;
