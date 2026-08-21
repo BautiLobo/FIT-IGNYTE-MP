@@ -6,6 +6,10 @@ const config = {
   ADMIN_WECHAT_SECRET: 'YOUR_WECHAT_APP_SECRET',
   ADMIN_OPENID: 'YOUR_ADMIN_OPENID',
   WECHAT_ID: 'YOUR_WECHAT_ID',
+  // true = pagos simulados en local (requiere también el secret
+  // ALLOW_PAYMENT_SIMULATION='true' en Supabase). Dejar false salvo que
+  // estés probando el flujo de pago sin plata real.
+  SIMULATE_PAYMENTS: false,
 };
 
 module.exports = config;

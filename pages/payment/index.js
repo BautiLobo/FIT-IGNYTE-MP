@@ -9,6 +9,7 @@ Page({
     selectedPlan: null,
     total: 0,
     fromRenewal: false,
+    deferToPending: false,
     // Referral code
     referralInput: '',
     referralApplied: false,
@@ -73,9 +74,18 @@ Page({
         const clientId = wx.getStorageSync('clientId');
         const data = await app.getClient({ clientId });
         if (data && data.length > 0) {
+          const client = data[0];
+          // Renovacion anticipada (ver RENEWAL_PLAN.md): si el plan ACTUAL
+          // del cliente (el de antes de esta renovacion) todavia no vencio,
+          // las selecciones de "choose new meals" (que se guardan aca, no en
+          // meal-select.js) tienen que ir a pending_meal_selections, no a
+          // meal_selections -- misma razon que en edit-meals.js.
+          const today = new Date(); today.setHours(0, 0, 0, 0);
+          const currentExpiry = client.expiry_date ? new Date(client.expiry_date + 'T00:00:00') : null;
+          const deferToPending = !!(currentExpiry && today <= currentExpiry);
           // En renovación, `order` es directamente la fila de clients:
           // ahí ya está el flag referral_used del pago anterior.
-          this.setData({ order: data[0], client: data[0], referralAlreadyUsed: !!data[0].referral_used });
+          this.setData({ order: client, client, referralAlreadyUsed: !!client.referral_used, deferToPending });
         }
       } else {
         const pendingOrderId = wx.getStorageSync('pendingOrderId');
@@ -186,6 +196,22 @@ Page({
 
       wx.hideLoading();
 
+      // Solo dev/local (ver config.js `SIMULATE_PAYMENTS`): saltea WeChat
+      // Pay de verdad y marca el pago como pagado directo del lado del
+      // servidor (dev-simulate-payment), que igual lo rechaza si el
+      // secret correspondiente no está activo en Supabase.
+      if (app.globalData.simulatePayments) {
+        try {
+          await app.simulatePayment({ outTradeNo: payment.outTradeNo });
+          wx.navigateTo({ url: '/pages/pay-processing/index' });
+          this.finishAfterPayment(clientId, payment.outTradeNo);
+        } catch (simErr) {
+          console.error('simulatePayment failed:', simErr);
+          wx.showModal({ title: t('payment_error_title'), content: simErr.message || t('payment_error_content'), showCancel: false });
+        }
+        return;
+      }
+
       wx.requestPayment({
         timeStamp: payment.timeStamp,
         nonceStr: payment.nonceStr,
@@ -194,7 +220,7 @@ Page({
         paySign: payment.paySign,
         success: () => {
           wx.navigateTo({ url: '/pages/pay-processing/index' });
-          this.finishAfterPayment(clientId);
+          this.finishAfterPayment(clientId, payment.outTradeNo);
         },
         fail: (err) => {
           console.error('wx.requestPayment failed:', err);
@@ -206,16 +232,22 @@ Page({
     } catch (err) {
       wx.hideLoading();
       console.error('payNow error:', err);
+      // Renovación anticipada duplicada (ver RENEWAL_PLAN.md, decisión 6):
+      // no debería llegar acá con el botón ya oculto en Home, pero por las
+      // dudas mostramos un mensaje claro en vez del genérico.
+      if (err.code === 'duplicate_pending_renewal') {
+        wx.showModal({ title: t('payment_error_title'), content: t('payment_already_renewed'), showCancel: false });
+        return;
+      }
       wx.showModal({ title: t('payment_error_title'), content: err.message || t('payment_error_content'), showCancel: false });
     }
   },
 
   // El pago ya se confirmó del lado del usuario en wx.requestPayment(), pero
   // quien realmente activa al cliente es el webhook de WeChat Pay (server to
-  // server), que puede tardar un segundo en llegar. Esperamos a que
-  // clients.paid se ponga en true antes de navegar, y guardamos las
-  // selecciones de comida mientras tanto.
-  async finishAfterPayment(clientId) {
+  // server), que puede tardar un segundo en llegar. Esperamos confirmación
+  // antes de navegar, y guardamos las selecciones de comida mientras tanto.
+  async finishAfterPayment(clientId, outTradeNo) {
     const { fromRenewal } = this.data;
 
     try {
@@ -233,7 +265,7 @@ Page({
         }
       }
 
-      await this.waitForPaymentConfirmation(clientId);
+      await this.waitForPaymentConfirmation(clientId, outTradeNo);
 
       wx.removeStorageSync('mealSelections');
       wx.removeStorageSync('startDate');
@@ -259,20 +291,37 @@ Page({
     }
   },
 
-  // Sondea clients.paid hasta ~10s. El pago ya se hizo (WeChat lo confirmó
-  // en wx.requestPayment); esto solo espera a que el webhook lo refleje en
-  // la base. Si tarda más, seguimos igual — el webhook lo va a dejar
-  // consistente en cuanto llegue, aunque el usuario ya haya navegado.
-  waitForPaymentConfirmation(clientId) {
+  // Sondea hasta ~10s que el webhook de WeChat Pay ya proceso el pago. El
+  // pago ya se hizo (WeChat lo confirmó en wx.requestPayment); esto solo
+  // espera a que el servidor lo refleje. Si tarda más, seguimos igual — el
+  // webhook lo va a dejar consistente en cuanto llegue, aunque el usuario
+  // ya haya navegado.
+  //
+  // Renovación anticipada (deferToPending=true): complete-payment no toca
+  // `clients` en ese caso (queda para el cron diario, ver RENEWAL_PLAN.md),
+  // así que `clients.paid` nunca refleja este pago puntual. Se sondea en
+  // cambio `payments.status` por out_trade_no (get-payment-status), que sí
+  // se pone en 'paid' apenas el webhook lo procesa, sin importar si
+  // complete-payment aplicó o difirió el resto.
+  waitForPaymentConfirmation(clientId, outTradeNo) {
+    const { deferToPending } = this.data;
     return new Promise((resolve) => {
       let attempts = 0;
       const check = async () => {
         attempts++;
         try {
-          const data = await app.getClient({ clientId });
-          if (data && data.length > 0 && data[0].paid) {
-            resolve();
-            return;
+          if (deferToPending && outTradeNo) {
+            const payment = await app.getPaymentStatus({ outTradeNo });
+            if (payment && payment.status === 'paid') {
+              resolve();
+              return;
+            }
+          } else {
+            const data = await app.getClient({ clientId });
+            if (data && data.length > 0 && data[0].paid) {
+              resolve();
+              return;
+            }
           }
         } catch (err) {
           console.error('waitForPaymentConfirmation error:', err);
@@ -289,12 +338,17 @@ Page({
   // meal-select solo guarda en wx.storage y dependía de que algo más lo
   // sincronizara más adelante en el flujo de renovación.
   async saveMealSelections(clientId, allSelections) {
+    // Renovacion anticipada (ver RENEWAL_PLAN.md, Causa Raiz #3): si el plan
+    // actual del cliente todavia esta activo, no escribir en meal_selections
+    // -- pisaria la semana que la cocina ya esta preparando. Se escribe en
+    // pending_meal_selections y el cron la aplica el dia que corresponde.
+    const table = this.data.deferToPending ? 'pending_meal_selections' : 'meal_selections';
     const dayMap = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday' };
     for (const key in dayMap) {
       const label = dayMap[key];
       const sel = allSelections[key];
       if (!sel || !sel.meal_ids || sel.meal_ids.length === 0) continue;
-      const existing = await app.supabase('GET', 'meal_selections', null, `client_id=eq.${clientId}&day=eq.${label}&slot=eq.1`);
+      const existing = await app.supabase('GET', table, null, `client_id=eq.${clientId}&day=eq.${label}&slot=eq.1`);
       const payload = {
         client_id: clientId,
         day: label,
@@ -304,9 +358,9 @@ Page({
         note: sel.notes || '',
       };
       if (existing && existing.length > 0) {
-        await app.supabase('PATCH', 'meal_selections', payload, `client_id=eq.${clientId}&day=eq.${label}&slot=eq.1`);
+        await app.supabase('PATCH', table, payload, `client_id=eq.${clientId}&day=eq.${label}&slot=eq.1`);
       } else {
-        await app.supabase('POST', 'meal_selections', payload);
+        await app.supabase('POST', table, payload);
       }
     }
   },

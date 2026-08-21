@@ -19,6 +19,7 @@ Page({
     weekMeals: [],
     todayDelivery: null,
     showRenewal: false,
+    hasPendingRenewal: false,
     daysLeft: 0,
     notifications: [],
     lbl_hi: '',
@@ -29,6 +30,11 @@ Page({
     lbl_this_weeks_meals: '',
     lbl_edit: '',
     lbl_contact: '',
+    lbl_renewal_title: '',
+    lbl_renewal_sub: '',
+    lbl_renewal_btn: '',
+    lbl_renewal_pending_title: '',
+    lbl_renewal_pending_sub: '',
   },
 
   async onLoad() {
@@ -39,6 +45,9 @@ Page({
       lbl_this_weeks_meals: t('home_this_weeks_meals'),
       lbl_edit: t('home_edit'),
       lbl_contact: t('home_contact'),
+      lbl_renewal_title: t('home_renewal_title'),
+      lbl_renewal_btn: t('home_renewal_btn'),
+      lbl_renewal_pending_title: t('home_renewal_pending_title'),
     });
     await this.loadClientData();
     await this.loadNotifications();
@@ -124,8 +133,29 @@ Page({
         startDateFormatted = this.formatFullDate(d);
       }
 
+      // Renovación anticipada ya pagada pero todavía sin aplicar (el cron
+      // diario la aplica el día que corresponde -- ver RENEWAL_PLAN.md,
+      // decisión 4). `get-client` ya adjunta este chequeo en la misma
+      // respuesta. Mientras esté presente, no hay que ofrecer renovar de
+      // nuevo (create-payment lo bloquearía igual, pero mejor no llegar ni
+      // a mostrar el botón).
+      const pendingRenewal = client.pending_renewal || null;
+      const hasPendingRenewal = !!pendingRenewal;
+      let pendingRenewalDateFormatted = '';
+      if (pendingRenewal && pendingRenewal.start_date) {
+        pendingRenewalDateFormatted = this.formatFullDate(new Date(pendingRenewal.start_date + 'T00:00:00'));
+      }
+
       const realToday = new Date().getDay();
-      const showRenewal = !isUpcoming && (realToday === 5 || daysLeft <= 1);
+      const showRenewal = !isUpcoming && !hasPendingRenewal && (realToday === 5 || daysLeft <= 2);
+
+      // Texto del banner: "hoy"/"mañana" en vez de "0/1 days left" cuando
+      // corresponde; genérico con el número el resto de los casos (incluido
+      // el aviso de los viernes cuando quedan más de 2 días).
+      let renewalSubText;
+      if (daysLeft <= 0) renewalSubText = t('home_renewal_sub_today');
+      else if (daysLeft === 1) renewalSubText = t('home_renewal_sub_tomorrow');
+      else renewalSubText = t('home_renewal_sub', daysLeft);
 
       const planLabel = client.plan_name || '';
 
@@ -147,6 +177,7 @@ Page({
         weekMeals,
         todayDelivery,
         showRenewal,
+        hasPendingRenewal,
         daysLeft,
         planLabel,
         planPrice,
@@ -156,6 +187,8 @@ Page({
         loading: false,
         lbl_hi: t('home_hi', firstName),
         lbl_first_delivery: t('home_first_delivery', startDateFormatted),
+        lbl_renewal_sub: renewalSubText,
+        lbl_renewal_pending_sub: t('home_renewal_pending_sub', pendingRenewalDateFormatted),
       });
 
     } catch (err) {
@@ -222,9 +255,15 @@ Page({
     return { day: todayMeals.day, time: todayMeals.time };
   },
 
+  // Diferencia en días de calendario (medianoche a medianoche, hora local),
+  // no en milisegundos -- `new Date(expiresAt)` sin 'T00:00:00' se parsea
+  // como UTC, y mezclado con `new Date()` (local) el corte de "1 día antes"
+  // podía atrasarse hasta 8hs (huso de Shanghai) cerca de la medianoche.
   getDaysLeft(expiresAt) {
     if (!expiresAt) return 999;
-    return Math.ceil((new Date(expiresAt) - new Date()) / 86400000);
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const expiry = new Date(expiresAt + 'T00:00:00');
+    return Math.round((expiry - today) / 86400000);
   },
 
   // Formatea una fecha como "Monday, Aug 3" (EN) o "8月3日 周一" (ZH).

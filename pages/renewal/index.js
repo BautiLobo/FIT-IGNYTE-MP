@@ -45,7 +45,16 @@ Page({
       if (!data || data.length === 0) return;
 
       const client = data[0];
-      const expired = !client.expiry_date || new Date(client.expiry_date) < new Date();
+      // Comparación por fecha de calendario (medianoche local), no por
+      // milisegundos -- `new Date(client.expiry_date)` sin 'T00:00:00' se
+      // parsea como UTC; mezclado con `new Date()` (local) esto marcaba el
+      // plan como "expirado" desde temprano en la mañana del día en que
+      // vence de verdad (huso de Shanghai), en vez de recién al día
+      // siguiente -- mismo bug que se encontró y arregló en
+      // home.js/getDaysLeft().
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const expiryDate = client.expiry_date ? new Date(client.expiry_date + 'T00:00:00') : null;
+      const expired = !expiryDate || today > expiryDate;
 
       // Load current plan price
       let currentPlanPrice = 0, planTier = '', planName = '', planMeals = 0;

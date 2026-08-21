@@ -17,6 +17,9 @@ App({
 
   globalData: {
     clientId: null,
+    // Ver config.js: requiere también el secret ALLOW_PAYMENT_SIMULATION
+    // en Supabase para que dev-simulate-payment acepte el llamado.
+    simulatePayments: config.SIMULATE_PAYMENTS === true,
   },
 
   // ── WECHAT SUBSCRIBE MESSAGES (push notifications) ──────────────
@@ -279,11 +282,75 @@ App({
             resolve(res.data);
           } else {
             console.error('[createPayment] failed:', res.statusCode, res.data);
-            reject(new Error(`createPayment error: ${JSON.stringify(res.data)}`));
+            const err = new Error(`createPayment error: ${JSON.stringify(res.data)}`);
+            // Código de error estructurado (ej. 'duplicate_pending_renewal')
+            // para que el caller pueda mostrar un mensaje específico en vez
+            // del genérico -- ver RENEWAL_PLAN.md, decisión 6.
+            err.code = res.data && res.data.error;
+            reject(err);
           }
         },
         fail: (err) => {
           console.error('[createPayment] network error:', err);
+          reject(err);
+        }
+      });
+    });
+  },
+
+  // ── SIMULATE PAYMENT (solo dev/local, ver config.js) ─────────────
+  // Reemplaza a wx.requestPayment() + el webhook de WeChat cuando
+  // globalData.simulatePayments está en true: marca el pago como pagado
+  // del lado del servidor y dispara el mismo complete-payment que usaría
+  // el webhook real. La Edge Function la rechaza igual (403) si el secret
+  // ALLOW_PAYMENT_SIMULATION no está activo en Supabase, así que dejar
+  // esto en true acá no alcanza por sí solo para saltarse un pago real.
+  simulatePayment({ outTradeNo }) {
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/dev-simulate-payment',
+        method: 'POST',
+        header: { 'Content-Type': 'application/json' },
+        data: { out_trade_no: outTradeNo },
+        success: (res) => {
+          if (res.statusCode >= 200 && res.statusCode < 300 && res.data && res.data.ok) {
+            resolve(res.data);
+          } else {
+            console.error('[simulatePayment] failed:', res.statusCode, res.data);
+            reject(new Error(`simulatePayment error: ${JSON.stringify(res.data)}`));
+          }
+        },
+        fail: (err) => {
+          console.error('[simulatePayment] network error:', err);
+          reject(err);
+        }
+      });
+    });
+  },
+
+  // ── GET PAYMENT STATUS (vía Edge Function get-payment-status) ────
+  // Chequeo liviano de una fila de `payments` por out_trade_no, sin PII.
+  // Existe para confirmar que un pago se proceso sin depender de
+  // `clients.paid` -- necesario en renovaciones anticipadas, donde
+  // complete-payment deja `clients` sin tocar hasta que el cron diario lo
+  // aplica (ver RENEWAL_PLAN.md).
+  getPaymentStatus({ outTradeNo }) {
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/get-payment-status',
+        method: 'POST',
+        header: { 'Content-Type': 'application/json' },
+        data: { out_trade_no: outTradeNo },
+        success: (res) => {
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            resolve(res.data);
+          } else {
+            console.error('[getPaymentStatus] failed:', res.statusCode, res.data);
+            reject(new Error(`getPaymentStatus error ${res.statusCode}: ${JSON.stringify(res.data)}`));
+          }
+        },
+        fail: (err) => {
+          console.error('[getPaymentStatus] network error:', err);
           reject(err);
         }
       });

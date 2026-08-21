@@ -43,8 +43,9 @@
       </view>
     </view>
 
-    <!-- Referral code -->
-    <view class="card" wx:if="{{!referralAlreadyUsed}}">
+    <!-- Referral code: solo en alta nueva, no en renovación (create-payment
+         lo ignora igual del lado del servidor si viene de una renovación) -->
+    <view class="card" wx:if="{{!referralAlreadyUsed && !fromRenewal}}">
       <text class="card-label">{{lbl_referral_label}}</text>
 
       <view class="referral-row" wx:if="{{!referralApplied}}">

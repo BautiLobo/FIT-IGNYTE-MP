@@ -19,6 +19,7 @@ Page({
     plan: null,
     clientId: null,
     fromRenewal: false,
+    deferToPending: false,
     days: [],
     rotationAnchor: null,
     rotationOrder: [1, 2, 3, 4],
@@ -84,14 +85,27 @@ Page({
       const today = new Date(); today.setHours(0, 0, 0, 0);
       const startDateObj = client.start_date ? new Date(client.start_date + 'T00:00:00') : null;
       const startDateStr = renewalStartDate || (startDateObj && startDateObj > today ? client.start_date : null);
-      this.setData({ startDateStr });
+
+      // Renovacion anticipada (ver RENEWAL_PLAN.md): si el plan ACTUAL del
+      // cliente (el de antes de esta renovacion) todavia no vencio, no hay
+      // que pisar meal_selections -- esa tabla es la semana que la cocina
+      // esta preparando ahora mismo. Las elecciones de esta renovacion se
+      // guardan en pending_meal_selections y el cron las aplica el dia que
+      // arranca el ciclo nuevo.
+      const currentExpiry = client.expiry_date ? new Date(client.expiry_date + 'T00:00:00') : null;
+      const deferToPending = fromRenewal && !!(currentExpiry && today <= currentExpiry);
+      this.setData({ startDateStr, deferToPending });
 
       const planData = await app.supabase('GET', 'plans', null, `id=eq.${client.plan_id}`);
       const plan = planData && planData.length > 0 ? app.getDisplayPlan(planData[0]) : null;
       if (!plan) { wx.navigateBack(); return; }
 
-      // Load existing meal selections
-      const selectionsData = await app.supabase('GET', 'meal_selections', null, `client_id=eq.${clientId}&order=day.asc`);
+      // Load existing meal selections -- si esta renovacion quedo diferida
+      // (deferToPending), el prefill tiene que leer lo que el cliente ya
+      // eligio para el ciclo nuevo (pending_meal_selections), no la semana
+      // vieja que todavia esta en curso.
+      const selectionsTable = deferToPending ? 'pending_meal_selections' : 'meal_selections';
+      const selectionsData = await app.supabase('GET', selectionsTable, null, `client_id=eq.${clientId}&order=day.asc`);
       const allSelections = {};
       (selectionsData || []).forEach(row => {
         const key = DAY_KEY_MAP[row.day];
@@ -313,13 +327,18 @@ Page({
   },
 
   async saveMealSelections(clientId, allSelections) {
+    // Renovacion anticipada (ver RENEWAL_PLAN.md, Causa Raiz #3): si el plan
+    // actual del cliente todavia esta activo, no escribir en meal_selections
+    // -- pisaria la semana que la cocina ya esta preparando. Se escribe en
+    // pending_meal_selections y el cron la aplica el dia que corresponde.
+    const table = this.data.deferToPending ? 'pending_meal_selections' : 'meal_selections';
     const dayMap = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday' };
     for (const key in dayMap) {
       const label = dayMap[key];
       const sel = allSelections[key];
       if (!sel || !sel.meal_ids || sel.meal_ids.length === 0) continue;
       // PATCH si existe, POST si no
-      const existing = await app.supabase('GET', 'meal_selections', null, `client_id=eq.${clientId}&day=eq.${label}&slot=eq.1`);
+      const existing = await app.supabase('GET', table, null, `client_id=eq.${clientId}&day=eq.${label}&slot=eq.1`);
       const payload = {
         client_id: clientId,
         day: label,
@@ -329,9 +348,9 @@ Page({
         note: sel.notes || '',
       };
       if (existing && existing.length > 0) {
-        await app.supabase('PATCH', 'meal_selections', payload, `client_id=eq.${clientId}&day=eq.${label}&slot=eq.1`);
+        await app.supabase('PATCH', table, payload, `client_id=eq.${clientId}&day=eq.${label}&slot=eq.1`);
       } else {
-        await app.supabase('POST', 'meal_selections', payload);
+        await app.supabase('POST', table, payload);
       }
     }
   },

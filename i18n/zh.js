@@ -33,6 +33,13 @@ module.exports = {
   home_snack: '零食',
   sauce: '酱料',
   home_contact: '联系 FIT IGNYTE',
+  home_renewal_title: '您的套餐即将到期',
+  home_renewal_sub: '还剩 %s 天 · 现在续费，餐食不中断',
+  home_renewal_sub_tomorrow: '明天到期 · 现在续费，餐食不中断',
+  home_renewal_sub_today: '今天到期 · 现在续费，餐食不中断',
+  home_renewal_btn: '续费',
+  home_renewal_pending_title: '✓ 续费已确认',
+  home_renewal_pending_sub: '您的新套餐将于 %s 开始',
 
   // ── TIER NAMES ─────────────────────────────────────────────
   tier_lean_fit: '精益健身',
@@ -197,6 +204,7 @@ module.exports = {
   payment_contact_title: '通过微信联系我们',
   payment_contact_content: '搜索：fitignyte_shanghai',
   payment_renewed: '套餐已续费！',
+  payment_already_renewed: '您已经续费过了 — 请在首页查看新套餐的开始日期。',
 
   // ── RENEWAL ────────────────────────────────────────────────
   renewal_title: '续费套餐',

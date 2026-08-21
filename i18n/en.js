@@ -33,6 +33,13 @@ module.exports = {
   home_snack: 'Snack',
   sauce: 'Sauce',
   home_contact: 'Contact FIT IGNYTE',
+  home_renewal_title: 'Your plan is ending soon',
+  home_renewal_sub: '%s days left · renew now to keep your meals coming',
+  home_renewal_sub_tomorrow: 'Ends tomorrow · renew now to keep your meals coming',
+  home_renewal_sub_today: 'Ends today · renew now to keep your meals coming',
+  home_renewal_btn: 'Renew',
+  home_renewal_pending_title: '✓ Renewal confirmed',
+  home_renewal_pending_sub: 'Your new plan starts %s',
 
   // ── TIER NAMES ─────────────────────────────────────────────
   tier_lean_fit: 'Lean Fit',
@@ -197,6 +204,7 @@ module.exports = {
   payment_contact_title: 'Contact us on WeChat',
   payment_contact_content: 'Search for: fitignyte_shanghai',
   payment_renewed: 'Plan renewed!',
+  payment_already_renewed: "You've already renewed — check Home for your new plan's start date.",
 
   // ── RENEWAL ────────────────────────────────────────────────
   renewal_title: 'Renew your plan',

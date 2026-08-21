@@ -1,4 +1,5 @@
 // pages/start-date/index.js
+const app = getApp();
 const { PUBLIC_HOLIDAYS, MAKEUP_WORKDAYS } = require('./holidays');
 const t = require('../../i18n/index');
 
@@ -19,7 +20,7 @@ Page({
     lbl_continue: '',
   },
 
-  onLoad(options) {
+  async onLoad(options) {
     this.setData({
       lbl_topbar: t('start_date_topbar'),
       lbl_heading: t('start_date_heading'),
@@ -36,7 +37,30 @@ Page({
     // the following day is already closed, so push the minimum one more day out.
     const now = new Date();
     const cutoffPassed = now.getHours() >= 20;
-    const min = this.getNextBusinessDay(now, cutoffPassed ? 2 : 1);
+    let min = this.getNextBusinessDay(now, cutoffPassed ? 2 : 1);
+
+    // Renovación anticipada (ver RENEWAL_PLAN.md): si el cliente renueva
+    // antes de que venza su plan actual, el mínimo no puede ser antes del
+    // día siguiente a ese vencimiento -- si no, se pisa o se solapa con el
+    // ciclo en curso. Se usa el mayor entre "próximo día hábil desde hoy" y
+    // "próximo día hábil después del vencimiento actual".
+    if (fromRenewal) {
+      try {
+        const clientId = wx.getStorageSync('clientId');
+        if (clientId) {
+          const data = await app.getClient({ clientId });
+          const client = data && data[0];
+          if (client && client.expiry_date) {
+            const currentExpiry = new Date(client.expiry_date + 'T00:00:00');
+            const minAfterExpiry = this.getNextBusinessDay(currentExpiry, 1);
+            if (minAfterExpiry > min) min = minAfterExpiry;
+          }
+        }
+      } catch (err) {
+        console.error('start-date onLoad client fetch error:', err);
+      }
+    }
+
     const minStr = this.toDateString(min);
     const formatted = this.formatDate(min);
     const expiry = this.addBusinessDays(min, 4); // 5 days total including start
