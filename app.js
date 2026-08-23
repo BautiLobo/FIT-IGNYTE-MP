@@ -358,9 +358,11 @@ App({
   },
 
   // ── MENU ROTATION (rotación de 2 meses) ─────────────────────────
-  // Cada menú dura 1 mes calendario. El cambio ocurre el primer lunes
-  // de cada mes. `menu_rotation_anchor` es cualquier fecha dentro del
-  // mes que inicia el ciclo. `menu_rotation_order` tiene 2 elementos.
+  // Cada menú dura 1 mes calendario. El cambio ocurre el primer día hábil
+  // (lunes a viernes) de cada mes -- puede caer en medio de una semana de
+  // entrega si el mes no arranca en lunes. `menu_rotation_anchor` es
+  // cualquier fecha dentro del mes que inicia el ciclo.
+  // `menu_rotation_order` tiene 2 elementos.
   async getMenuRotation() {
     const data = await this.supabase('GET', 'settings', null, `key=in.(menu_rotation_anchor,menu_rotation_order)`);
     const map = {};
@@ -392,20 +394,20 @@ App({
   getWeekIndexForDay(dayKey, anchor, order, startDateStr) {
     if (!anchor || !order || order.length !== 2) return 1;
 
-    // Devuelve el primer lunes del mes dado (year, month 0-based)
-    const firstMondayOfMonth = (year, month) => {
+    // Devuelve el primer día hábil (lunes a viernes) del mes dado (year, month 0-based)
+    const firstBusinessDayOfMonth = (year, month) => {
       const d = new Date(year, month, 1);
       const dow = d.getDay();
-      const offset = dow === 0 ? 1 : dow === 1 ? 0 : 8 - dow;
+      const offset = dow === 0 ? 1 : dow === 6 ? 2 : 0;
       return new Date(year, month, 1 + offset);
     };
 
     // Devuelve {year, month} del "mes de menú" al que pertenece una fecha.
-    // Si la fecha cae antes del primer lunes del mes, pertenece al mes anterior.
+    // Si la fecha cae antes del primer día hábil del mes, pertenece al mes anterior.
     const menuMonthOf = (date) => {
       const y = date.getFullYear();
       const m = date.getMonth();
-      if (date < firstMondayOfMonth(y, m)) {
+      if (date < firstBusinessDayOfMonth(y, m)) {
         return m === 0 ? { year: y - 1, month: 11 } : { year: y, month: m - 1 };
       }
       return { year: y, month: m };
@@ -425,20 +427,18 @@ App({
     refDate.setHours(0, 0, 0, 0);
     const refMonday = toMonday(refDate);
 
-    let weekMonday;
-    if (startDateStr) {
-      const dayDate = new Date(refMonday);
-      dayDate.setDate(refMonday.getDate() + (targetDow - 1));
-      weekMonday = dayDate < refDate
-        ? new Date(refMonday.getTime() + 7 * 24 * 60 * 60 * 1000)
-        : refMonday;
-    } else {
-      weekMonday = refMonday;
-    }
+    // Fecha calendario real del día pedido (no el lunes de la semana): el
+    // corte de mes puede caer en medio de una semana de entrega si el mes
+    // no arranca en lunes, así que cada día se evalúa con su propia fecha.
+    const dayDate = new Date(refMonday);
+    dayDate.setDate(refMonday.getDate() + (targetDow - 1));
+    const targetDate = (startDateStr && dayDate < refDate)
+      ? new Date(dayDate.getTime() + 7 * 24 * 60 * 60 * 1000)
+      : dayDate;
 
     const anchorDate = new Date(anchor + 'T00:00:00');
     const anchorMenu = menuMonthOf(anchorDate);
-    const targetMenu = menuMonthOf(weekMonday);
+    const targetMenu = menuMonthOf(targetDate);
 
     const monthsSinceAnchor = (targetMenu.year - anchorMenu.year) * 12 + (targetMenu.month - anchorMenu.month);
     const slot = ((monthsSinceAnchor % 2) + 2) % 2;

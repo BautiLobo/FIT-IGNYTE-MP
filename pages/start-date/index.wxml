@@ -8,7 +8,11 @@
 
   <view class="content">
 
-    <view class="center-block">
+    <view class="center-block" wx:if="{{loading}}">
+      <view class="loading-wrap"><view class="spinner"></view></view>
+    </view>
+
+    <view class="center-block" wx:else>
 
       <view class="heading-wrap">
         <text class="heading">{{lbl_heading}}</text>

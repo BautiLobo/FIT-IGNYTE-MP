@@ -66,7 +66,7 @@ Page({
 
     const planPrice = selectedPlan.price || 0;
     const discount = fromRenewal ? 0 : Math.round(planPrice * 0.25);
-    const total = planPrice - discount + 0; // TEMP: delivery fee en 0 para pruebas — volver a 35
+    const total = planPrice - discount + 35;
     this.setData({ selectedPlan, total, fromRenewal, discount });
 
     try {
@@ -126,7 +126,7 @@ Page({
 
       const { selectedPlan, discount } = this.data;
       const planPrice = selectedPlan.price || 0;
-      const baseTotal = planPrice - discount + 0; // TEMP: delivery fee en 0 para pruebas — volver a 35
+      const baseTotal = planPrice - discount + 35;
       const referralDiscount = Math.round(baseTotal * 0.10);
       const total = baseTotal - referralDiscount;
 

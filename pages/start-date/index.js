@@ -5,6 +5,7 @@ const t = require('../../i18n/index');
 
 Page({
   data: {
+    loading: true,
     fromRenewal: false,
     next: 'meal-select',
     selectedDate: '',
@@ -44,6 +45,11 @@ Page({
     // día siguiente a ese vencimiento -- si no, se pisa o se solapa con el
     // ciclo en curso. Se usa el mayor entre "próximo día hábil desde hoy" y
     // "próximo día hábil después del vencimiento actual".
+    // El wxml mantiene el picker oculto (wx:if="{{loading}}") hasta que esto
+    // termine -- si no, hay una ventana real (mientras se espera el fetch
+    // del cliente) donde `minDate` todavía es '' y el picker no bloquea
+    // nada, dejando elegir cualquier fecha, incluido el mismo día del
+    // vencimiento actual.
     if (fromRenewal) {
       try {
         const clientId = wx.getStorageSync('clientId');
@@ -67,6 +73,7 @@ Page({
     const expiryFormatted = this.formatDate(expiry);
 
     this.setData({
+      loading: false,
       minDate: minStr,
       selectedDate: minStr,
       selectedDateFormatted: formatted,

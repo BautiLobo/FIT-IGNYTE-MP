@@ -1,4 +1,4 @@
-# FIT IGNYTE — Estado y pendientes (2026-08-21)
+# FIT IGNYTE — Estado y pendientes (2026-08-22)
 
 Repos involucrados:
 - **Mini-program**: `C:\Users\USER\WeChatProjects\miniprogram-1` (este repo)
@@ -11,10 +11,8 @@ Contexto: la app está por mandarse como **beta a varios testers** (no producci�
 
 ## 🔴 Pendiente — hacer antes de producción completa (NO antes de la beta)
 
-- **Delivery fee en $0**, a propósito, para la beta actual. Volver a **$35** cuando se pase a producción completa, en 4 lugares:
-  - `pages/order-summary/index.js` (2 ocurrencias: alta nueva y renovación)
-  - `pages/payment/index.js` (2 ocurrencias: carga inicial y al aplicar código de referido)
-  - Edge Function `create-payment` (`const DELIVERY_FEE = 0` → volver a `35`) — **esta es la que de verdad cobra**, las otras son solo visuales.
+*(vacío por ahora — el delivery fee, que era el único ítem acá, se volvió a
+poner en $35 el 2026-08-22, ver sección de esta sesión)*
 
 ## 🟡 Pendiente — decisión del usuario, no urgente
 
@@ -22,7 +20,78 @@ Contexto: la app está por mandarse como **beta a varios testers** (no producci�
 - **`meal_selections` sigue con `SELECT` público** (`USING true`) — decisión consciente de dejarlo así. Migrarlo es más quilombo que `new_orders`/`clients` porque `edit-meals.js` también lo toca con las mismas keys (`client_id/day/slot`), y no queremos repetir el bug que rompió el flujo de `new_orders` la primera vez. Bajo riesgo real: solo expone comidas elegidas + horario + notas, sin nombre/teléfono/dirección directos.
 - **Modal "Edit Menu" huérfano** en el panel admin (`App.jsx`) — se encontró que `openEditMenu` (la única función que abría ese modal) ya estaba muerta antes de cualquier cambio nuestro; se borró la función muerta pero el modal (`showMenuModal`/`saveMenu`/`menuForm`) sigue en el código, inalcanzable. Decidir: ¿reconectarlo a algún botón o borrarlo del todo?
 - Hardening cosmético sin apuro: 2 funciones de Postgres con `search_path` mutable (`notifications_restrict_anon_update`, `clean_menu_on_plan_delete` — `increment_renewal_count` ya se arregló, ver sesión 2026-08-21), extensión `pg_net` instalada en schema `public`, "leaked password protection" desactivada en Supabase Auth (solo afecta la cuenta de admin con login por password).
-- **Renovación anticipada (feature nueva de la sesión 2026-08-21, ver detalle abajo)**: el backend (Supabase) ya está desplegado y activo en producción — tablas, guards, cron. Los cambios del **mini-program** (botón en Home, `start-date.js`, `edit-meals.js`, `payment.js`) están escritos y probados a nivel de integración con la base, pero **no se subieron todavía a WeChat DevTools ni se probaron en el simulador/dispositivo real** — falta ese paso antes de mandarlo a review. Mientras tanto no hay riesgo: sin el botón de Home desplegado, nadie puede llegar al flujo de renovación anticipada, así que el guard nuevo de `complete-payment` simplemente nunca se activa (las renovaciones normales, con el plan ya vencido, siguen funcionando exactamente igual que antes).
+- **Renovación anticipada (feature de la sesión 2026-08-21, ver detalle
+  abajo)**: backend y mini-program ya se probaron en WeChat DevTools por el
+  usuario (sesión 2026-08-22, con `SIMULATE_PAYMENTS` para no pagar plata
+  real) — aparecieron varios bugs reales durante esa prueba, todos
+  arreglados esa misma sesión (ver más abajo). **Falta la prueba manual
+  todavía**: registro nuevo completo, address change, notificaciones, y
+  repasar las pantallas en chino (`i18n`) — nada de eso se tocó esta sesión
+  pero comparte código con lo que sí se tocó.
+
+---
+
+## ✅ Ya arreglado y verificado — sesión 2026-08-22 (bugs encontrados probando en WeChat DevTools + notificaciones + delivery fee)
+
+El usuario probó el flujo de renovación anticipada de verdad en WeChat
+DevTools (con `SIMULATE_PAYMENTS`, ver `RENEWAL_PLAN.md`). Aparecieron
+varios bugs reales, todos arreglados y probados esta sesión:
+
+### Mini-program
+- **`home.js` — `getDaysLeft()`**: mezclaba fecha UTC con hora local;
+  en huso de Shanghai el corte de "1 día antes" no era confiable entre
+  00:00 y 08:00. Arreglado (comparación por fecha de calendario). De paso
+  se ajustó la ventana del banner de renovar a 2 días antes (o viernes), con
+  texto "Ends today"/"Ends tomorrow"/"%s days left" según corresponda.
+- **`renewal.js` — cálculo de `expired`**: mismo tipo de bug (UTC vs
+  local) — mostraba "PLAN EXPIRED" antes de tiempo. Arreglado.
+- **`edit-meals.js` — prefill roto en renovación anticipada**: "Renew this
+  plan" mostraba la pantalla en blanco en vez de las comidas actuales,
+  porque el prefill leía directo de `pending_meal_selections` (vacía hasta
+  que el cliente elige algo). Arreglado: el prefill siempre arranca de
+  `meal_selections` (lo que el cliente tiene ahora) y solo pisa por encima
+  con `pending_meal_selections` si ya hay algo ahí. Probado a fondo,
+  incluyendo simular el flujo completo "Renew this plan" con los 5 días
+  contra datos reales — confirmado que nunca pisa la semana en curso.
+- **`home.wxml` — warning de `wx:key` duplicada**: un cliente puede elegir
+  la misma comida 2 veces en un día (2 porciones); la key usaba el
+  `name`, que entonces se repetía. Arreglado con `id + posición`.
+- **Delivery fee vuelto a $35** (estaba en $0 a propósito para la beta) en
+  los 5 lugares documentados (4 en el mini-program + `create-payment`, la
+  que de verdad cobra). Probado contra un plan real: el monto calculado
+  ahora incluye los $35 correctamente.
+
+### Notificaciones automáticas — 2 huecos cerrados
+Ninguno de los dos se armó desde cero — se extendió lo que ya existía:
+- **"Tu plan arranca mañana" no le llegaba a nadie con renovación
+  anticipada** (`clients.start_date` no se actualiza hasta que se aplica
+  el ciclo nuevo). `wx-notify-cron` ahora también busca en `payments`
+  (pagado, sin aplicar, `start_date=mañana`).
+- **Nadie se enteraba cuando su renovación anticipada se aplicaba** — no
+  existía ningún aviso. `apply_pending_renewals()` ahora inserta una
+  notificación in-app (tabla `notifications`, mismo banner de Home que ya
+  existía) en el mismo paso atómico que aplica el resto del ciclo.
+
+### Panel admin (`FIT-IGNYTE`, con la extensión de Chrome conectada)
+Se probó en vivo (dashboard, crear cliente, editar, Renewals, Payments,
+Orders, Plans, Notifications) — todo funciona. 3 bugs nuevos encontrados y
+arreglados, no relacionados con la renovación anticipada:
+- **Loop de 4 fetches redundantes en cada carga de página** —
+  `useEffect` dependía del objeto `session` completo en vez de
+  `session?.user?.id` (estable). Causaba el "Loading..." pegado que se vio
+  al probar por primera vez.
+- **`fmtDate()` mostraba la fecha un día antes** en husos horarios
+  detrás de UTC (rompía en esta máquina, Buenos Aires) — no afecta la
+  lógica de Active/Expired (`daysUntil()` ya estaba bien), solo el texto
+  de fecha en 3 lugares.
+- **`todayIso()` — bug inverso, este sí afecta a China**: usaba
+  `.toISOString()` (siempre UTC); en husos adelantados a UTC (Shanghai,
+  +8) de noche ya cruzó al día siguiente en UTC, así que un admin en China
+  creando un cliente de noche vería precargado "ayer" en "Start Date".
+  Arreglado, verificado con matemática exacta para ambos husos.
+
+Detalle técnico completo, con cada prueba documentada paso a paso, en
+`RENEWAL_PLAN.md` y `C:\Users\USER\Desktop\TEST_PLAN.md`.
 
 ---
 

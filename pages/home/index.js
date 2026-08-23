@@ -238,9 +238,12 @@ Page({
       const dayLabel = dayLabelMap[d.key];
       const row = selections.find(s => s.day === dayLabel && s.slot === 1);
       const mealIds = row ? (row.meals_json || []) : [];
-      const mealNames = mealIds.map(id => {
+      // `key` combina id + posición: un cliente puede elegir la misma
+      // comida más de una vez en el mismo día (2 porciones), así que el
+      // nombre solo no alcanza como wx:key único en el wxml.
+      const mealNames = mealIds.map((id, i) => {
         if (!mealMap[id]) return null;
-        return { name: app.getMealName(mealMap[id]) };
+        return { name: app.getMealName(mealMap[id]), key: `${id}_${i}` };
       }).filter(Boolean);
       const photo = mealIds.length > 0 && mealMap[mealIds[0]] ? mealMap[mealIds[0]].photo_url || '' : '';
       const time = row ? row.delivery_time : '';

@@ -82,6 +82,14 @@ Page({
   },
 
   choosNewMeals() {
+    // "Elegir comidas nuevas" tiene que arrancar en blanco, no precargado
+    // con lo que el cliente comía antes -- mismo flag que ya usa
+    // changePlan() para lograr esto en meal-select.js (ver comentario ahí:
+    // "Fresh signup and renewal both start empty"). Sin este flag,
+    // meal-select.js interpretaba fromRenewal=true como "traer las
+    // selecciones viejas de la base", contradiciendo el propósito del botón.
+    wx.setStorageSync('renewalFreshMeals', true);
+    wx.removeStorageSync('mealSelections');
     wx.navigateTo({ url: '/pages/start-date/index?from=renewal&next=meal-select' });
   },
 

@@ -100,14 +100,17 @@ Page({
       const plan = planData && planData.length > 0 ? app.getDisplayPlan(planData[0]) : null;
       if (!plan) { wx.navigateBack(); return; }
 
-      // Load existing meal selections -- si esta renovacion quedo diferida
-      // (deferToPending), el prefill tiene que leer lo que el cliente ya
-      // eligio para el ciclo nuevo (pending_meal_selections), no la semana
-      // vieja que todavia esta en curso.
-      const selectionsTable = deferToPending ? 'pending_meal_selections' : 'meal_selections';
-      const selectionsData = await app.supabase('GET', selectionsTable, null, `client_id=eq.${clientId}&order=day.asc`);
+      // Load existing meal selections. El precargado SIEMPRE arranca de
+      // meal_selections -- es lo que el cliente tiene ahora, la base real
+      // de "mantener lo mismo" (esto es lo que "Renew this plan" promete:
+      // mostrar ya elegido lo que comía antes). pending_meal_selections
+      // recien tiene algo despues de que el cliente elija comidas para una
+      // renovacion anticipada -- si ya hay algo ahi (volvio a editar antes
+      // de que se aplicara), esas filas pisan la base porque son lo mas
+      // reciente que eligio para el ciclo nuevo.
+      const currentSelectionsData = await app.supabase('GET', 'meal_selections', null, `client_id=eq.${clientId}&order=day.asc`);
       const allSelections = {};
-      (selectionsData || []).forEach(row => {
+      (currentSelectionsData || []).forEach(row => {
         const key = DAY_KEY_MAP[row.day];
         if (!key) return;
         allSelections[key] = {
@@ -117,18 +120,55 @@ Page({
         };
       });
 
+      if (deferToPending) {
+        const pendingSelectionsData = await app.supabase('GET', 'pending_meal_selections', null, `client_id=eq.${clientId}&order=day.asc`);
+        (pendingSelectionsData || []).forEach(row => {
+          const key = DAY_KEY_MAP[row.day];
+          if (!key) return;
+          allSelections[key] = {
+            meal_ids: row.meals_json || [],
+            time: row.delivery_time || '10:00',
+            notes: row.note || '',
+          };
+        });
+      }
+
+      let rotationAnchor = null;
+      let rotationOrder = [1, 2];
+      try {
+        const rotation = await app.getMenuRotation();
+        rotationAnchor = rotation.anchor;
+        rotationOrder = rotation.order;
+        this.setData({ rotationAnchor, rotationOrder });
+      } catch (err) {
+        console.error('Load menu rotation error:', err);
+      }
+
+      // Una comida elegida en un ciclo anterior puede haber salido del menú
+      // (rotación mensual) antes de que el cliente renueve. Se descarta acá
+      // -- no solo al abrir ese día -- porque el tick de "día completo" en
+      // las tabs de arriba se calcula para los 5 días de una, antes de que
+      // el cliente visite ninguno.
+      await Promise.all(DAYS.map(async (d) => {
+        const sel = allSelections[d.key];
+        if (!sel || !sel.meal_ids || sel.meal_ids.length === 0) return;
+        const weekIndex = app.getWeekIndexForDay(d.key, rotationAnchor, rotationOrder, startDateStr);
+        const menuData = await app.supabase('GET', 'menu', null, `day=eq.${d.label}&tier=eq.${plan.tier}&week_index=eq.${weekIndex}`);
+        const menu = menuData && menuData.length > 0 ? menuData[0] : null;
+        const validIds = new Set((menu && menu.meals_json) || []);
+        const filteredIds = sel.meal_ids.filter(id => validIds.has(id));
+        if (filteredIds.length === 0) {
+          delete allSelections[d.key];
+        } else {
+          allSelections[d.key] = Object.assign({}, sel, { meal_ids: filteredIds });
+        }
+      }));
+
       const days = DAYS.map(d => Object.assign({}, d, {
         done: !!(allSelections[d.key] && allSelections[d.key].meal_ids.length >= plan.meals),
       }));
 
       this.setData({ clientId, plan, allSelections, days });
-
-      try {
-        const { anchor, order } = await app.getMenuRotation();
-        this.setData({ rotationAnchor: anchor, rotationOrder: order });
-      } catch (err) {
-        console.error('Load menu rotation error:', err);
-      }
 
       await this.loadMenu('mon');
 
