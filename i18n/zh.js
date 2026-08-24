@@ -172,6 +172,7 @@ module.exports = {
   order_summary_continue_payment: '继续付款  →',
   order_summary_review_note: '暂无需付款 · 我们将尽快确认您的配送区域',
   order_summary_renewal_note: '请在付款前确认续费信息',
+  order_summary_repay_note: '请在付款前确认新的开始日期和餐食',
   order_summary_failed: '加载订单失败',
   order_summary_error: '出现错误',
 
@@ -205,6 +206,8 @@ module.exports = {
   payment_contact_content: '搜索：fitignyte_shanghai',
   payment_renewed: '套餐已续费！',
   payment_already_renewed: '您已经续费过了 — 请在首页查看新套餐的开始日期。',
+  payment_date_stale_title: '请重新选择开始日期',
+  payment_date_stale_body: '距离您选择开始日期已经过了一段时间，该日期已不可用。请重新选择日期和餐食，然后即可付款。',
 
   // ── RENEWAL ────────────────────────────────────────────────
   renewal_title: '续费套餐',

@@ -30,9 +30,9 @@
         <image style="position: relative; left: 6rpx; top: 0rpx; width: 43rpx; height: 27rpx; display: block; box-sizing: border-box" class="chip-icon" src="/images/icon-delivery.png" mode="aspectFit" />
         <text class="chip-text" style="position: relative; left: 0rpx; top: 0rpx">{{lbl_feature1}}</text>
       </view>
-      <view class="chip" style="position: relative; left: 3rpx; top: 100rpx; width: 210rpx; display: flex; box-sizing: border-box">
-        <image class="chip-icon" src="/images/icon-cart.png" mode="aspectFit" />
-        <text class="chip-text">{{lbl_feature2}}</text>
+      <view class="chip" style="position: relative; left: 4rpx; top: 100rpx; width: 210rpx; display: flex; box-sizing: border-box">
+        <image style="position: relative; left: 0rpx; top: 2rpx" class="chip-icon" src="/images/icon-cart.png" mode="aspectFit" />
+        <text class="chip-text" style="position: relative; left: -6rpx; top: 1rpx">{{lbl_feature2}}</text>
       </view>
       <view class="chip" style="position: relative; left: 25rpx; top: 100rpx">
         <image class="chip-icon" src="/images/icon-utensils.png" mode="aspectFit" />

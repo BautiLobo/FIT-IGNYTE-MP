@@ -374,10 +374,20 @@ if (fromRenewal) wx.removeStorageSync('flowContext');
 
       wx.setStorageSync('mealSelections', allSelections);
       wx.setStorageSync('cutleryNeeded', this.data.needsCutlery === true);
+      // Flag de un solo uso (ver payment.js): dice si llegamos acá porque
+      // el start_date había quedado vencido. Se lee una sola vez, abajo, y
+      // se limpia siempre para no dejarlo pisando un flujo futuro distinto.
+      const dateResync = wx.getStorageSync('dateResync');
+      wx.removeStorageSync('dateResync');
       if (fromOrderSummary) {
         wx.navigateBack();
       } else if (fromRenewal) {
         wx.navigateTo({ url: '/pages/order-summary/index?from=renewal' });
+      } else if (dateResync) {
+        // Alta nueva ya aprobada, re-eligiendo fecha/comidas -- la orden y
+        // el cliente ya existen, así que saltamos register.js (los datos
+        // personales no cambiaron) directo a order-summary a revisar y pagar.
+        wx.navigateTo({ url: '/pages/order-summary/index?from=repay' });
       } else {
         wx.navigateTo({ url: '/pages/register/index' });
       }

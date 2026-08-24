@@ -1,6 +1,6 @@
 // pages/start-date/index.js
 const app = getApp();
-const { PUBLIC_HOLIDAYS, MAKEUP_WORKDAYS } = require('./holidays');
+const { getMinStartDate, addBusinessDays, isNonWorkingDay, toDateString } = require('../../utils/business-days');
 const t = require('../../i18n/index');
 
 Page({
@@ -34,42 +34,37 @@ Page({
     const fromRenewal = options.from === 'renewal';
     const next = options.next === 'edit-meals' ? 'edit-meals' : 'meal-select';
     this.setData({ fromRenewal, next });
-    // Min date = next business day. After the 8pm cutoff, kitchen prep for
-    // the following day is already closed, so push the minimum one more day out.
-    const now = new Date();
-    const cutoffPassed = now.getHours() >= 20;
-    let min = this.getNextBusinessDay(now, cutoffPassed ? 2 : 1);
 
     // Renovación anticipada (ver RENEWAL_PLAN.md): si el cliente renueva
     // antes de que venza su plan actual, el mínimo no puede ser antes del
     // día siguiente a ese vencimiento -- si no, se pisa o se solapa con el
-    // ciclo en curso. Se usa el mayor entre "próximo día hábil desde hoy" y
-    // "próximo día hábil después del vencimiento actual".
+    // ciclo en curso. getMinStartDate() ya resuelve esto (usa el mayor
+    // entre "próximo día hábil desde hoy" y "próximo día hábil después del
+    // vencimiento actual") -- misma función que payment.js reusa para
+    // detectar una fecha vencida al momento de pagar.
     // El wxml mantiene el picker oculto (wx:if="{{loading}}") hasta que esto
     // termine -- si no, hay una ventana real (mientras se espera el fetch
     // del cliente) donde `minDate` todavía es '' y el picker no bloquea
     // nada, dejando elegir cualquier fecha, incluido el mismo día del
     // vencimiento actual.
+    let currentExpiryDate = null;
     if (fromRenewal) {
       try {
         const clientId = wx.getStorageSync('clientId');
         if (clientId) {
           const data = await app.getClient({ clientId });
           const client = data && data[0];
-          if (client && client.expiry_date) {
-            const currentExpiry = new Date(client.expiry_date + 'T00:00:00');
-            const minAfterExpiry = this.getNextBusinessDay(currentExpiry, 1);
-            if (minAfterExpiry > min) min = minAfterExpiry;
-          }
+          if (client && client.expiry_date) currentExpiryDate = client.expiry_date;
         }
       } catch (err) {
         console.error('start-date onLoad client fetch error:', err);
       }
     }
 
-    const minStr = this.toDateString(min);
+    const minStr = getMinStartDate({ currentExpiryDate });
+    const min = new Date(minStr + 'T00:00:00');
     const formatted = this.formatDate(min);
-    const expiry = this.addBusinessDays(min, 4); // 5 days total including start
+    const expiry = addBusinessDays(min, 4); // 5 days total including start
     const expiryFormatted = this.formatDate(expiry);
 
     this.setData({
@@ -85,55 +80,18 @@ Page({
     const dateStr = e.detail.value; // YYYY-MM-DD
     const date = new Date(dateStr + 'T00:00:00');
 
-    if (this.isNonWorkingDay(date)) {
+    if (isNonWorkingDay(date)) {
       wx.showToast({ title: t('start_date_no_delivery'), icon: 'none', duration: 2500 });
       return; // keep the previously selected date
     }
 
-    const expiry = this.addBusinessDays(date, 4);
+    const expiry = addBusinessDays(date, 4);
 
     this.setData({
-      selectedDate: this.toDateString(date),
+      selectedDate: toDateString(date),
       selectedDateFormatted: this.formatDate(date),
       expiryDateFormatted: this.formatDate(expiry),
     });
-  },
-
-  // A weekend day, unless it's been designated a make-up workday;
-  // or a listed public holiday.
-  isNonWorkingDay(date) {
-    const dateStr = this.toDateString(date);
-    if (PUBLIC_HOLIDAYS.includes(dateStr)) return true;
-    const day = date.getDay();
-    const isWeekend = day === 0 || day === 6;
-    if (isWeekend && !MAKEUP_WORKDAYS.includes(dateStr)) return true;
-    return false;
-  },
-
-  getNextBusinessDay(date, startOffset = 1) {
-    const d = new Date(date);
-    d.setDate(d.getDate() + startOffset);
-    while (this.isNonWorkingDay(d)) {
-      d.setDate(d.getDate() + 1);
-    }
-    return d;
-  },
-
-  addBusinessDays(date, days) {
-    const d = new Date(date);
-    let added = 0;
-    while (added < days) {
-      d.setDate(d.getDate() + 1);
-      if (!this.isNonWorkingDay(d)) added++;
-    }
-    return d;
-  },
-
-  toDateString(date) {
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const d = String(date.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
   },
 
   formatDate(date) {
@@ -154,8 +112,8 @@ Page({
     wx.setStorageSync('startDate', this.data.selectedDate);
     // Calculate expiry
     const startDate = new Date(this.data.selectedDate + 'T00:00:00');
-    const expiry = this.addBusinessDays(startDate, 4);
-    wx.setStorageSync('expiryDate', this.toDateString(expiry));
+    const expiry = addBusinessDays(startDate, 4);
+    wx.setStorageSync('expiryDate', toDateString(expiry));
 
     const { fromRenewal, next } = this.data;
     const target = next === 'edit-meals' ? '/pages/edit-meals/index' : '/pages/meal-select/index';

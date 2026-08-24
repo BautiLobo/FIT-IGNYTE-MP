@@ -1,5 +1,6 @@
 // pages/payment/index.js
 const app = getApp();
+const { getMinStartDate } = require('../../utils/business-days');
 const t = require('../../i18n/index');
 
 Page({
@@ -10,6 +11,7 @@ Page({
     total: 0,
     fromRenewal: false,
     deferToPending: false,
+    submitting: false,
     // Referral code
     referralInput: '',
     referralApplied: false,
@@ -37,6 +39,87 @@ Page({
   },
 
   async onLoad(options) {
+    const fromRenewal = options.from === 'renewal';
+    const selectedPlan = wx.getStorageSync('selectedPlan');
+
+    if (!selectedPlan) {
+      wx.navigateBack();
+      return;
+    }
+
+    // Cargamos cliente/orden primero -- hace falta antes de poder chequear
+    // si el start_date sigue siendo válido (ver más abajo), y se reusa
+    // después para el resto de la pantalla en vez de pedirlo de nuevo.
+    let client = null;
+    let order = null;
+    let deferToPending = false;
+    try {
+      if (fromRenewal) {
+        const clientId = wx.getStorageSync('clientId');
+        const data = await app.getClient({ clientId });
+        if (data && data.length > 0) {
+          client = data[0];
+          // Renovacion anticipada (ver RENEWAL_PLAN.md): si el plan ACTUAL
+          // del cliente (el de antes de esta renovacion) todavia no vencio,
+          // las selecciones de "choose new meals" (que se guardan aca, no en
+          // meal-select.js) tienen que ir a pending_meal_selections, no a
+          // meal_selections -- misma razon que en edit-meals.js.
+          const today = new Date(); today.setHours(0, 0, 0, 0);
+          const currentExpiry = client.expiry_date ? new Date(client.expiry_date + 'T00:00:00') : null;
+          deferToPending = !!(currentExpiry && today <= currentExpiry);
+        }
+      } else {
+        const pendingOrderId = wx.getStorageSync('pendingOrderId');
+        if (!pendingOrderId) return;
+        const data = await app.getOrder({ orderId: pendingOrderId });
+        if (data && data.length > 0) {
+          order = data[0];
+          // El cliente ya existe (se crea al aprobar la orden): lo buscamos
+          // por teléfono para saber si ya gastó un código de referido antes.
+          const clientData = await app.getClient({ phone: order.phone });
+          if (clientData && clientData.length > 0) client = clientData[0];
+        }
+      }
+    } catch (err) {
+      console.error('Load error:', err);
+    }
+
+    // Fecha vencida: el start_date se elige mucho antes de pagar (antes de
+    // la aprobación del admin, en el caso de un alta nueva) y nada lo
+    // revalidaba al momento de pagar -- si pasó suficiente tiempo, esa
+    // fecha puede haber quedado en el pasado, o el menú de esos días puede
+    // haber cambiado. Se recalcula la fecha mínima "en vivo" (misma regla
+    // que start-date.js) y si la guardada ya no la cumple, mandamos al
+    // cliente a elegir fecha y comidas de nuevo en vez de dejarlo pagar
+    // sobre datos viejos.
+    const storedStart = wx.getStorageSync('startDate');
+    if (storedStart) {
+      const liveMin = getMinStartDate({ currentExpiryDate: fromRenewal && client ? client.expiry_date : null });
+      if (storedStart < liveMin) {
+        if (fromRenewal) {
+          // Mismo flag que usa "choose new meals" en renewal.js: fuerza a
+          // arrancar en blanco en vez de precargar lo que el cliente comía
+          // antes, porque esas comidas pueden ya no estar en el menú de las
+          // fechas nuevas.
+          wx.setStorageSync('renewalFreshMeals', true);
+          wx.removeStorageSync('mealSelections');
+        }
+        wx.setStorageSync('dateResync', true);
+        wx.showModal({
+          title: t('payment_date_stale_title'),
+          content: t('payment_date_stale_body'),
+          showCancel: false,
+          success: () => {
+            const url = fromRenewal
+              ? '/pages/start-date/index?from=renewal&next=meal-select'
+              : '/pages/start-date/index?next=meal-select';
+            wx.redirectTo({ url });
+          },
+        });
+        return;
+      }
+    }
+
     this.setData({
       lbl_title: t('payment_title'),
       lbl_order_summary: t('payment_order_summary'),
@@ -56,54 +139,18 @@ Page({
       lbl_referral_row: t('payment_referral_row'),
       lbl_referral_applied: t('payment_referral_applied'),
     });
-    const fromRenewal = options.from === 'renewal';
-    const selectedPlan = wx.getStorageSync('selectedPlan');
-
-    if (!selectedPlan) {
-      wx.navigateBack();
-      return;
-    }
 
     const planPrice = selectedPlan.price || 0;
     const discount = fromRenewal ? 0 : Math.round(planPrice * 0.25);
     const total = planPrice - discount + 35;
     this.setData({ selectedPlan, total, fromRenewal, discount });
 
-    try {
-      if (fromRenewal) {
-        const clientId = wx.getStorageSync('clientId');
-        const data = await app.getClient({ clientId });
-        if (data && data.length > 0) {
-          const client = data[0];
-          // Renovacion anticipada (ver RENEWAL_PLAN.md): si el plan ACTUAL
-          // del cliente (el de antes de esta renovacion) todavia no vencio,
-          // las selecciones de "choose new meals" (que se guardan aca, no en
-          // meal-select.js) tienen que ir a pending_meal_selections, no a
-          // meal_selections -- misma razon que en edit-meals.js.
-          const today = new Date(); today.setHours(0, 0, 0, 0);
-          const currentExpiry = client.expiry_date ? new Date(client.expiry_date + 'T00:00:00') : null;
-          const deferToPending = !!(currentExpiry && today <= currentExpiry);
-          // En renovación, `order` es directamente la fila de clients:
-          // ahí ya está el flag referral_used del pago anterior.
-          this.setData({ order: client, client, referralAlreadyUsed: !!client.referral_used, deferToPending });
-        }
-      } else {
-        const pendingOrderId = wx.getStorageSync('pendingOrderId');
-        if (!pendingOrderId) return;
-        const data = await app.getOrder({ orderId: pendingOrderId });
-        if (data && data.length > 0) {
-          const order = data[0];
-          this.setData({ order });
-          // El cliente ya existe (se crea al aprobar la orden): lo buscamos
-          // por teléfono para saber si ya gastó un código de referido antes.
-          const clientData = await app.getClient({ phone: order.phone });
-          if (clientData && clientData.length > 0) {
-            this.setData({ client: clientData[0], referralAlreadyUsed: !!clientData[0].referral_used });
-          }
-        }
-      }
-    } catch (err) {
-      console.error('Load error:', err);
+    if (fromRenewal) {
+      // En renovación, `order` es directamente la fila de clients: ahí ya
+      // está el flag referral_used del pago anterior.
+      this.setData({ order: client, client, referralAlreadyUsed: !!(client && client.referral_used), deferToPending });
+    } else if (order) {
+      this.setData({ order, client, referralAlreadyUsed: !!(client && client.referral_used) });
     }
   },
 
@@ -161,6 +208,10 @@ Page({
   },
 
   async payNow() {
+    // Guard contra doble-tap: sin esto, tocar "Pagar" dos veces rápido podía
+    // disparar dos create-payment casi simultáneos.
+    if (this.data.submitting) return;
+
     const { fromRenewal, selectedPlan, referralApplied, referralCode, client } = this.data;
 
     if (!client || !client.id) {
@@ -168,6 +219,7 @@ Page({
       return;
     }
 
+    this.setData({ submitting: true });
     wx.showLoading({ title: t('loading') });
     try {
       // El pago JSAPI de WeChat exige el openid del pagador; si todavía no
@@ -208,6 +260,7 @@ Page({
         } catch (simErr) {
           console.error('simulatePayment failed:', simErr);
           wx.showModal({ title: t('payment_error_title'), content: simErr.message || t('payment_error_content'), showCancel: false });
+          this.setData({ submitting: false });
         }
         return;
       }
@@ -227,11 +280,13 @@ Page({
           if (err.errMsg && err.errMsg.indexOf('cancel') === -1) {
             wx.showModal({ title: t('payment_error_title'), content: t('payment_error_content'), showCancel: false });
           }
+          this.setData({ submitting: false });
         },
       });
     } catch (err) {
       wx.hideLoading();
       console.error('payNow error:', err);
+      this.setData({ submitting: false });
       // Renovación anticipada duplicada (ver RENEWAL_PLAN.md, decisión 6):
       // no debería llegar acá con el botón ya oculto en Home, pero por las
       // dudas mostramos un mensaje claro en vez del genérico.

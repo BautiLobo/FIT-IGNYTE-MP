@@ -105,6 +105,8 @@
   width: 100%;
 }
 
+.wechat-pay-btn-disabled { opacity: 0.55; }
+
 .wechat-pay-left { display:flex; align-items:center; gap:20rpx; }
 
 .wechat-icon-wrap {

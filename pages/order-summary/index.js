@@ -17,6 +17,7 @@ Page({
     discount: 0,
     submitting: false,
     fromRenewal: false,
+    repay: false,
     lbl_title: '',
     lbl_your_plan: '',
     lbl_meals_day: '',
@@ -30,6 +31,7 @@ Page({
     lbl_continue_payment: '',
     lbl_review_note: '',
     lbl_renewal_note: '',
+    lbl_repay_note: '',
   },
 
   async onLoad(options) {
@@ -47,11 +49,18 @@ Page({
       lbl_continue_payment: t('order_summary_continue_payment'),
       lbl_review_note: t('order_summary_review_note'),
       lbl_renewal_note: t('order_summary_renewal_note'),
+      lbl_repay_note: t('order_summary_repay_note'),
       lbl_total: t('payment_total'),
       lbl_plan: t('payment_plan'),
     });
     const fromRenewal = options.from === 'renewal' || wx.getStorageSync('flowContext') === 'renewal';
     if (fromRenewal) wx.removeStorageSync('flowContext');
+    // Alta nueva ya aprobada, re-eligiendo fecha/comidas porque el
+    // start_date había quedado vencido al momento de pagar (ver
+    // payment.js/meal-select.js) -- la orden ya fue aprobada por el admin,
+    // así que "continuar" de acá abajo tiene que ir directo a pagar, no
+    // volver a mandarla a revisión.
+    const repay = options.from === 'repay';
     const selectedPlan = wx.getStorageSync('selectedPlan');
 
     if (!selectedPlan) {
@@ -71,6 +80,20 @@ Page({
     }
 
     try {
+      if (repay) {
+        // meal-select/start-date solo dejaron los valores nuevos en
+        // storage -- los persistimos en la orden ahora para que el panel
+        // admin no quede mostrando la fecha/comidas viejas que ya aprobó.
+        const mealSelections = wx.getStorageSync('mealSelections') || {};
+        const startDate = wx.getStorageSync('startDate') || null;
+        const expiryDate = wx.getStorageSync('expiryDate') || null;
+        await app.updateOrder({
+          orderId: pendingOrderId,
+          patch: { meals: mealSelections, start_date: startDate, expiry_date: expiryDate },
+        });
+        wx.removeStorageSync('mealSelections');
+      }
+
       const data = await app.getOrder({ orderId: pendingOrderId });
       if (!data || data.length === 0) {
         wx.navigateBack();
@@ -83,7 +106,7 @@ Page({
       const discount = Math.round(planPrice * 0.25);
       const total = planPrice - discount + 35;
 
-      this.setData({ order, selectedPlan, mealSummary, total, discount, fromRenewal: false });
+      this.setData({ order, selectedPlan, mealSummary, total, discount, fromRenewal: false, repay });
 
     } catch (err) {
       console.error('Load order error:', err);
@@ -204,6 +227,11 @@ Page({
 
     if (this.data.fromRenewal) {
       wx.navigateTo({ url: '/pages/payment/index?from=renewal' });
+      return;
+    }
+
+    if (this.data.repay) {
+      wx.navigateTo({ url: '/pages/payment/index' });
       return;
     }
 

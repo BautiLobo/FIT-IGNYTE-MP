@@ -70,9 +70,9 @@
     </view>
 
     <button class="btn-submit {{submitting ? 'btn-disabled' : ''}}" bindtap="submitOrder" disabled="{{submitting}}">
-      {{submitting ? lbl_submitting : (fromRenewal ? lbl_continue_payment : lbl_place_order)}}
+      {{submitting ? lbl_submitting : ((fromRenewal || repay) ? lbl_continue_payment : lbl_place_order)}}
     </button>
-    <text class="hint">{{fromRenewal ? lbl_renewal_note : lbl_review_note}}</text>
+    <text class="hint">{{fromRenewal ? lbl_renewal_note : (repay ? lbl_repay_note : lbl_review_note)}}</text>
 
   </scroll-view>
 

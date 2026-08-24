@@ -70,7 +70,7 @@
     <text class="section-label">{{lbl_method}}</text>
 
     <!-- WeChat Pay -->
-    <view class="wechat-pay-btn" bindtap="payNow">
+    <view class="wechat-pay-btn {{submitting ? 'wechat-pay-btn-disabled' : ''}}" bindtap="payNow">
       <view class="wechat-pay-left">
         <view class="wechat-icon-wrap">
           <text class="wechat-icon">💬</text>

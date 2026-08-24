@@ -172,6 +172,7 @@ module.exports = {
   order_summary_continue_payment: 'Continue to payment  →',
   order_summary_review_note: "No payment yet · We'll confirm your delivery area shortly.",
   order_summary_renewal_note: 'Review your renewal before paying',
+  order_summary_repay_note: 'Review your updated start date and meals before paying',
   order_summary_failed: 'Failed to load order',
   order_summary_error: 'Something went wrong',
 
@@ -205,6 +206,8 @@ module.exports = {
   payment_contact_content: 'Search for: fitignyte_shanghai',
   payment_renewed: 'Plan renewed!',
   payment_already_renewed: "You've already renewed — check Home for your new plan's start date.",
+  payment_date_stale_title: 'Let’s update your start date',
+  payment_date_stale_body: 'Some time has passed since you picked your start date, so it’s no longer available. Pick a new date and meals, then you can pay.',
 
   // ── RENEWAL ────────────────────────────────────────────────
   renewal_title: 'Renew your plan',

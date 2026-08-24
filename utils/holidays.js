@@ -1,4 +1,4 @@
-// pages/start-date/holidays.js
+// utils/holidays.js
 // Official PRC public holiday calendar (State Council).
 // Update this list every November when the State Council publishes next year's schedule.
 // Source (2026): https://www.china-briefing.com/news/china-2026-public-holiday-schedule/
