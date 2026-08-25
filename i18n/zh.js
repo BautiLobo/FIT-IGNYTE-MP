@@ -1,4 +1,14 @@
 module.exports = {
+  // ── SHARE ──────────────────────────────────────────────────
+  share_title: 'FIT IGNYTE — 上海健康餐配送到家',
+  share_title_home: '我在用 FIT IGNYTE 吃饭 — 快来看看',
+
+  // ── PRIVACY MODAL (pop-up oficial antes de continuar en register) ──
+  privacy_modal_title: '继续之前',
+  privacy_modal_body: 'FIT IGNYTE 会收集您的姓名、电话、地址及饮食信息，以便为您准备和配送餐食。请在继续之前阅读我们的隐私政策。',
+  privacy_modal_view: '查看隐私政策',
+  privacy_modal_agree: '同意并继续',
+
   // ── DISCOVERY ──────────────────────────────────────────────
   discovery_headline1: '终于可以',
   discovery_headline2: '在上海健康饮食',

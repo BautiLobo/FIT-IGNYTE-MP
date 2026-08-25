@@ -43,6 +43,27 @@ Page({
           if (status === 'pending') { wx.reLaunch({ url: '/pages/under-review/index' }); return; }
           if (status === 'approved') { wx.reLaunch({ url: '/pages/approved/index' }); return; }
           if (status === 'rejected') { wx.reLaunch({ url: '/pages/rejected/index' }); return; }
+          if (status === 'draft') {
+            // El usuario cerró la app antes de tocar "Place Order" en
+            // order-summary -- el pedido quedó en draft, nunca llegó a
+            // pending. Si lo dejamos re-hacer el registro desde cero, el
+            // backend detecta el draft existente (mismo openid) y devuelve
+            // 'duplicate_pending_order', que manda a under-review sin que
+            // el status haya pasado a pending -- pantalla de espera que
+            // nunca se resuelve. Lo retomamos directo en order-summary.
+            const draftOrder = orderData[0];
+            if (draftOrder.plan_id) {
+              const planData = await app.supabase('GET', 'plans', null, `id=eq.${draftOrder.plan_id}`);
+              if (planData && planData.length > 0) {
+                wx.setStorageSync('selectedPlan', app.getDisplayPlan(planData[0]));
+                wx.reLaunch({ url: '/pages/order-summary/index' });
+                return;
+              }
+            }
+            // No se pudo reconstruir el plan (dato inconsistente) -- se
+            // descarta el draft viejo y se deja arrancar de cero.
+            wx.removeStorageSync('pendingOrderId');
+          }
           if (status === 'paid') {
             const order = orderData[0];
             const clientData = await app.getClient({ phone: order.phone });
@@ -103,5 +124,20 @@ Page({
 
   goToTiers() {
     wx.navigateTo({ url: '/pages/how-it-works/index' });
-  }
+  },
+
+  onShareAppMessage() {
+    return {
+      title: t('share_title'),
+      path: '/pages/discovery/index',
+      imageUrl: '/images/hero-meal.jpeg',
+    };
+  },
+
+  onShareTimeline() {
+    return {
+      title: t('share_title'),
+      imageUrl: '/images/hero-meal.jpeg',
+    };
+  },
 });

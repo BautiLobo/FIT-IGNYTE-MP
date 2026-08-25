@@ -32,6 +32,11 @@ Page({
     lbl_privacy_agree_pre: '',
     lbl_privacy_agree_link: '',
     privacyAccepted: false,
+    showPrivacyModal: false,
+    lbl_privacy_modal_title: '',
+    lbl_privacy_modal_body: '',
+    lbl_privacy_modal_view: '',
+    lbl_privacy_modal_agree: '',
     form: {
       name: '',
       phone: '',
@@ -69,6 +74,10 @@ Page({
       lbl_privacy_policy: t('register_privacy_policy'),
       lbl_privacy_agree_pre: t('register_privacy_agree_pre'),
       lbl_privacy_agree_link: t('register_privacy_agree_link'),
+      lbl_privacy_modal_title: t('privacy_modal_title'),
+      lbl_privacy_modal_body: t('privacy_modal_body'),
+      lbl_privacy_modal_view: t('privacy_modal_view'),
+      lbl_privacy_modal_agree: t('privacy_modal_agree'),
     });
     const selectedPlan = wx.getStorageSync('selectedPlan');
     if (!selectedPlan) {
@@ -76,6 +85,21 @@ Page({
       return;
     }
     this.setData({ selectedPlan });
+
+    // Pop-up oficial de privacidad (ver WeChat "Privacy Protocol Development
+    // Guide"): solo tiene sentido para altas nuevas -- si el usuario ya
+    // aceptó en una sesión anterior (needAuthorization: false), no se
+    // vuelve a mostrar. El checkbox de abajo queda como respaldo visible
+    // en todo momento, por si este popup no dispara en algún dispositivo.
+    if (!this.data.editing && options.from !== 'order-summary') {
+      wx.getPrivacySetting({
+        success: (res) => {
+          if (res.needAuthorization) {
+            this.setData({ showPrivacyModal: true });
+          }
+        },
+      });
+    }
 
     if (options.from === 'order-summary') {
       const pendingOrderId = wx.getStorageSync('pendingOrderId');
@@ -283,5 +307,26 @@ Page({
 
   goBack() {
     wx.navigateBack();
-  }
+  },
+
+  // Abre la guía de privacidad nativa de WeChat. Importante: se llama por
+  // JS (wx.openPrivacyContract), NO como atributo open-type="openPrivacyContract"
+  // en el botón -- en pruebas reales, el atributo declarativo no abría nada
+  // en algunos dispositivos, mientras que llamarlo desde código sí funciona.
+  viewPrivacyPolicy() {
+    wx.openPrivacyContract({
+      fail: (err) => {
+        console.error('openPrivacyContract failed:', err);
+        wx.showToast({ title: t('failed_open'), icon: 'none' });
+      },
+    });
+  },
+
+  // Callback del botón open-type="agreePrivacyAuthorization" del popup:
+  // WeChat ya registró que este usuario aceptó la guía de privacidad
+  // declarada en mp.weixin.qq.com -- reflejamos lo mismo en el checkbox
+  // de abajo para no pedirle que lo tilde de nuevo.
+  handleAgreePrivacyAuthorization() {
+    this.setData({ showPrivacyModal: false, privacyAccepted: true });
+  },
 });

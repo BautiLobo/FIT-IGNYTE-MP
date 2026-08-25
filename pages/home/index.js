@@ -294,4 +294,19 @@ Page({
     wx.navigateTo({ url: '/pages/renewal/index' });
   },
 
+  onShareAppMessage() {
+    return {
+      title: t('share_title_home'),
+      path: '/pages/discovery/index',
+      imageUrl: '/images/hero-meal.jpeg',
+    };
+  },
+
+  onShareTimeline() {
+    return {
+      title: t('share_title_home'),
+      imageUrl: '/images/hero-meal.jpeg',
+    };
+  },
+
 });

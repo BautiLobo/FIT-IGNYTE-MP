@@ -1,4 +1,14 @@
 module.exports = {
+  // ── SHARE ──────────────────────────────────────────────────
+  share_title: 'FIT IGNYTE — Healthy meals delivered in Shanghai',
+  share_title_home: 'I eat with FIT IGNYTE — check it out',
+
+  // ── PRIVACY MODAL (pop-up oficial antes de continuar en register) ──
+  privacy_modal_title: 'Before you continue',
+  privacy_modal_body: 'FIT IGNYTE collects your name, phone, address and dietary info to prepare and deliver your meals. Please read our Privacy Policy before continuing.',
+  privacy_modal_view: 'View Privacy Policy',
+  privacy_modal_agree: 'Agree & Continue',
+
   // ── DISCOVERY ──────────────────────────────────────────────
   discovery_headline1: 'FINALLY EAT',
   discovery_headline2: 'HEALTHY IN SHANGHAI',

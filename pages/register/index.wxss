@@ -52,7 +52,7 @@
   font-size:30rpx;
   color:#f3f3f4;
   width:100%;
-  min-height:88rpx;
+  height:88rpx;
   box-sizing:border-box;
 }
 
@@ -152,3 +152,78 @@ button { margin:0 !important; padding:0 !important; background:transparent; bord
   color: #e8342a;
   text-decoration: underline;
 }
+
+/* ── PRIVACY MODAL — pop-up oficial recomendado por WeChat, se muestra
+   antes de completar el formulario cuando wx.getPrivacySetting() indica
+   que este usuario todavía no aceptó la guía de privacidad ── */
+.privacy-modal-mask {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.privacy-modal-card {
+  width: 560rpx;
+  background: #13131a;
+  border: 1rpx solid #2a2a33;
+  border-radius: 24rpx;
+  padding: 44rpx 36rpx;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.privacy-modal-title {
+  font-size: 32rpx;
+  font-weight: 800;
+  color: #f3f3f4;
+  display: block;
+  margin-bottom: 16rpx;
+  text-align: center;
+}
+
+.privacy-modal-body {
+  font-size: 26rpx;
+  color: #beb6b6;
+  line-height: 1.6;
+  display: block;
+  margin-bottom: 32rpx;
+  text-align: center;
+}
+
+.privacy-modal-view-btn {
+  background: transparent !important;
+  border: 1rpx solid #4a4a52 !important;
+  border-radius: 20rpx !important;
+  height: 84rpx;
+  line-height: 84rpx;
+  color: #e8342a !important;
+  font-size: 28rpx !important;
+  font-weight: 700 !important;
+  width: 100% !important;
+  text-align: center;
+  box-sizing: border-box;
+  display: block;
+  margin-bottom: 16rpx !important;
+}
+.privacy-modal-view-btn::after { border: none; }
+
+.privacy-modal-agree-btn {
+  background: #e8342a !important;
+  border-radius: 20rpx !important;
+  height: 84rpx;
+  line-height: 84rpx;
+  color: #fff !important;
+  font-size: 28rpx !important;
+  font-weight: 800 !important;
+  width: 100% !important;
+  text-align: center;
+  box-sizing: border-box;
+  display: block;
+}
+.privacy-modal-agree-btn::after { border: none; }

@@ -56,7 +56,7 @@
         <text wx:if="{{privacyAccepted}}">✓</text>
       </view>
       <text class="privacy-consent-text" bindtap="togglePrivacyAccepted">{{lbl_privacy_agree_pre}}</text>
-      <button class="privacy-link-inline" open-type="openPrivacyContract">
+      <button class="privacy-link-inline" bindtap="viewPrivacyPolicy">
         <text>{{lbl_privacy_agree_link}}</text>
       </button>
     </view>
@@ -66,11 +66,21 @@
         {{submitting ? lbl_submitting : (editing ? lbl_save_changes : lbl_next)}}
       </button>
       <text class="btn-hint">{{editing ? lbl_delivery_note : lbl_area_note}}</text>
-      <button class="privacy-link" wx:if="{{editing}}" open-type="openPrivacyContract">
+      <button class="privacy-link" wx:if="{{editing}}" bindtap="viewPrivacyPolicy">
         <text>{{lbl_privacy_policy}}</text>
       </button>
     </view>
 
   </scroll-view>
+
+  <!-- Pop-up oficial de privacidad (WeChat Privacy Protocol Development Guide) -->
+  <view class="privacy-modal-mask" wx:if="{{showPrivacyModal}}">
+    <view class="privacy-modal-card">
+      <text class="privacy-modal-title">{{lbl_privacy_modal_title}}</text>
+      <text class="privacy-modal-body">{{lbl_privacy_modal_body}}</text>
+      <button class="privacy-modal-view-btn" bindtap="viewPrivacyPolicy">{{lbl_privacy_modal_view}}</button>
+      <button class="privacy-modal-agree-btn" open-type="agreePrivacyAuthorization" bindagreeprivacyauthorization="handleAgreePrivacyAuthorization">{{lbl_privacy_modal_agree}}</button>
+    </view>
+  </view>
 
 </view>

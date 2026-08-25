@@ -31,8 +31,8 @@
         <text class="chip-text" style="position: relative; left: 0rpx; top: 0rpx">{{lbl_feature1}}</text>
       </view>
       <view class="chip" style="position: relative; left: 4rpx; top: 100rpx; width: 210rpx; display: flex; box-sizing: border-box">
-        <image style="position: relative; left: 0rpx; top: 2rpx" class="chip-icon" src="/images/icon-cart.png" mode="aspectFit" />
-        <text class="chip-text" style="position: relative; left: -6rpx; top: 1rpx">{{lbl_feature2}}</text>
+        <image style="position: relative; left: -9rpx; top: 2rpx" class="chip-icon" src="/images/icon-cart.png" mode="aspectFit" />
+        <text class="chip-text" style="position: relative; left: -8rpx; top: 3rpx">{{lbl_feature2}}</text>
       </view>
       <view class="chip" style="position: relative; left: 25rpx; top: 100rpx">
         <image class="chip-icon" src="/images/icon-utensils.png" mode="aspectFit" />
