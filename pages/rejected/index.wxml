@@ -21,14 +21,11 @@
       <text class="info-text">{{lbl_reason}}</text>
     </view>
 
-    <!-- Notify card -->
-    <view class="notify-card">
-      <text class="notify-label">{{lbl_notify_label}}</text>
-      <button class="btn-notify" bindtap="requestNotify">  {{lbl_notify_btn}}</button>
-    </view>
+    <!-- Contact (primary) -->
+    <button class="btn-primary" open-type="contact">  {{lbl_contact}}</button>
 
-    <!-- Contact -->
-    <button class="btn-secondary" open-type="contact">  {{lbl_contact}}</button>
+    <!-- Start over (secondary) -->
+    <button class="btn-secondary" bindtap="startOver">  {{lbl_start_over_btn}}</button>
 
   </view>
 

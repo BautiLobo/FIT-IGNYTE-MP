@@ -177,10 +177,10 @@ Page({
 
   logout() {
     wx.showModal({
-      title: 'Log out',
-      content: 'Are you sure you want to log out?',
-      confirmText: 'Log out',
-      cancelText: 'Cancel',
+      title: t('edit_profile_logout_title'),
+      content: t('edit_profile_logout_body'),
+      confirmText: t('edit_profile_logout_confirm'),
+      cancelText: t('edit_profile_logout_cancel'),
       confirmColor: '#E8342A',
       success: (res) => {
         if (res.confirm) {

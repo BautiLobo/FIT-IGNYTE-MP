@@ -92,7 +92,15 @@ Page({
     // que start-date.js) y si la guardada ya no la cumple, mandamos al
     // cliente a elegir fecha y comidas de nuevo en vez de dejarlo pagar
     // sobre datos viejos.
-    const storedStart = wx.getStorageSync('startDate');
+    //
+    // La fuente de verdad es `order.start_date` (lo que quedó guardado en
+    // la orden), no el storage local: si un pedido queda rechazado y el
+    // admin lo vuelve a aprobar mucho después, el storage del dispositivo
+    // puede no reflejar más la fecha real (o directamente no existir).
+    // Confiar solo en el storage hacía que ese chequeo se salteara en
+    // silencio y `payNow()` cayera al fallback de "hoy".
+    const storedStart = (!fromRenewal && order && order.start_date) || wx.getStorageSync('startDate');
+    if (storedStart && !fromRenewal) wx.setStorageSync('startDate', storedStart);
     if (storedStart) {
       const liveMin = getMinStartDate({ currentExpiryDate: fromRenewal && client ? client.expiry_date : null });
       if (storedStart < liveMin) {

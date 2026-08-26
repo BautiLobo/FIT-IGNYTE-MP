@@ -124,6 +124,10 @@ module.exports = {
 
   // ── REGISTER ───────────────────────────────────────────────
   edit_profile_title: '编辑资料',
+  edit_profile_logout_title: '退出登录',
+  edit_profile_logout_body: '确定要退出登录吗？',
+  edit_profile_logout_confirm: '确定',
+  edit_profile_logout_cancel: '取消',
   register_title: '您的信息',
   register_change: '修改',
   register_name_label: '姓名',
@@ -250,13 +254,15 @@ module.exports = {
   approved_contact: '💬  联系 FIT IGNYTE',
 
   // ── REJECTED ───────────────────────────────────────────────
-  rejected_title: '暂未覆盖您的区域',
-  rejected_body: '目前暂不配送至您的位置，但我们正在快速扩展！',
-  rejected_reason: '超出当前配送范围',
-  rejected_notify_label: '覆盖后通知我',
-  rejected_notify_btn: '有货时通知我',
-  rejected_contact: '仍然联系我们',
-  rejected_notified: '我们会通知您！🔔',
+  rejected_title: '您的地址稍微超出了配送范围',
+  rejected_body: '我们仍然很乐意为您配送！',
+  rejected_reason: '请联系我们，我们会为您确认配送安排和费用',
+  rejected_contact: '联系我们',
+  rejected_start_over_btn: '重新开始',
+  rejected_start_over_title: '要重新开始吗？',
+  rejected_start_over_body: '这将删除您当前的申请，您可以随时重新申请。',
+  rejected_start_over_confirm: '重新开始',
+  rejected_start_over_cancel: '取消',
 
   // ── WELCOME ────────────────────────────────────────────────
   welcome_title: '欢迎，%s！',
@@ -265,9 +271,9 @@ module.exports = {
   // ── HOW IT WORKS ───────────────────────────────────────────
   how_title: '使用说明',
   how_kicker: 'FIT IGNYTE · 四个步骤',
-  how_headline1: '从目标到门口，',
-  how_headline2: '我们来搞定。',
-  how_intro: '新鲜健身餐，直送到您家门口。无需购物，无需烹饪。',
+  how_headline1: '您的营养目标，',
+  how_headline2: '交给我们负责。',
+  how_intro: '无需下厨，新鲜健康，直送家门。',
   how_step1_title: '选择您的套餐',
   how_step1_tag: '您的目标',
   how_step1_desc: '根据目标选择 Balance 或 Performance 套餐，然后选择每天 1、2 或 3 餐。',

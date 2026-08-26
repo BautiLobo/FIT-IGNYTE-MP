@@ -267,6 +267,32 @@ App({
     });
   },
 
+  // Borra un pedido propio (vía Edge Function delete-order) -- usado desde
+  // "Start over" en la pantalla de rejected. El servidor solo lo permite si
+  // el pedido sigue en draft/rejected (ver comentario en la Edge Function).
+  deleteOrder({ orderId }) {
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/delete-order',
+        method: 'POST',
+        header: { 'Content-Type': 'application/json' },
+        data: { orderId },
+        success: (res) => {
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            resolve(res.data);
+          } else {
+            console.error('[deleteOrder] failed:', res.statusCode, res.data);
+            reject(new Error(`deleteOrder error: ${JSON.stringify(res.data)}`));
+          }
+        },
+        fail: (err) => {
+          console.error('[deleteOrder] network error:', err);
+          reject(err);
+        }
+      });
+    });
+  },
+
   // ── CREATE PAYMENT (vía Edge Function create-payment) ────────────
   // Crea la orden JSAPI real en WeChat Pay y devuelve los parámetros
   // firmados listos para pasarle directo a wx.requestPayment().

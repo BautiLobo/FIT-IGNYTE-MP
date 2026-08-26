@@ -71,29 +71,10 @@
 .info-icon { font-size: 32rpx; color: #e8342a; flex-shrink: 0; }
 .info-text { font-size: 28rpx; font-weight: 700; color: #e8342a; flex: 1; }
 
-/* ── NOTIFY CARD ── */
-.notify-card {
-  width: 100%;
-  background: #13131a;
-  border: 1rpx solid #1a1a22;
-  border-radius: 20rpx;
-  padding: 28rpx;
-  display: flex;
-  flex-direction: column;
-  gap: 20rpx;
-}
-
-.notify-label {
-  font-size: 20rpx;
-  color: #9f9fa8;
-  font-weight: 700;
-  letter-spacing: 3rpx;
-  display: block;
-}
-
 button { margin:0 !important; padding:0 !important; background:transparent; border:none; }
 
-.btn-notify {
+/* ── CONTACT (primary) ── */
+.btn-primary {
   background: #e8342a !important;
   border-radius: 24rpx !important;
   height: 92rpx;
@@ -107,7 +88,7 @@ button { margin:0 !important; padding:0 !important; background:transparent; bord
   display: block;
 }
 
-/* ── CONTACT ── */
+/* ── START OVER (secondary) ── */
 .btn-secondary {
   background: #13131a !important;
   border: 1rpx solid #1a1a22 !important;

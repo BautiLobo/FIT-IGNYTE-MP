@@ -124,6 +124,10 @@ module.exports = {
 
   // ── REGISTER ───────────────────────────────────────────────
   edit_profile_title: 'Edit Profile',
+  edit_profile_logout_title: 'Log out',
+  edit_profile_logout_body: 'Are you sure you want to log out?',
+  edit_profile_logout_confirm: 'Yes',
+  edit_profile_logout_cancel: 'No',
   register_title: 'Your details',
   register_change: 'Change',
   register_name_label: 'Full name',
@@ -250,13 +254,15 @@ module.exports = {
   approved_contact: '💬  Contact FIT IGNYTE',
 
   // ── REJECTED ───────────────────────────────────────────────
-  rejected_title: "We're not in your area yet",
-  rejected_body: "We don't deliver to your location yet, but we're growing fast!",
-  rejected_reason: 'Outside our current delivery radius',
-  rejected_notify_label: 'NOTIFY ME WHEN YOU ARRIVE',
-  rejected_notify_btn: 'Notify me when available',
-  rejected_contact: 'Contact us anyway',
-  rejected_notified: "We'll notify you! 🔔",
+  rejected_title: 'Your address is a little further away',
+  rejected_body: "We'd still love to deliver to you!",
+  rejected_reason: "Please contact us and we'll confirm the delivery arrangement and fee",
+  rejected_contact: 'Contact us',
+  rejected_start_over_btn: 'Start over',
+  rejected_start_over_title: 'Start over?',
+  rejected_start_over_body: "This will remove your current application. You can apply again anytime.",
+  rejected_start_over_confirm: 'Yes',
+  rejected_start_over_cancel: 'No',
 
   // ── WELCOME ────────────────────────────────────────────────
   welcome_title: 'Welcome, %s!',
@@ -265,9 +271,9 @@ module.exports = {
   // ── HOW IT WORKS ───────────────────────────────────────────
   how_title: 'How it works',
   how_kicker: 'FIT IGNYTE · FOUR STEPS',
-  how_headline1: 'Goal to door,',
-  how_headline2: 'handled.',
-  how_intro: 'Fresh fitness meals, delivered to your door. No shopping, no cooking.',
+  how_headline1: 'Your nutrition goals,',
+  how_headline2: 'handled for you.',
+  how_intro: 'No cooking needed — fresh, healthy meals delivered to your door.',
   how_step1_title: 'Choose your plan',
   how_step1_tag: 'YOUR GOAL',
   how_step1_desc: 'Choose Balance or Performance based on your goals, then select 1, 2 or 3 meals per day.',
