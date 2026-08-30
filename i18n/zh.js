@@ -181,6 +181,7 @@ module.exports = {
   order_summary_address: '配送地址',
   order_summary_discount: '首周 25% 折扣',
   order_summary_delivery: '配送费（5天）',
+  order_summary_delivery_tbc: '批准后确认',
   order_summary_submitting: '提交中…',
   order_summary_place_order: '提交订单  →',
   order_summary_continue_payment: '继续付款  →',
@@ -216,6 +217,7 @@ module.exports = {
   payment_simulate_cancel: '取消',
   payment_error_title: '支付错误',
   payment_error_content: '保存数据时出现错误。',
+  payment_contact_btn: '联系我们',
   payment_contact_title: '通过微信联系我们',
   payment_contact_content: '搜索：fitignyte_shanghai',
   payment_renewed: '套餐已续费！',
@@ -251,7 +253,6 @@ module.exports = {
   approved_title: '%s，一切就绪！',
   approved_welcome: '欢迎加入 FIT IGNYTE',
   approved_payment_btn: '完成付款  →',
-  approved_contact: '💬  联系 FIT IGNYTE',
 
   // ── REJECTED ───────────────────────────────────────────────
   rejected_title: '您的地址稍微超出了配送范围',

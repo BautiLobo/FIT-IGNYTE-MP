@@ -1,18 +1,18 @@
 <view class="container">
 
   <!-- Topbar -->
-  <view class="topbar">
-    <view class="profile-btn" bindtap="goToProfile">
+  <view class="topbar" style="height: 180rpx; display: flex; box-sizing: border-box">
+    <view class="profile-btn" bindtap="goToProfile" style="position: relative; left: 0rpx; top: 8rpx">
       <text class="profile-icon">P</text>
     </view>
-    <image style="position: relative; left: 0rpx; top: 11rpx; width: 225rpx; height: 82rpx; display: block; box-sizing: border-box" class="topbar-logo" src="/images/logo.png" mode="aspectFit" />
+    <image style="width: 56rpx; height: 75rpx; display: block; box-sizing: border-box" class="topbar-logo" src="/images/mark.png" mode="aspectFit" />
     <view style="width:60rpx;"></view>
   </view>
 
-  <scroll-view class="scroll" scroll-y>
+  <scroll-view class="scroll" scroll-y style="position: relative; left: 0rpx; top: 0rpx">
 
     <block wx:if="{{loading}}">
-      <view class="loading-wrap"><view class="spinner"></view></view>
+      <view class="loading-wrap" style="position: relative; left: 0rpx; top: -175rpx"><view class="spinner"></view></view>
     </block>
 
     <block wx:else>

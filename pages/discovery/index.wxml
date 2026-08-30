@@ -1,31 +1,31 @@
 <view class="container" wx:if="{{!checking}}">
 
   <!-- Hero Image Background (full bleed) -->
-  <image class="hero-bg" src="/images/hero-meal.jpeg" mode="aspectFill" />
+  <image style="height: 681rpx; display: block; box-sizing: border-box; left: 0rpx; top: 96rpx; position: absolute" class="hero-bg" src="/images/hero-meal.jpeg" mode="aspectFill" />
 
   <!-- Main content body (flex: 1, anchored to bottom) -->
-  <view class="body" style="position: relative; left: 0rpx; top: -31rpx">
+  <view class="body" style="position: relative; left: 0rpx; top: -30rpx">
 
     <!-- Logo floating in hero zone -->
     <view class="logo-float">
-      <image style="width: 339rpx; height: 249rpx; display: inline-block; box-sizing: border-box" class="logo" src="/images/logo.png" mode="aspectFit" />
+      <image style="width: 362rpx; height: 175rpx; display: inline-block; box-sizing: border-box; position: relative; left: -252rpx; top: -23rpx" class="logo" src="/images/logo.png" mode="aspectFit" />
     </view>
 
     <!-- Headline: 3 lines, last in red -->
     <view class="headline-block">
-      <text class="headline" style="position: relative; left: 0rpx; top: 152rpx">{{lbl_headline1}}<text class="break"></text>{{lbl_headline2}}<text class="break"></text><text class="headline-red">{{lbl_headline_red}}</text></text>
+      <text class="headline" style="position: relative; left: 0rpx; top: 212rpx">{{lbl_headline1}}<text class="break"></text>{{lbl_headline2}}<text class="break"></text><text class="headline-red">{{lbl_headline_red}}</text></text>
     </view>
 
     <!-- Rule separator -->
-    <view class="rule" style="width: 83rpx; display: block; box-sizing: border-box; position: relative; left: -2rpx; top: 144rpx"></view>
+    <view class="rule" style="width: 83rpx; display: block; box-sizing: border-box; position: relative; left: 0rpx; top: 194rpx"></view>
 
     <!-- Tagline: 2 lines split at · -->
     <view class="tagline-block">
-      <text class="tagline" style="position: relative; left: 0rpx; top: 156rpx; width: 389rpx; height: 112rpx; display: block; box-sizing: border-box">{{lbl_tagline1}}<text class="break"></text>{{lbl_tagline2}}</text>
+      <text class="tagline" style="position: relative; left: 0rpx; top: 199rpx; width: 389rpx; height: 112rpx; display: block; box-sizing: border-box">{{lbl_tagline1}}<text class="break"></text>{{lbl_tagline2}}</text>
     </view>
 
     <!-- Feature chips: 3 in one row -->
-    <view class="chips-row" style="position: relative; left: -2rpx; top: 41rpx">
+    <view class="chips-row" style="position: relative; left: 0rpx; top: 77rpx">
       <view class="chip" style="position: relative; left: -22rpx; top: 100rpx; width: 210rpx; display: flex; box-sizing: border-box">
         <image style="position: relative; left: 6rpx; top: 0rpx; width: 43rpx; height: 27rpx; display: block; box-sizing: border-box" class="chip-icon" src="/images/icon-delivery.png" mode="aspectFit" />
         <text class="chip-text" style="position: relative; left: 0rpx; top: 0rpx">{{lbl_feature1}}</text>
@@ -41,13 +41,13 @@
     </view>
 
     <!-- Fresh weekly meal plans line -->
-    <text class="fresh-copy" style="position: relative; left: 0rpx; top: -41rpx">{{lbl_fresh}}</text>
+    <text class="fresh-copy" style="position: relative; left: 0rpx; top: -13rpx">{{lbl_fresh}}</text>
 
     <!-- Trust micro-copy -->
     <text class="trust-copy" style="width: 302rpx; height: 33rpx; display: block; box-sizing: border-box; position: relative; left: -44rpx; top: 7rpx">{{lbl_trusted_pre}}<text class="trust-bold">{{lbl_trusted_bold}}</text>{{lbl_trusted_post}}</text>
 
     <!-- Promo badge -->
-    <view class="promo-badge" style="position: relative; left: 0rpx; top: -12rpx">
+    <view class="promo-badge" style="position: relative; left: 0rpx; top: 18rpx">
       <text class="badge-off">{{lbl_promo_off}}</text>
       <view class="badge-divider"></view>
       <view class="badge-right">

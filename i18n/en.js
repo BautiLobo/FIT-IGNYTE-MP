@@ -181,6 +181,7 @@ module.exports = {
   order_summary_address: 'ADDRESS',
   order_summary_discount: '25% first week discount',
   order_summary_delivery: 'Delivery (5 days)',
+  order_summary_delivery_tbc: 'Confirmed after approval',
   order_summary_submitting: 'Submitting...',
   order_summary_place_order: 'Submit Order  →',
   order_summary_continue_payment: 'Continue to payment  →',
@@ -216,6 +217,7 @@ module.exports = {
   payment_simulate_cancel: 'Cancel',
   payment_error_title: 'Payment error',
   payment_error_content: 'Something went wrong saving your data.',
+  payment_contact_btn: 'Contact us',
   payment_contact_title: 'Contact us on WeChat',
   payment_contact_content: 'Search for: fitignyte_shanghai',
   payment_renewed: 'Plan renewed!',
@@ -251,7 +253,6 @@ module.exports = {
   approved_title: "You're all set, %s!",
   approved_welcome: 'Welcome to FIT IGNYTE',
   approved_payment_btn: 'Complete payment  →',
-  approved_contact: '💬  Contact FIT IGNYTE',
 
   // ── REJECTED ───────────────────────────────────────────────
   rejected_title: 'Your address is a little further away',

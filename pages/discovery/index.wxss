@@ -31,13 +31,13 @@
   left: 0;
   right: 0;
   width: 100%;
-  height: 840rpx;        /* la foto ocupa la mitad superior de la pantalla */
+  height: 860rpx;        /* la foto ocupa la mitad superior de la pantalla */
   object-fit: cover;
   z-index: 1;
 }
 
-/* Overlay de 5 stops: funde la foto a negro arriba y abajo,
-   deja el centro visible; suma dos glows rojos atmosféricos */
+/* Overlay: foto clara arriba (donde va el logo), funde a negro solo
+   sobre el final para que el headline sea legible */
 .hero-bg::after {
   content: '';
   position: absolute;
@@ -47,15 +47,21 @@
   height: 100%;
   background:
     linear-gradient(to bottom,
-      rgba(11,11,12,.90) 0%,
-      rgba(11,11,12,.82) 30%,
-      rgba(11,11,12,.46) 48%,
-      rgba(11,11,12,.82) 76%,
+      rgba(11,11,12,0) 0%,
+      rgba(11,11,12,0) 58%,
+      rgba(11,11,12,.55) 78%,
       #0b0b0c 100%),
-    radial-gradient(circle at 50% 26%, rgba(232,52,42,.20) 0%, transparent 48%),
     radial-gradient(circle at 50% 92%, rgba(232,52,42,.08) 0%, transparent 40%);
   z-index: 2;
   pointer-events: none;
+}
+
+/* Logo: flota en la zona de la foto; margin-bottom:auto
+   empuja todo lo demás hacia abajo */
+.logo-float {
+  margin-bottom: auto;
+  padding-top: 54rpx;
+  height: auto;
 }
 
 /* Textura de puntos sutiles sobre toda la zona del hero */
@@ -86,19 +92,11 @@
   overflow: hidden;
 }
 
-/* Logo: flota en la zona de la foto; margin-bottom:auto
-   empuja todo lo demás hacia abajo */
-.logo-float {
-  margin-bottom: auto;
-  padding-top: 54rpx;
-  height: auto;
-}
-
 .logo {
-  width: 302rpx;               /* logo grande centrado sobre la foto */
+  width: 170rpx;
   height: auto;
-  aspect-ratio: 1 / .79;
-  filter: drop-shadow(0 10rpx 26rpx rgba(232,52,42,.28));  /* glow rojo */
+  aspect-ratio: 216 / 113;
+  filter: drop-shadow(0 4rpx 14rpx rgba(0,0,0,.5));
 }
 
 /* ── HEADLINE: 3 líneas exactas, la tercera en rojo (WXML) ── */

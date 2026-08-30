@@ -48,6 +48,11 @@ button { margin:0 !important; padding:0 !important; background:transparent; bord
 .day-header { display:flex; justify-content:space-between; align-items:center; margin:12rpx 0 6rpx; }
 .day-time { font-size:24rpx; color:#e8342a; font-weight:700; }
 
+.price-val-tbc {
+  font-size: 22rpx;
+  font-style: italic;
+}
+
 .price-val-strike {
   text-decoration: line-through;
   color: #9f9fa8;

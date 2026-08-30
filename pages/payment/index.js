@@ -9,6 +9,7 @@ Page({
     client: null,
     selectedPlan: null,
     total: 0,
+    deliveryFee: 0,
     fromRenewal: false,
     deferToPending: false,
     submitting: false,
@@ -36,6 +37,7 @@ Page({
     lbl_referral_apply: '',
     lbl_referral_row: '',
     lbl_referral_applied: '',
+    lbl_contact_btn: '',
   },
 
   async onLoad(options) {
@@ -146,12 +148,18 @@ Page({
       lbl_referral_apply: t('payment_referral_apply'),
       lbl_referral_row: t('payment_referral_row'),
       lbl_referral_applied: t('payment_referral_applied'),
+      lbl_contact_btn: t('payment_contact_btn'),
     });
 
+    // El fee real lo define el admin al aprobar la orden (ver panel FIT-IGNYTE)
+    // y queda en clients.delivery_fee -- misma fuente que usa create-payment
+    // del lado del servidor para calcular el monto que realmente se cobra.
+    // El fallback a 35 es solo por si un cliente viejo quedara sin el campo.
+    const deliveryFee = (client && client.delivery_fee != null) ? client.delivery_fee : 35;
     const planPrice = selectedPlan.price || 0;
     const discount = fromRenewal ? 0 : Math.round(planPrice * 0.25);
-    const total = planPrice - discount + 35;
-    this.setData({ selectedPlan, total, fromRenewal, discount });
+    const total = planPrice - discount + deliveryFee;
+    this.setData({ selectedPlan, total, fromRenewal, discount, deliveryFee });
 
     if (fromRenewal) {
       // En renovación, `order` es directamente la fila de clients: ahí ya
@@ -179,9 +187,9 @@ Page({
         return;
       }
 
-      const { selectedPlan, discount } = this.data;
+      const { selectedPlan, discount, deliveryFee } = this.data;
       const planPrice = selectedPlan.price || 0;
-      const baseTotal = planPrice - discount + 35;
+      const baseTotal = planPrice - discount + deliveryFee;
       const referralDiscount = Math.round(baseTotal * 0.10);
       const total = baseTotal - referralDiscount;
 

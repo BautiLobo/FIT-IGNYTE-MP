@@ -61,7 +61,7 @@
       </view>
       <view class="price-row price-row-border">
         <text class="price-label">{{lbl_delivery}}</text>
-        <text class="price-val">¥35</text>
+        <text class="price-val price-val-tbc">{{lbl_delivery_tbc}}</text>
       </view>
       <view class="price-row">
         <text class="price-total-label">{{lbl_total}}</text>

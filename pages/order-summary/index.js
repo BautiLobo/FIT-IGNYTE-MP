@@ -26,6 +26,7 @@ Page({
     lbl_address: '',
     lbl_discount: '',
     lbl_delivery: '',
+    lbl_delivery_tbc: '',
     lbl_submitting: '',
     lbl_place_order: '',
     lbl_continue_payment: '',
@@ -44,6 +45,7 @@ Page({
       lbl_address: t('order_summary_address'),
       lbl_discount: t('order_summary_discount'),
       lbl_delivery: t('order_summary_delivery'),
+      lbl_delivery_tbc: t('order_summary_delivery_tbc'),
       lbl_submitting: t('order_summary_submitting'),
       lbl_place_order: t('order_summary_place_order'),
       lbl_continue_payment: t('order_summary_continue_payment'),
@@ -104,7 +106,7 @@ Page({
       const mealSummary = await this.buildMealSummary(order.meals || {});
       const planPrice = selectedPlan.price || 0;
       const discount = Math.round(planPrice * 0.25);
-      const total = planPrice - discount + 35;
+      const total = planPrice - discount;
 
       this.setData({ order, selectedPlan, mealSummary, total, discount, fromRenewal: false, repay });
 
@@ -160,7 +162,7 @@ Page({
       const mealSummary = await this.buildMealSummary(mealSelections);
 
       const planPrice = selectedPlan.price || 0;
-      const total = planPrice + 35;
+      const total = planPrice;
 
       this.setData({ order, selectedPlan, mealSummary, total, discount: 0, fromRenewal: true });
 

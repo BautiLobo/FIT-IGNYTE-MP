@@ -126,3 +126,20 @@
 
 /* ── HINT ── */
 .pay-hint { font-size:22rpx; color:#beb6b6; text-align:center; display:block; }
+
+/* ── CONTACT (mismo estilo que home/tiers) ── */
+.btn-contact {
+  background: #13131a !important;
+  border: 1rpx solid #1a1a22 !important;
+  color: #beb6b6 !important;
+  border-radius: 20rpx !important;
+  height: 88rpx;
+  line-height: 88rpx;
+  font-size: 28rpx !important;
+  font-weight: 600 !important;
+  width: 100% !important;
+  text-align: center;
+  box-sizing: border-box;
+  display: block;
+  margin-top: 20rpx;
+}

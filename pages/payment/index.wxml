@@ -29,7 +29,7 @@
 
       <view class="row row-border">
         <text class="row-key">{{lbl_delivery}}</text>
-        <text class="row-val">¥35</text>
+        <text class="row-val">¥{{deliveryFee}}</text>
       </view>
 
       <view class="row row-border" wx:if="{{referralApplied}}">
@@ -84,6 +84,8 @@
     </view>
 
     <text class="pay-hint">  {{lbl_renewal_note}}</text>
+
+    <button class="btn-contact" bindtap="contactUs">{{lbl_contact_btn}}</button>
 
   </scroll-view>
 

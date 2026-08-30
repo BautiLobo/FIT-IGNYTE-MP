@@ -1,10 +1,10 @@
 <view class="container">
 
   <view class="topbar">
-    <image style="position: relative; left: 0rpx; top: 25rpx; width: 214rpx; height: 185rpx; display: block; box-sizing: border-box" class="topbar-logo" src="/images/mark.png" mode="aspectFit" />
+    <image style="position: relative; left: 0rpx; top: -51rpx; width: 300rpx; height: 520rpx; display: block; box-sizing: border-box" class="topbar-logo" src="/images/logo.png" mode="aspectFit" />
   </view>
 
-  <view class="content" style="position: relative; left: 0rpx; top: -225rpx">
+  <view class="content" style="position: relative; left: 0rpx; top: -372rpx">
 
     <view class="circle-wrap">
       <view class="hero-circle">
@@ -23,10 +23,6 @@
 
     <view class="btn-wrap">
       <button class="btn-primary" bindtap="goToPayment">{{lbl_payment_btn}}</button>
-    </view>
-
-    <view class="btn-wrap">
-      <button class="btn-secondary" open-type="contact" style="position: relative; left: 0rpx; top: -22rpx; width: 656rpx; height: 93rpx; display: block; box-sizing: border-box">{{lbl_contact}}</button>
     </view>
 
   </view>

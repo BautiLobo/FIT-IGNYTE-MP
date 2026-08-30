@@ -298,14 +298,14 @@ Page({
     return {
       title: t('share_title_home'),
       path: '/pages/discovery/index',
-      imageUrl: '/images/hero-meal.jpeg',
+      imageUrl: '/images/hero-meal-share.jpeg',
     };
   },
 
   onShareTimeline() {
     return {
       title: t('share_title_home'),
-      imageUrl: '/images/hero-meal.jpeg',
+      imageUrl: '/images/hero-meal-share.jpeg',
     };
   },
 

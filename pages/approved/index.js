@@ -10,14 +10,12 @@ Page({
     lbl_title: '',
     lbl_welcome: '',
     lbl_payment_btn: '',
-    lbl_contact: '',
   },
 
   async onLoad() {
     this.setData({
       lbl_welcome: t('approved_welcome'),
       lbl_payment_btn: t('approved_payment_btn'),
-      lbl_contact: t('approved_contact'),
     });
     const pendingOrderId = wx.getStorageSync('pendingOrderId');
     if (!pendingOrderId) return;
