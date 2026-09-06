@@ -143,3 +143,20 @@
   display: block;
   margin-top: 20rpx;
 }
+
+/* ── START OVER (solo alta nueva) ── */
+.btn-start-over {
+  background: #13131a !important;
+  border: 1rpx solid #1a1a22 !important;
+  border-radius: 20rpx !important;
+  height: 88rpx;
+  line-height: 88rpx;
+  color: #9f9fa8 !important;
+  font-size: 28rpx !important;
+  font-weight: 600 !important;
+  width: 100% !important;
+  text-align: center;
+  box-sizing: border-box;
+  display: block;
+  margin-top: 16rpx;
+}

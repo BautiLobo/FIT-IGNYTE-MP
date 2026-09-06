@@ -268,8 +268,8 @@ App({
   },
 
   // Borra un pedido propio (vía Edge Function delete-order) -- usado desde
-  // "Start over" en la pantalla de rejected. El servidor solo lo permite si
-  // el pedido sigue en draft/rejected (ver comentario en la Edge Function).
+  // "Start over" en rejected.js y payment.js. El servidor solo lo permite si
+  // el pedido sigue en draft/rejected/approved (ver comentario en la Edge Function).
   deleteOrder({ orderId }) {
     return new Promise((resolve, reject) => {
       wx.request({

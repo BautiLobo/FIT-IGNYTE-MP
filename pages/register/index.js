@@ -231,13 +231,31 @@ Page({
         const byOpenid = await app.getClient({ openid });
         if (byOpenid && byOpenid.length > 0) {
           const existing = byOpenid[0];
-          const status = app.getRealStatus(existing.start_date, existing.expiry_date);
+          // Un cliente ya aprobado pero que todavía no pagó ('Pending
+          // Payment') siempre tiene expiry_date vacío -- eso hace que
+          // getRealStatus() lo lea como 'Inactive' (plan vencido) y lo
+          // mande a "renovar" un plan que ni siquiera llegó a pagar. Mismo
+          // chequeo que ya hace discovery.js checkSession(): hay que
+          // resolver 'Pending Payment' antes de mirar fechas.
           wx.showModal({
             title: t('register_account_exists_title'),
             content: t('register_account_exists_body'),
             showCancel: false,
-            success: () => {
+            success: async () => {
               wx.setStorageSync('clientId', existing.id);
+              if (existing.status === 'Pending Payment') {
+                if (existing.plan_id) {
+                  const planData = await app.supabase('GET', 'plans', null, `id=eq.${existing.plan_id}`);
+                  if (planData && planData.length > 0) {
+                    wx.setStorageSync('selectedPlan', app.getDisplayPlan(planData[0]));
+                  }
+                  wx.reLaunch({ url: '/pages/payment/index' });
+                } else {
+                  wx.reLaunch({ url: '/pages/tiers/index' });
+                }
+                return;
+              }
+              const status = app.getRealStatus(existing.start_date, existing.expiry_date);
               if (status === 'Inactive') {
                 wx.reLaunch({ url: '/pages/renewal/index' });
               } else {
@@ -274,9 +292,34 @@ Page({
       if (result && result.reason === 'duplicate_pending_order') {
         // Mismo openid ya tiene un pedido sin resolver (draft/pending) —
         // pasa antes de que exista fila en `clients`, así que el chequeo de
-        // arriba (por clients) no lo agarra. Lo mandamos a ver ese pedido
-        // en vez de dejarlo crear uno duplicado.
+        // arriba (por clients) no lo agarra. Antes de decidir a dónde
+        // mandarlo hay que revisar el estado real de ese pedido existente:
+        // si sigue en 'draft' (nunca tocó "Place Order" en order-summary),
+        // mandarlo derecho a "under-review" lo deja varado ahí para siempre
+        // -- el admin nunca ve pedidos en draft, así que esa pantalla de
+        // espera nunca se resuelve. Mismo bug que ya se había resuelto en
+        // discovery.js checkSession() para el caso de reabrir la app; acá
+        // faltaba el mismo chequeo para el caso de re-registrarse.
         wx.setStorageSync('pendingOrderId', result.existingOrderId);
+
+        let existingOrder = null;
+        try {
+          const existingData = await app.getOrder({ orderId: result.existingOrderId });
+          existingOrder = existingData && existingData.length > 0 ? existingData[0] : null;
+        } catch (err) {
+          console.error('getOrder (duplicate check) error:', err);
+        }
+
+        if (existingOrder && existingOrder.status === 'draft' && existingOrder.plan_id) {
+          const planData = await app.supabase('GET', 'plans', null, `id=eq.${existingOrder.plan_id}`);
+          if (planData && planData.length > 0) {
+            wx.setStorageSync('selectedPlan', app.getDisplayPlan(planData[0]));
+            wx.reLaunch({ url: '/pages/order-summary/index' });
+            this.setData({ submitting: false });
+            return;
+          }
+        }
+
         wx.showModal({
           title: t('register_account_exists_title'),
           content: t('register_account_exists_body'),

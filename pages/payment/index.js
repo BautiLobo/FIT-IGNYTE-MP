@@ -38,6 +38,11 @@ Page({
     lbl_referral_row: '',
     lbl_referral_applied: '',
     lbl_contact_btn: '',
+    lbl_start_over_btn: '',
+    lbl_start_over_title: '',
+    lbl_start_over_body: '',
+    lbl_start_over_confirm: '',
+    lbl_start_over_cancel: '',
   },
 
   async onLoad(options) {
@@ -149,6 +154,11 @@ Page({
       lbl_referral_row: t('payment_referral_row'),
       lbl_referral_applied: t('payment_referral_applied'),
       lbl_contact_btn: t('payment_contact_btn'),
+      lbl_start_over_btn: t('payment_start_over_btn'),
+      lbl_start_over_title: t('payment_start_over_title'),
+      lbl_start_over_body: t('payment_start_over_body'),
+      lbl_start_over_confirm: t('payment_start_over_confirm'),
+      lbl_start_over_cancel: t('payment_start_over_cancel'),
     });
 
     // El fee real lo define el admin al aprobar la orden (ver panel FIT-IGNYTE)
@@ -440,12 +450,36 @@ Page({
     wx.navigateBack();
   },
 
-  contactUs() {
+  // Igual que en rejected.js: solo tiene sentido en alta nueva (no en
+  // renovación, donde no hay pendingOrderId que borrar ni tiene lógica
+  // "empezar de nuevo" -- el botón queda oculto con wx:if="{{!fromRenewal}}").
+  startOver() {
+    if (this.data.fromRenewal) return;
+    const { lbl_start_over_title, lbl_start_over_body, lbl_start_over_confirm, lbl_start_over_cancel } = this.data;
     wx.showModal({
-      title: t('payment_contact_title'),
-      content: t('payment_contact_content'),
-      showCancel: false,
-      confirmText: 'OK',
+      title: lbl_start_over_title,
+      content: lbl_start_over_body,
+      confirmText: lbl_start_over_confirm,
+      cancelText: lbl_start_over_cancel,
+      confirmColor: '#E8342A',
+      success: async (res) => {
+        if (!res.confirm) return;
+        const pendingOrderId = wx.getStorageSync('pendingOrderId');
+        if (pendingOrderId) {
+          try {
+            await app.deleteOrder({ orderId: pendingOrderId });
+          } catch (err) {
+            console.error('deleteOrder error:', err);
+          }
+        }
+        wx.removeStorageSync('pendingOrderId');
+        wx.removeStorageSync('selectedPlan');
+        wx.removeStorageSync('mealSelections');
+        wx.removeStorageSync('startDate');
+        wx.removeStorageSync('expiryDate');
+        wx.reLaunch({ url: '/pages/discovery/index' });
+      },
     });
   },
+
 });

@@ -222,6 +222,11 @@ module.exports = {
   payment_contact_content: '搜索：fitignyte_shanghai',
   payment_renewed: '套餐已续费！',
   payment_already_renewed: '您已经续费过了 — 请在首页查看新套餐的开始日期。',
+  payment_start_over_btn: '重新开始',
+  payment_start_over_title: '要重新开始吗？',
+  payment_start_over_body: '这将删除您当前的申请，您可以随时重新申请。',
+  payment_start_over_confirm: '重新开始',
+  payment_start_over_cancel: '取消',
   payment_date_stale_title: '请重新选择开始日期',
   payment_date_stale_body: '距离您选择开始日期已经过了一段时间，该日期已不可用。请重新选择日期和餐食，然后即可付款。',
 
