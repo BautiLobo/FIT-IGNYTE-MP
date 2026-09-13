@@ -42,13 +42,13 @@ function addBusinessDays(date, days) {
 }
 
 // Earliest valid start date as of right now (YYYY-MM-DD): next business
-// day, pushed one more day out if the 8pm kitchen-prep cutoff already
+// day, pushed one more day out if the 10pm kitchen-prep cutoff already
 // passed today. For a renewal, also never before the day after the
 // client's CURRENT plan expires, so it can't overlap the cycle already in
 // progress.
 function getMinStartDate({ currentExpiryDate } = {}) {
   const now = new Date();
-  const cutoffPassed = now.getHours() >= 20;
+  const cutoffPassed = now.getHours() >= 22;
   let min = getNextBusinessDay(now, cutoffPassed ? 2 : 1);
 
   if (currentExpiryDate) {

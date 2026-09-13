@@ -216,7 +216,7 @@ y verificado con una prueba real (incrementó y se restauró después).
 ### Copy / contenido (pedidos del usuario, no bugs)
 - Sacado el botón "View Full Menu PDF" de `how-it-works` (bloqueaba el botón "Get Started").
 - Textos de `order-summary`, `how-it-works`, `tiers`, `register`, `plans` actualizados/acortados varias veces según pedidos puntuales (ver historial de conversación si hace falta el detalle exacto).
-- `pages/start-date`: después de las 20:00, la fecha mínima de inicio salta un día extra (no se puede más elegir "mañana" tarde en la noche).
+- `pages/start-date`: después de las 22:00, la fecha mínima de inicio salta un día extra (no se puede más elegir "mañana" tarde en la noche).
 - Botón de `how-it-works` cambiado de "Get started →" a "Choose your plan →" (no repetir el texto de `discovery`).
 - Tiers page: agregada línea de kcal/proteína por tier (`tiers_balance_kcal`/`tiers_performance_kcal`).
 - Plans page: hooks de cada plan actualizados + agregada proteína/día (calculada como proteína-por-comida-del-tier × cantidad de comidas: 35g Balance / 55g Performance).
