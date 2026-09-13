@@ -109,29 +109,9 @@ Page({
         }
       }
 
-      const selectionsData = await app.supabase('GET', 'meal_selections', null, `client_id=eq.${clientId}&order=day.asc,slot.asc`);
-      const selections = selectionsData || [];
-
       const firstName = client.name ? client.name.split(' ')[0] : 'there';
-
-      // Determinar qué día le corresponde "hoy" dentro del plan, basado en start_date
-      const planDayKey = this.getPlanDayKey(client.start_date, client.expiry_date);
-
-      const weekMeals = await this.buildWeekMeals(selections, planDayKey);
-      const todayDelivery = this.getTodayDelivery(weekMeals);
       const daysLeft = this.getDaysLeft(client.expiry_date);
-
       const realStatus = app.getRealStatus(client.start_date, client.expiry_date);
-      const isUpcoming = realStatus === 'Upcoming';
-
-      let startDateFormatted = '';
-      if (isUpcoming && client.start_date) {
-        const d = new Date(client.start_date + 'T00:00:00');
-        const dow = d.getDay();
-        if (dow === 6) d.setDate(d.getDate() + 2);
-        if (dow === 0) d.setDate(d.getDate() + 1);
-        startDateFormatted = this.formatFullDate(d);
-      }
 
       // Renovación anticipada ya pagada pero todavía sin aplicar (el cron
       // diario la aplica el día que corresponde -- ver RENEWAL_PLAN.md,
@@ -144,6 +124,35 @@ Page({
       let pendingRenewalDateFormatted = '';
       if (pendingRenewal && pendingRenewal.start_date) {
         pendingRenewalDateFormatted = this.formatFullDate(new Date(pendingRenewal.start_date + 'T00:00:00'));
+      }
+
+      // Hueco entre el vencimiento del ciclo viejo y el arranque del nuevo ya
+      // pagado: `realStatus` da 'Inactive' porque solo mira start/expiry del
+      // ciclo viejo, pero para el cliente esto es indistinguible de estar
+      // 'Upcoming' -- mismo trato: banner "starts soon" + comidas de la
+      // semana que viene, tomadas de `pending_meal_selections` porque el
+      // cron todavía no las migró a `meal_selections`.
+      const inRenewalGap = realStatus === 'Inactive' && hasPendingRenewal;
+      const isUpcoming = realStatus === 'Upcoming' || inRenewalGap;
+      const effectiveStartDate = inRenewalGap ? pendingRenewal.start_date : client.start_date;
+
+      const selectionsTable = inRenewalGap ? 'pending_meal_selections' : 'meal_selections';
+      const selectionsData = await app.supabase('GET', selectionsTable, null, `client_id=eq.${clientId}&order=day.asc,slot.asc`);
+      const selections = selectionsData || [];
+
+      // Determinar qué día le corresponde "hoy" dentro del plan, basado en start_date
+      const planDayKey = this.getPlanDayKey(client.start_date, client.expiry_date);
+
+      const weekMeals = await this.buildWeekMeals(selections, planDayKey);
+      const todayDelivery = this.getTodayDelivery(weekMeals);
+
+      let startDateFormatted = '';
+      if (isUpcoming && effectiveStartDate) {
+        const d = new Date(effectiveStartDate + 'T00:00:00');
+        const dow = d.getDay();
+        if (dow === 6) d.setDate(d.getDate() + 2);
+        if (dow === 0) d.setDate(d.getDate() + 1);
+        startDateFormatted = this.formatFullDate(d);
       }
 
       const realToday = new Date().getDay();

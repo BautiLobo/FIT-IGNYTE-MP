@@ -84,7 +84,22 @@ Page({
       // Clientes activos usan null → getWeekIndexForDay toma la semana actual.
       const today = new Date(); today.setHours(0, 0, 0, 0);
       const startDateObj = client.start_date ? new Date(client.start_date + 'T00:00:00') : null;
-      const startDateStr = renewalStartDate || (startDateObj && startDateObj > today ? client.start_date : null);
+
+      // Hueco entre el vencimiento del ciclo viejo y el arranque del nuevo ya
+      // pagado (mismo chequeo que home.js): el cliente puede llegar acá por
+      // el botón "Edit" normal (sin from=renewal) mientras está en este
+      // hueco -- para él "esta semana" YA ES el ciclo nuevo, así que hay que
+      // tratarlo igual que a una renovación anticipada: editar/guardar en
+      // pending_meal_selections (no en meal_selections, que el cron va a
+      // borrar) y usar la fecha del ciclo nuevo para elegir la semana de
+      // rotación del menú correcta.
+      const realStatus = app.getRealStatus(client.start_date, client.expiry_date);
+      const pendingRenewal = client.pending_renewal || null;
+      const inRenewalGap = realStatus === 'Inactive' && !!pendingRenewal;
+
+      const startDateStr = renewalStartDate
+        || (inRenewalGap && pendingRenewal.start_date)
+        || (startDateObj && startDateObj > today ? client.start_date : null);
 
       // Renovacion anticipada (ver RENEWAL_PLAN.md): si el plan ACTUAL del
       // cliente (el de antes de esta renovacion) todavia no vencio, no hay
@@ -93,7 +108,7 @@ Page({
       // guardan en pending_meal_selections y el cron las aplica el dia que
       // arranca el ciclo nuevo.
       const currentExpiry = client.expiry_date ? new Date(client.expiry_date + 'T00:00:00') : null;
-      const deferToPending = fromRenewal && !!(currentExpiry && today <= currentExpiry);
+      const deferToPending = inRenewalGap || (fromRenewal && !!(currentExpiry && today <= currentExpiry));
       this.setData({ startDateStr, deferToPending });
 
       const planData = await app.supabase('GET', 'plans', null, `id=eq.${client.plan_id}`);

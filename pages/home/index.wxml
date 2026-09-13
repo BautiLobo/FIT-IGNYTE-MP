@@ -54,7 +54,7 @@
         </view>
       </view>
 
-      <view class="delivery-banner" wx:if="{{hasPendingRenewal}}">
+      <view class="delivery-banner" wx:if="{{hasPendingRenewal && !isUpcoming}}">
         <view class="delivery-banner-body">
           <text class="delivery-banner-title">{{lbl_renewal_pending_title}}</text>
           <text class="delivery-banner-sub">{{lbl_renewal_pending_sub}}</text>

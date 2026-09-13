@@ -103,7 +103,14 @@ Page({
 
           const realStatus = app.getRealStatus(client.start_date, client.expiry_date);
 
-          if (realStatus === 'Active' || realStatus === 'Upcoming') {
+          // Renovacion anticipada ya pagada pero todavia sin aplicar (el cron
+          // diario la aplica el dia que corresponde -- ver RENEWAL_PLAN.md,
+          // decision 4): el ciclo VIEJO en `clients` ya vencio, asi que
+          // realStatus da 'Inactive' aunque el cliente ya pago el proximo
+          // ciclo. `get-client` adjunta `pending_renewal` en la misma
+          // respuesta (mismo campo que ya usa home.js) -- sin este chequeo
+          // se lo mandaba a la pantalla "PLAN EXPIRED" recien pagado.
+          if (realStatus === 'Active' || realStatus === 'Upcoming' || client.pending_renewal) {
             wx.reLaunch({ url: '/pages/home/index' }); return;
           }
 

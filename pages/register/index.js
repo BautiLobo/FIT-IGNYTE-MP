@@ -255,8 +255,12 @@ Page({
                 }
                 return;
               }
+              // Mismo chequeo que discovery.js: una renovación anticipada ya
+              // pagada pero sin aplicar deja `status` en 'Inactive' aunque
+              // el cliente ya tenga el próximo ciclo confirmado -- no hay
+              // que mandarlo a "PLAN EXPIRED" en ese hueco.
               const status = app.getRealStatus(existing.start_date, existing.expiry_date);
-              if (status === 'Inactive') {
+              if (status === 'Inactive' && !existing.pending_renewal) {
                 wx.reLaunch({ url: '/pages/renewal/index' });
               } else {
                 wx.reLaunch({ url: '/pages/home/index' });
