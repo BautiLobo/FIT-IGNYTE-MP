@@ -3,7 +3,7 @@
 // start date) and pages/payment (which has to re-check, right before
 // paying, whether a date picked earlier is still valid — see
 // getMinStartDate below).
-const { PUBLIC_HOLIDAYS, MAKEUP_WORKDAYS } = require('./holidays');
+const { PUBLIC_HOLIDAYS } = require('./holidays');
 
 function toDateString(date) {
   const y = date.getFullYear();
@@ -12,15 +12,14 @@ function toDateString(date) {
   return `${y}-${m}-${d}`;
 }
 
-// A weekend day, unless it's been designated a make-up workday;
-// or a listed public holiday.
+// Any Sat/Sun, or a listed public holiday. Deliveries never happen on
+// weekends, even on dates the government designates as compensatory
+// working days (bandiao) to make up for a holiday elsewhere.
 function isNonWorkingDay(date) {
   const dateStr = toDateString(date);
   if (PUBLIC_HOLIDAYS.includes(dateStr)) return true;
   const day = date.getDay();
-  const isWeekend = day === 0 || day === 6;
-  if (isWeekend && !MAKEUP_WORKDAYS.includes(dateStr)) return true;
-  return false;
+  return day === 0 || day === 6;
 }
 
 function getNextBusinessDay(date, startOffset = 1) {

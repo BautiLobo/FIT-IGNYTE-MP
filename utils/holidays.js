@@ -16,16 +16,12 @@ const PUBLIC_HOLIDAYS_2026 = [
   '2026-10-05', '2026-10-06', '2026-10-07', // National Day Golden Week
 ];
 
-// Weekends turned into working days to compensate for the holidays above —
-// deliveries DO happen on these dates even though they fall on a Sat/Sun.
-const MAKEUP_WORKDAYS_2026 = [
-  '2026-01-04', // compensates New Year's Day
-  '2026-02-14', '2026-02-28', // compensates Spring Festival
-  '2026-05-09', // compensates Labor Day
-  '2026-09-20', '2026-10-10', // compensates National Day
-];
+// NOTE: The government designates certain Sat/Sundays as compensatory
+// working days ("bandiao") to make up for the holidays above (e.g. the
+// Sat 2026-01-04 makes up for New Year's Day). We deliberately ignore
+// that — this business never delivers on a weekend, compensatory or not.
+// See isNonWorkingDay in ./business-days.js.
 
 module.exports = {
   PUBLIC_HOLIDAYS: PUBLIC_HOLIDAYS_2026,
-  MAKEUP_WORKDAYS: MAKEUP_WORKDAYS_2026,
 };
