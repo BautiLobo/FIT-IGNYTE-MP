@@ -181,6 +181,45 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    // Si el cliente ya habia elegido comidas para este ciclo antes de pagar
+    // (quedaron en pending_meal_selections porque en ese momento la app
+    // esperaba que el pago fuera a diferirse -- ver deferApply mas arriba),
+    // pero al final el ciclo se aplico de una aca mismo, hay que migrar esas
+    // comidas a meal_selections ahora. Sin este paso quedaban huerfanas en
+    // pending_meal_selections para siempre (apply_pending_renewals() nunca
+    // las toca porque este pago nunca quedo en estado diferido), y las
+    // comidas reales del cliente seguian siendo las viejas. Mismo paso que
+    // hace apply_pending_renewals() para el camino diferido.
+    const pendingRes = await fetch(
+      `${supabaseUrl}/rest/v1/pending_meal_selections?client_id=eq.${clientId}`,
+      { headers: baseHeaders },
+    );
+    const pendingRows = await pendingRes.json();
+    if (pendingRows && pendingRows.length > 0) {
+      await fetch(
+        `${supabaseUrl}/rest/v1/meal_selections?client_id=eq.${clientId}`,
+        { method: 'DELETE', headers: noReturnHeaders },
+      );
+      const newSelections = pendingRows.map((r: Record<string, unknown>) => ({
+        client_id: r.client_id,
+        day: r.day,
+        slot: r.slot,
+        meals_json: r.meals_json,
+        delivery_time: r.delivery_time,
+        snack_id: r.snack_id,
+        note: r.note,
+        sauce_ids: r.sauce_ids,
+      }));
+      await fetch(
+        `${supabaseUrl}/rest/v1/meal_selections`,
+        { method: 'POST', headers: noReturnHeaders, body: JSON.stringify(newSelections) },
+      );
+      await fetch(
+        `${supabaseUrl}/rest/v1/pending_meal_selections?client_id=eq.${clientId}`,
+        { method: 'DELETE', headers: noReturnHeaders },
+      );
+    }
+
     // Marcar la fila de payments como aplicada -- misma logica que usara el
     // cron para las renovaciones anticipadas, asi `applied` siempre refleja
     // si `clients` ya quedo al dia con este pago.
