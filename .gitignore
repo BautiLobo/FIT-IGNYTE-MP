@@ -1,3 +1,6 @@
 # Environment config — never commit
 config.js
 config.js.backup
+
+# Estado local del CLI de Supabase (proyecto linkeado) -- distinto por checkout
+supabase/.temp/
