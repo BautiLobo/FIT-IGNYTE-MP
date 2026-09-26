@@ -15,12 +15,53 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 // Renovacion anticipada (ver RENEWAL_PLAN.md): si el pago es una renovacion
 // y el plan ACTUAL del cliente (el de antes de este pago) todavia no vencio,
 // no se pisa `clients` en el momento del pago -- se deja la fila de
-// `payments` marcada `paid` con `applied=false`, y un cron diario (a
-// implementar) la aplica el dia que arranca el ciclo nuevo. Para pagos que
-// no caen en ese caso (plan ya vencido, o alta nueva) el comportamiento es
-// exactamente el de antes: se aplica todo de inmediato.
+// `payments` marcada `paid` con `applied=false`, y el cron diario la aplica
+// el dia que arranca el ciclo nuevo. Para pagos que no caen en ese caso
+// (plan ya vencido, o alta nueva) se aplica todo de inmediato.
+//
+// LAS COMIDAS VIAJAN EN LA FILA DE `payments` (columna `selections`, la
+// escribe create-payment). Antes las escribia el mini-program por su cuenta,
+// DESPUES de que el pago se confirmaba -- o sea despues de que esta funcion
+// ya habia aplicado el ciclo nuevo. En esa ventana el cliente quedaba con el
+// plan nuevo y las comidas del viejo, y si ahi se cortaba la señal quedaba
+// asi para siempre. Ahora plan y comidas se escriben en el mismo paso, desde
+// la misma fuente, asi que ese desfase no puede existir -- por eso tampoco
+// hace falta el registro en meal_plan_alerts que tenia esta funcion.
 //
 // Body esperado: { out_trade_no: string }
+
+type Sel = {
+  meal_ids?: unknown;
+  time?: unknown;
+  notes?: unknown;
+  date?: unknown;
+  slot?: unknown;
+};
+
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+// Convierte el objeto `selections` del pago en filas para meal_selections /
+// pending_meal_selections. Descarta lo que no tenga comidas o no tenga una
+// fecha valida: mejor escribir de menos que escribir basura.
+function selectionsToRows(clientId: number, selections: unknown): Record<string, unknown>[] {
+  if (!selections || typeof selections !== 'object') return [];
+  const rows: Record<string, unknown>[] = [];
+  for (const [key, raw] of Object.entries(selections as Record<string, Sel>)) {
+    const sel = raw || {};
+    if (!Array.isArray(sel.meal_ids) || sel.meal_ids.length === 0) continue;
+    const day = typeof sel.date === 'string' && sel.date ? sel.date : key;
+    if (!ISO_DATE.test(day)) continue;
+    rows.push({
+      client_id: clientId,
+      delivery_date: day,
+      slot: Number.isInteger(sel.slot) ? sel.slot : 1,
+      meals_json: sel.meal_ids,
+      delivery_time: typeof sel.time === 'string' ? sel.time : '',
+      note: typeof sel.notes === 'string' ? sel.notes : '',
+    });
+  }
+  return rows;
+}
 
 Deno.serve(async (req: Request) => {
   const corsHeaders = {
@@ -56,6 +97,11 @@ Deno.serve(async (req: Request) => {
       Authorization: `Bearer ${serviceKey}`,
       'Content-Type': 'application/json',
     };
+    // Mismo criterio que apply_pending_renewals(): un duplicado de
+    // (client_id, delivery_date, slot) se descarta en vez de tirar abajo el
+    // insert entero y dejar al cliente sin comidas.
+    const mealInsertUrl = `${supabaseUrl}/rest/v1/meal_selections?on_conflict=client_id,delivery_date,slot`;
+    const mealInsertHeaders = { ...noReturnHeaders, Prefer: 'resolution=ignore-duplicates' };
 
     // La unica fuente de verdad: una fila de `payments` que wx-pay-webhook ya
     // marco como pagada tras validar la notificacion real de WeChat Pay.
@@ -78,7 +124,7 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    const { type, client_id: clientId, pending_order_id: pendingOrderId, plan_id, start_date, expiry_date, cutlery, referral_code: referralCode, client_status: status } = payment;
+    const { type, client_id: clientId, pending_order_id: pendingOrderId, plan_id, start_date, expiry_date, cutlery, referral_code: referralCode, client_status: status, selections } = payment;
 
     // Ya se aplico (por este mismo llamado antes, o por el cron mas
     // adelante) -- responder ok sin volver a tocar nada (idempotente).
@@ -88,10 +134,11 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    const mealRows = selectionsToRows(clientId, selections);
+
     // Se necesita el ltv actual del cliente para poder incrementarlo (ver
     // clientPayload mas abajo) -- se aprovecha el mismo fetch para el
-    // chequeo de renovacion anticipada (expiry_date), que antes solo se
-    // hacia para type==='renewal'.
+    // chequeo de renovacion anticipada (expiry_date).
     const currentClientRes = await fetch(
       `${supabaseUrl}/rest/v1/clients?id=eq.${clientId}&select=expiry_date,ltv`,
       { headers: baseHeaders },
@@ -110,24 +157,50 @@ Deno.serve(async (req: Request) => {
     }
 
     if (deferApply) {
-      // No tocar `clients` ni `meal_selections` todavia -- el pago ya quedo
-      // registrado como `paid` en `payments`, que alcanza como fuente de
-      // verdad. El cron diario lo aplica el dia que arranca `start_date` y
-      // marca `applied=true` (y ahi tambien incrementa `ltv`, ver
-      // apply_pending_renewals()).
+      // No tocar `clients` ni `meal_selections` todavia -- el ciclo viejo
+      // sigue corriendo y la cocina lo esta preparando. El cron aplica el
+      // pago el dia que arranca `start_date`.
+      //
+      // Pero SI se dejan las comidas elegidas en pending_meal_selections: es
+      // lo que muestra Home durante el hueco entre ciclos, y de donde sale el
+      // reparto del panel admin si el cron todavia no corrio.
+      if (mealRows.length > 0) {
+        await fetch(
+          `${supabaseUrl}/rest/v1/pending_meal_selections?client_id=eq.${clientId}`,
+          { method: 'DELETE', headers: noReturnHeaders },
+        );
+        const insPendRes = await fetch(
+          `${supabaseUrl}/rest/v1/pending_meal_selections`,
+          { method: 'POST', headers: noReturnHeaders, body: JSON.stringify(mealRows) },
+        );
+        if (!insPendRes.ok) {
+          const errBody = await insPendRes.text();
+          return new Response(JSON.stringify({ error: `pending_meal_selections insert failed: ${errBody}` }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+      }
+
       return new Response(JSON.stringify({ ok: true, deferred: true, applyDate: start_date }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    if (type === 'new') {
-      if (!pendingOrderId) {
-        return new Response(JSON.stringify({ error: 'Missing pendingOrderId on payment' }), {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
+    // pendingOrderId falta cuando el pago es de un cliente que YA existe en
+    // `clients` (aprobado, Pending Payment) pero llega a pagar sin una
+    // `new_orders` asociada en este dispositivo -- ver payment.js/
+    // order-summary.js (camino "repay" sin orden: se re-registra por
+    // openid, o vuelve a elegir fecha/comidas porque la vieja quedó
+    // vencida). Antes esto exigia pendingOrderId siempre para type==='new'
+    // y cortaba ahi con error 500 -- el pago quedaba 'paid' pero
+    // applied=false para siempre (nada lo reintenta: apply_pending_renewals
+    // solo corre para fechas ya vencidas, y esta nunca lo estaria si el
+    // cliente nunca vuelve a intentar). El cliente pagaba de verdad y jamas
+    // recibia su plan. Si no hay pendingOrderId, no hay nada que marcar en
+    // new_orders -- se sigue de largo y se aplica igual el resto (clients +
+    // meal_selections, mas abajo).
+    if (type === 'new' && pendingOrderId) {
       const orderPayload: Record<string, unknown> = { status: 'paid' };
       if (referralCode) orderPayload.referral_code = referralCode;
 
@@ -145,8 +218,7 @@ Deno.serve(async (req: Request) => {
     }
 
     // LTV: suma lo que este pago realmente cobro (amount_fen esta en fen,
-    // 1/100 de yuan) al total historico que ya tenia el cliente. No existia
-    // ningun lugar que tocara esta columna -- quedaba en 0 para siempre.
+    // 1/100 de yuan) al total historico que ya tenia el cliente.
     const paidYuan = Math.round((payment.amount_fen || 0) / 100);
 
     const clientPayload: Record<string, unknown> = {
@@ -181,46 +253,77 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    // Si el cliente ya habia elegido comidas para este ciclo antes de pagar
-    // (quedaron en pending_meal_selections porque en ese momento la app
-    // esperaba que el pago fuera a diferirse -- ver deferApply mas arriba),
-    // pero al final el ciclo se aplico de una aca mismo, hay que migrar esas
-    // comidas a meal_selections ahora. Sin este paso quedaban huerfanas en
-    // pending_meal_selections para siempre (apply_pending_renewals() nunca
-    // las toca porque este pago nunca quedo en estado diferido), y las
-    // comidas reales del cliente seguian siendo las viejas. Mismo paso que
-    // hace apply_pending_renewals() para el camino diferido.
-    const pendingRes = await fetch(
-      `${supabaseUrl}/rest/v1/pending_meal_selections?client_id=eq.${clientId}`,
-      { headers: baseHeaders },
-    );
-    const pendingRows = await pendingRes.json();
-    if (pendingRows && pendingRows.length > 0) {
+    // Las comidas del ciclo que se acaba de aplicar, escritas en el mismo
+    // paso que el plan. Reemplazan el set completo del cliente.
+    if (mealRows.length > 0) {
       await fetch(
         `${supabaseUrl}/rest/v1/meal_selections?client_id=eq.${clientId}`,
         { method: 'DELETE', headers: noReturnHeaders },
       );
-      const newSelections = pendingRows.map((r: Record<string, unknown>) => ({
-        client_id: r.client_id,
-        day: r.day,
-        slot: r.slot,
-        meals_json: r.meals_json,
-        delivery_time: r.delivery_time,
-        snack_id: r.snack_id,
-        note: r.note,
-        sauce_ids: r.sauce_ids,
-      }));
-      await fetch(
-        `${supabaseUrl}/rest/v1/meal_selections`,
-        { method: 'POST', headers: noReturnHeaders, body: JSON.stringify(newSelections) },
+      const insRes = await fetch(
+        mealInsertUrl,
+        { method: 'POST', headers: mealInsertHeaders, body: JSON.stringify(mealRows) },
       );
+      if (!insRes.ok) {
+        const errBody = await insRes.text();
+        return new Response(JSON.stringify({ error: `meal_selections insert failed: ${errBody}` }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      // Lo que hubiera quedado en pendientes es de este mismo ciclo y ya no
+      // corresponde.
       await fetch(
         `${supabaseUrl}/rest/v1/pending_meal_selections?client_id=eq.${clientId}`,
         { method: 'DELETE', headers: noReturnHeaders },
       );
+    } else {
+      // Fallback para pagos creados antes de que las comidas viajaran en la
+      // fila (`selections` nulo): migrar lo que haya en pendientes.
+      const pendingRes = await fetch(
+        `${supabaseUrl}/rest/v1/pending_meal_selections?client_id=eq.${clientId}`,
+        { headers: baseHeaders },
+      );
+      const pendingRows = await pendingRes.json();
+      if (pendingRows && pendingRows.length > 0) {
+        await fetch(
+          `${supabaseUrl}/rest/v1/meal_selections?client_id=eq.${clientId}`,
+          { method: 'DELETE', headers: noReturnHeaders },
+        );
+        // Las filas con fecha explicita primero: ante un duplicado, gana esa.
+        const ordered = [...pendingRows].sort((a: Record<string, unknown>, b: Record<string, unknown>) =>
+          (a.delivery_date ? 0 : 1) - (b.delivery_date ? 0 : 1));
+        const newSelections = ordered.map((r: Record<string, unknown>) => ({
+          client_id: r.client_id,
+          // delivery_date NULL = fila legacy: el trigger la re-deriva desde
+          // `day` con el start_date que se acaba de escribir arriba.
+          delivery_date: r.delivery_date,
+          day: r.day,
+          slot: r.slot,
+          meals_json: r.meals_json,
+          delivery_time: r.delivery_time,
+          snack_id: r.snack_id,
+          note: r.note,
+          sauce_ids: r.sauce_ids,
+        }));
+        const fbRes = await fetch(
+          mealInsertUrl,
+          { method: 'POST', headers: mealInsertHeaders, body: JSON.stringify(newSelections) },
+        );
+        if (!fbRes.ok) {
+          // No cortar: el pago y el plan ya quedaron aplicados. Las
+          // pendientes se conservan (no se borran abajo) para rescate manual.
+          console.error('complete-payment: fallback meal_selections insert failed:', await fbRes.text());
+        } else {
+          await fetch(
+            `${supabaseUrl}/rest/v1/pending_meal_selections?client_id=eq.${clientId}`,
+            { method: 'DELETE', headers: noReturnHeaders },
+          );
+        }
+      }
     }
 
-    // Marcar la fila de payments como aplicada -- misma logica que usara el
+    // Marcar la fila de payments como aplicada -- misma logica que usa el
     // cron para las renovaciones anticipadas, asi `applied` siempre refleja
     // si `clients` ya quedo al dia con este pago.
     await fetch(

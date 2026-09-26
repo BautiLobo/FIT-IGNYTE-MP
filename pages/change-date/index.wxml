@@ -19,7 +19,7 @@
         <text class="heading-sub">{{lbl_subtitle}}</text>
       </view>
 
-      <view class="counter-pill {{canContinue ? 'counter-pill-done' : ''}}">{{lbl_counter}}</view>
+      <view class="counter-pill {{canConfirm ? 'counter-pill-done' : ''}}">{{counterLabel}}</view>
 
       <scroll-view scroll-y class="calendar-scroll">
 
@@ -34,9 +34,9 @@
               wx:for="{{week.cells}}"
               wx:key="dateStr"
               wx:for-item="cell"
-              class="day-cell day-cell-{{cell.state}}"
+              class="day-cell day-cell-{{cell.cls}}"
               data-date="{{cell.dateStr}}"
-              data-state="{{cell.state}}"
+              data-reason="{{cell.reason}}"
               bindtap="toggleDate"
             >
               <text>{{cell.dayNum}}</text>
@@ -61,7 +61,7 @@
         </view>
       </view>
 
-      <button class="btn-primary {{!canContinue ? 'btn-disabled' : ''}}" bindtap="goNext">{{lbl_continue}}</button>
+      <button class="btn-primary {{!canConfirm ? 'btn-disabled' : ''}}" bindtap="confirmDates">{{lbl_confirm}}</button>
 
     </view>
 

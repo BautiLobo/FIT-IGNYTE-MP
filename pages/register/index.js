@@ -245,10 +245,7 @@ Page({
               wx.setStorageSync('clientId', existing.id);
               if (existing.status === 'Pending Payment') {
                 if (existing.plan_id) {
-                  const planData = await app.supabase('GET', 'plans', null, `id=eq.${existing.plan_id}`);
-                  if (planData && planData.length > 0) {
-                    wx.setStorageSync('selectedPlan', app.getDisplayPlan(planData[0]));
-                  }
+                  await app.cacheSelectedPlan(existing.plan_id);
                   wx.reLaunch({ url: '/pages/payment/index' });
                 } else {
                   wx.reLaunch({ url: '/pages/tiers/index' });
@@ -314,14 +311,10 @@ Page({
           console.error('getOrder (duplicate check) error:', err);
         }
 
-        if (existingOrder && existingOrder.status === 'draft' && existingOrder.plan_id) {
-          const planData = await app.supabase('GET', 'plans', null, `id=eq.${existingOrder.plan_id}`);
-          if (planData && planData.length > 0) {
-            wx.setStorageSync('selectedPlan', app.getDisplayPlan(planData[0]));
-            wx.reLaunch({ url: '/pages/order-summary/index' });
-            this.setData({ submitting: false });
-            return;
-          }
+        if (existingOrder && existingOrder.status === 'draft' && await app.cacheSelectedPlan(existingOrder.plan_id)) {
+          wx.reLaunch({ url: '/pages/order-summary/index' });
+          this.setData({ submitting: false });
+          return;
         }
 
         wx.showModal({

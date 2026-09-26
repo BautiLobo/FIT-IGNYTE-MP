@@ -1,6 +1,6 @@
 // pages/payment/index.js
 const app = getApp();
-const { getMinStartDate } = require('../../utils/business-days');
+const { getMinStartDate, getValidDeliveryWindow } = require('../../utils/business-days');
 const t = require('../../i18n/index');
 
 Page({
@@ -77,18 +77,39 @@ Page({
         }
       } else {
         const pendingOrderId = wx.getStorageSync('pendingOrderId');
-        if (!pendingOrderId) return;
-        const data = await app.getOrder({ orderId: pendingOrderId });
-        if (data && data.length > 0) {
-          order = data[0];
-          // El cliente ya existe (se crea al aprobar la orden): lo buscamos
-          // por teléfono para saber si ya gastó un código de referido antes.
-          const clientData = await app.getClient({ phone: order.phone });
-          if (clientData && clientData.length > 0) client = clientData[0];
+        if (pendingOrderId) {
+          const data = await app.getOrder({ orderId: pendingOrderId });
+          if (data && data.length > 0) {
+            order = data[0];
+            // El cliente ya existe (se crea al aprobar la orden): lo buscamos
+            // por teléfono para saber si ya gastó un código de referido antes.
+            const clientData = await app.getClient({ phone: order.phone });
+            if (clientData && clientData.length > 0) client = clientData[0];
+          }
+        } else {
+          // Cliente ya aprobado (status 'Pending Payment' en `clients`) sin
+          // una orden pendiente en ESTE storage -- pasa al re-registrarse
+          // después de un "start over", reinstalar la app, o entrar desde
+          // otro dispositivo. register.js/discovery.js ya guardaron
+          // `clientId` antes de mandar para acá; sin este camino la página
+          // quedaba en blanco (ni order ni client, ver payNow más abajo).
+          const clientId = wx.getStorageSync('clientId');
+          if (clientId) {
+            const data = await app.getClient({ clientId });
+            if (data && data.length > 0) client = data[0];
+          }
         }
       }
     } catch (err) {
       console.error('Load error:', err);
+    }
+
+    if (!order && !client) {
+      // Nada que mostrar (ni pendingOrderId ni clientId resolvieron datos) --
+      // mejor volver a discovery, que sabe recalcular a dónde mandar al
+      // usuario, que dejarlo en una pantalla de pago sin nada que pagar.
+      wx.reLaunch({ url: '/pages/discovery/index' });
+      return;
     }
 
     // Fecha vencida: el start_date se elige mucho antes de pagar (antes de
@@ -100,23 +121,33 @@ Page({
     // cliente a elegir fecha y comidas de nuevo en vez de dejarlo pagar
     // sobre datos viejos.
     //
-    // La fuente de verdad es `order.start_date` (lo que quedó guardado en
-    // la orden), no el storage local: si un pedido queda rechazado y el
-    // admin lo vuelve a aprobar mucho después, el storage del dispositivo
-    // puede no reflejar más la fecha real (o directamente no existir).
-    // Confiar solo en el storage hacía que ese chequeo se salteara en
-    // silencio y `payNow()` cayera al fallback de "hoy".
-    const storedStart = (!fromRenewal && order && order.start_date) || wx.getStorageSync('startDate');
+    // `order`/`client` primero, storage como fallback -- salvo que
+    // `freshResyncDate` diga que el storage se acaba de escribir DE VERDAD
+    // ahora (viene de order-summary.js volviendo de start-date.js/
+    // meal-select.js, ver ahí). Sin esa señal, confiar en el storage a
+    // ciegas es peligroso: puede tener una fecha de un intento anterior sin
+    // terminar, que por casualidad todavía no esté vencida -- pasaba el
+    // chequeo de abajo sin pedir nada nuevo y dejaba pagar sobre datos que
+    // no son los de este intento. Con la señal, sí se confía primero: es
+    // literalmente lo que el cliente acaba de elegir, y sin priorizarlo
+    // se volvía a ignorar en loop la fecha recién elegida a favor de la
+    // vieja de `order`/`client` (siempre vencida, por algo se volvió a
+    // elegir) -- ver el otro comentario que reemplazó a este mismo bug.
+    const freshResyncDate = wx.getStorageSync('freshResyncDate');
+    if (freshResyncDate) wx.removeStorageSync('freshResyncDate');
+    const storedStart = !fromRenewal
+      ? (freshResyncDate && wx.getStorageSync('startDate'))
+        || (order && order.start_date) || (client && client.start_date) || wx.getStorageSync('startDate')
+      : wx.getStorageSync('startDate');
     if (storedStart && !fromRenewal) wx.setStorageSync('startDate', storedStart);
     if (storedStart) {
       const liveMin = getMinStartDate({ currentExpiryDate: fromRenewal && client ? client.expiry_date : null });
       if (storedStart < liveMin) {
         if (fromRenewal) {
-          // Mismo flag que usa "choose new meals" en renewal.js: fuerza a
-          // arrancar en blanco en vez de precargar lo que el cliente comía
-          // antes, porque esas comidas pueden ya no estar en el menú de las
-          // fechas nuevas.
-          wx.setStorageSync('renewalFreshMeals', true);
+          // Las fechas quedaron viejas: se vuelve a elegirlas y, con ellas,
+          // las comidas (el menú de las fechas nuevas puede ser otro).
+          // Ya no hace falta ningún flag para forzar el arranque en blanco:
+          // con el camino único, la renovación siempre arranca vacía.
           wx.removeStorageSync('mealSelections');
         }
         wx.setStorageSync('dateResync', true);
@@ -125,9 +156,18 @@ Page({
           content: t('payment_date_stale_body'),
           showCancel: false,
           success: () => {
+            // Manda a tiers.js, no directo a start-date.js: si el pago se
+            // demoró tanto que la fecha quedó vieja, el cliente tiene que
+            // poder reconsiderar tier/plan en vez de quedar forzado a
+            // repetir el mismo plan de siempre y solo elegir otra fecha.
+            // `dateResync` (recien seteado arriba) sobrevive la vuelta por
+            // tiers → plans → start-date sin que ninguna de esas pantallas
+            // lo toque, así que meal-select.goNext() lo sigue viendo al
+            // final y manda a order-summary?from=repay igual, sin repetir
+            // register.js.
             const url = fromRenewal
-              ? '/pages/start-date/index?from=renewal&next=meal-select'
-              : '/pages/start-date/index?next=meal-select';
+              ? '/pages/tiers/index?from=renewal'
+              : '/pages/tiers/index';
             wx.redirectTo({ url });
           },
         });
@@ -177,6 +217,10 @@ Page({
       this.setData({ order: client, client, referralAlreadyUsed: !!(client && client.referral_used), deferToPending });
     } else if (order) {
       this.setData({ order, client, referralAlreadyUsed: !!(client && client.referral_used) });
+    } else if (client) {
+      // Cliente ya aprobado sin orden en este storage (ver arriba): usamos
+      // la fila de `clients` como `order`, mismo criterio que renovación.
+      this.setData({ order: client, client, referralAlreadyUsed: !!(client.referral_used) });
     }
   },
 
@@ -222,15 +266,10 @@ Page({
     // Use stored expiry date from start-date page if available
     const stored = wx.getStorageSync('expiryDate');
     if (stored) return stored;
-    // Fallback: 5 business days from today
-    const d = new Date();
-    let added = 0;
-    while (added < 4) {
-      d.setDate(d.getDate() + 1);
-      const day = d.getDay();
-      if (day !== 0 && day !== 6) added++;
-    }
-    return d.toISOString().split('T')[0];
+    // Fallback: last of 5 valid delivery days (business days, holidays
+    // excluded) from the earliest currently-selectable date.
+    const window = getValidDeliveryWindow(getMinStartDate({}), 5);
+    return window[window.length - 1];
   },
 
   async payNow() {
@@ -255,11 +294,37 @@ Page({
         await app.captureOpenid(clientId);
       }
 
-      const nextFriday = this.getExpiryDate();
-      const expiryDate = wx.getStorageSync('expiryDate') || nextFriday;
-      const startDate = wx.getStorageSync('startDate') || new Date().toISOString().split('T')[0];
+      const fallbackExpiry = this.getExpiryDate();
+      const expiryDate = wx.getStorageSync('expiryDate') || fallbackExpiry;
+      const startDate = wx.getStorageSync('startDate') || getMinStartDate({});
+
+      // Revalidar el corte de las 23 (hora de China) JUSTO antes de crear el
+      // pago. onLoad ya lo chequea, pero ese chequeo corre una sola vez: si
+      // el cliente abre esta pantalla 22:58 y toca Pagar 23:05, la fecha que
+      // tiene guardada ya no es valida y el pago se creaba igual.
+      const liveMin = getMinStartDate({
+        currentExpiryDate: fromRenewal && client.expiry_date ? client.expiry_date : null,
+      });
+      if (startDate < liveMin) {
+        wx.hideLoading();
+        this.setData({ submitting: false });
+        if (fromRenewal) wx.removeStorageSync('mealSelections');
+        wx.setStorageSync('dateResync', true);
+        wx.showModal({
+          title: t('payment_date_stale_title'),
+          content: t('payment_date_stale_body'),
+          showCancel: false,
+          success: () => {
+            wx.redirectTo({
+              url: fromRenewal ? '/pages/start-date/index?from=renewal' : '/pages/start-date/index',
+            });
+          },
+        });
+        return;
+      }
       const cutlery = wx.getStorageSync('cutleryNeeded') === true;
       const pendingOrderId = fromRenewal ? undefined : wx.getStorageSync('pendingOrderId');
+      const selections = wx.getStorageSync('mealSelections') || null;
 
       const payment = await app.createPayment({
         type: fromRenewal ? 'renewal' : 'new',
@@ -270,6 +335,7 @@ Page({
         expiryDate,
         cutlery,
         referralCode: referralApplied ? referralCode : undefined,
+        selections,
       });
 
       wx.hideLoading();
@@ -332,19 +398,12 @@ Page({
     const { fromRenewal } = this.data;
 
     try {
-      if (fromRenewal) {
-        const mealSelections = wx.getStorageSync('mealSelections');
-        if (mealSelections) {
-          await this.saveMealSelections(clientId, mealSelections);
-        }
-      } else {
-        const pendingOrderId = wx.getStorageSync('pendingOrderId');
-        const orderData = pendingOrderId ? await app.getOrder({ orderId: pendingOrderId }) : null;
-        const order = orderData && orderData.length > 0 ? orderData[0] : null;
-        if (order && order.meals && Object.keys(order.meals).length > 0) {
-          await this.saveMealSelections(clientId, order.meals);
-        }
-      }
+      // Las comidas ya NO se escriben desde aca. Viajan en la fila de
+      // `payments` (ver payNow) y las escribe quien aplica el pago, en la
+      // misma operacion en que cambia el plan. Antes se escribian en este
+      // punto -- despues de que complete-payment ya habia aplicado el ciclo
+      // nuevo -- y en esa ventana el cliente quedaba con el plan nuevo y las
+      // comidas del viejo; si ahi se cortaba la señal, quedaba asi.
 
       await this.waitForPaymentConfirmation(clientId, outTradeNo);
 
@@ -414,37 +473,6 @@ Page({
     });
   },
 
-  // Persiste las selecciones de meal-select en meal_selections — necesario
-  // porque, a diferencia de edit-meals (que escribe directo a la tabla),
-  // meal-select solo guarda en wx.storage y dependía de que algo más lo
-  // sincronizara más adelante en el flujo de renovación.
-  async saveMealSelections(clientId, allSelections) {
-    // Renovacion anticipada (ver RENEWAL_PLAN.md, Causa Raiz #3): si el plan
-    // actual del cliente todavia esta activo, no escribir en meal_selections
-    // -- pisaria la semana que la cocina ya esta preparando. Se escribe en
-    // pending_meal_selections y el cron la aplica el dia que corresponde.
-    const table = this.data.deferToPending ? 'pending_meal_selections' : 'meal_selections';
-    const dayMap = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday' };
-    for (const key in dayMap) {
-      const label = dayMap[key];
-      const sel = allSelections[key];
-      if (!sel || !sel.meal_ids || sel.meal_ids.length === 0) continue;
-      const existing = await app.supabase('GET', table, null, `client_id=eq.${clientId}&day=eq.${label}&slot=eq.1`);
-      const payload = {
-        client_id: clientId,
-        day: label,
-        slot: 1,
-        meals_json: sel.meal_ids,
-        delivery_time: sel.time,
-        note: sel.notes || '',
-      };
-      if (existing && existing.length > 0) {
-        await app.supabase('PATCH', table, payload, `client_id=eq.${clientId}&day=eq.${label}&slot=eq.1`);
-      } else {
-        await app.supabase('POST', table, payload);
-      }
-    }
-  },
 
   goBack() {
     wx.navigateBack();
@@ -472,7 +500,27 @@ Page({
             console.error('deleteOrder error:', err);
           }
         }
+        // approveOrder ya creó la fila en `clients` (status 'Pending
+        // Payment') antes de llegar a esta pantalla -- borrar solo la orden
+        // no alcanza, o el usuario queda trabado para siempre en "ya tenés
+        // cuenta" la próxima vez que se registre. Ver delete-pending-client.
+        //
+        // OJO: `wx.getStorageSync('clientId')` NO alcanza acá -- en el
+        // camino normal (recién aprobado, con pendingOrderId, primera vez)
+        // nunca se guarda en storage, aunque la fila ya exista (la crea
+        // approveOrder del lado del admin, sin avisarle al mini-program).
+        // `this.data.client` sí está resuelto siempre en onLoad, por los dos
+        // caminos (por teléfono con la orden, o por clientId sin orden).
+        const clientId = (this.data.client && this.data.client.id) || wx.getStorageSync('clientId');
+        if (clientId) {
+          try {
+            await app.deleteClient({ clientId });
+          } catch (err) {
+            console.error('deleteClient error:', err);
+          }
+        }
         wx.removeStorageSync('pendingOrderId');
+        wx.removeStorageSync('clientId');
         wx.removeStorageSync('selectedPlan');
         wx.removeStorageSync('mealSelections');
         wx.removeStorageSync('startDate');

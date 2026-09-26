@@ -17,7 +17,8 @@
     "pages/home/index",
     "pages/renewal/index",
     "pages/edit-profile/index",
-    "pages/edit-meals/index"
+    "pages/edit-meals/index",
+    "pages/change-date/index"
   ],
   "window": {
     "backgroundTextStyle": "dark",

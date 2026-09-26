@@ -52,13 +52,9 @@ Page({
             // el status haya pasado a pending -- pantalla de espera que
             // nunca se resuelve. Lo retomamos directo en order-summary.
             const draftOrder = orderData[0];
-            if (draftOrder.plan_id) {
-              const planData = await app.supabase('GET', 'plans', null, `id=eq.${draftOrder.plan_id}`);
-              if (planData && planData.length > 0) {
-                wx.setStorageSync('selectedPlan', app.getDisplayPlan(planData[0]));
-                wx.reLaunch({ url: '/pages/order-summary/index' });
-                return;
-              }
+            if (await app.cacheSelectedPlan(draftOrder.plan_id)) {
+              wx.reLaunch({ url: '/pages/order-summary/index' });
+              return;
             }
             // No se pudo reconstruir el plan (dato inconsistente) -- se
             // descarta el draft viejo y se deja arrancar de cero.
@@ -90,9 +86,7 @@ Page({
             if (stillPending) {
               wx.reLaunch({ url: '/pages/approved/index' }); return;
             } else if (client.plan_id) {
-              const planData = await app.supabase('GET', 'plans', null, `id=eq.${client.plan_id}`);
-              if (planData && planData.length > 0) {
-                wx.setStorageSync('selectedPlan', app.getDisplayPlan(planData[0]));
+              if (await app.cacheSelectedPlan(client.plan_id)) {
                 wx.setStorageSync('clientId', clientId);
               }
               wx.reLaunch({ url: '/pages/payment/index' }); return;

@@ -29,14 +29,16 @@ Page({
       // Nombre del cliente
       const firstName = order.name ? order.name.split(' ')[0] : '';
 
-      // Primera entrega — buscar en meals del order (estructura: { mon: { meal_ids, time, ... } })
+      // Primera entrega — buscar en meals del order (estructura: { '2026-09-19': { meal_ids, time, ... } },
+      // claves ordenables directo porque ya son fechas ISO reales).
       let firstMeals = '';
       let firstTime = '09:45';
       const meals = order.meals || {};
-      const monData = meals['mon'];
-      if (monData) {
-        firstTime = monData.time || '09:45';
-        const mealIds = monData.meal_ids || [];
+      const firstKey = Object.keys(meals).sort()[0];
+      const firstDayData = firstKey ? meals[firstKey] : null;
+      if (firstDayData) {
+        firstTime = firstDayData.time || '09:45';
+        const mealIds = firstDayData.meal_ids || [];
         if (mealIds.length > 0) {
           const mealData = await app.supabase('GET', 'meal_library', null, `id=in.(${mealIds.join(',')})`);
           if (mealData && mealData.length > 0) {

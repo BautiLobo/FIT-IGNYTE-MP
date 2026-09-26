@@ -43,6 +43,7 @@ module.exports = {
   home_snack: 'Snack',
   sauce: 'Sauce',
   home_contact: 'Contact FIT IGNYTE',
+  home_view_menu: '☰  View full menu PDF',
   home_renewal_title: 'Your plan is ending soon',
   home_renewal_sub: '%s days left · renew now to keep your meals coming',
   home_renewal_sub_tomorrow: 'Ends tomorrow · renew now to keep your meals coming',
@@ -88,6 +89,7 @@ module.exports = {
   plans_price: '¥%s',
   plans_per_week: '/wk',
   plans_tap_hint: 'Tap a plan to continue',
+  plans_current_plan: 'YOUR CURRENT PLAN',
   plans_failed: 'Failed to load plans',
 
   // ── MEAL-SELECT ────────────────────────────────────────────
@@ -121,6 +123,21 @@ module.exports = {
   edit_meals_save_next: 'Save & Next  →',
   edit_meals_updated: 'Meals updated!',
   edit_meals_failed: 'Failed to save',
+  edit_meals_unsaved_save: 'Save changes',
+  edit_meals_unsaved_discard: 'Discard changes',
+
+  // ── CHANGE-DATE (rearrange this cycle's remaining delivery dates) ──
+  change_date_link: 'Change dates',
+  change_date_topbar: 'Change delivery dates',
+  change_date_heading: 'Choose your delivery dates',
+  change_date_subtitle: 'Deselect a day and pick another free business day — weekdays only, no public holidays',
+  change_date_counter: '%s/%s selected',
+  change_date_legend_selected: 'Selected',
+  change_date_legend_available: 'Available',
+  change_date_legend_unavailable: 'Unavailable',
+  change_date_out_of_range: 'Pick a date within the highlighted range',
+  change_date_confirm: 'Use these dates  →',
+  change_date_multi_slot_unsupported: 'Date changes aren’t available for days with more than one delivery',
 
   // ── REGISTER ───────────────────────────────────────────────
   edit_profile_title: 'Edit Profile',
@@ -162,20 +179,23 @@ module.exports = {
   register_account_exists_title: 'Account already exists',
   register_account_exists_body: 'We found an existing account linked to your WeChat. Taking you there now.',
 
-  // ── START-DATE ─────────────────────────────────────────────
-  start_date_topbar: 'When do you start?',
-  start_date_heading: 'Choose your start date',
-  start_date_subtitle: 'Mon–Fri delivery · 5 business days',
-  start_date_label: 'START DATE',
-  start_date_plan_ends: 'PLAN ENDS',
-  start_date_5_days: '5 business days',
+  // ── START-DATE (delivery-days calendar) ─────────────────────
+  start_date_topbar: 'Delivery days',
+  start_date_heading: 'Select your delivery days',
+  start_date_subtitle: 'Choose 5 days — weekdays only, no public holidays',
+  start_date_counter: '%s/5 days selected',
+  start_date_legend_selected: 'Selected',
+  start_date_legend_available: 'Available',
+  start_date_legend_unavailable: 'Unavailable',
+  start_date_max_reached: 'You already picked %s days — remove one to change it',
   start_date_continue: 'Continue  →',
   start_date_no_delivery: 'No deliveries on weekends or public holidays — pick another date',
+  start_date_out_of_range: 'Pick a date within the highlighted range',
 
   // ── ORDER-SUMMARY ──────────────────────────────────────────
   order_summary_title: 'Order summary',
   order_summary_your_plan: 'YOUR PLAN',
-  order_summary_meals_day: 'meal(s)/day · Mon–Fri',
+  order_summary_meals_day: 'meal(s)/day',
   order_summary_chosen_meals: 'YOUR WEEK',
   order_summary_edit: 'Edit  ›',
   order_summary_address: 'ADDRESS',
@@ -233,15 +253,16 @@ module.exports = {
   // ── RENEWAL ────────────────────────────────────────────────
   renewal_title: 'Renew your plan',
   renewal_expired: 'PLAN EXPIRED',
-  renewal_due: 'DUE FRIDAY',
+  renewal_due: 'PLAN ENDING SOON',
+  renewal_days_left_tag: 'DAYS LEFT',
+  renewal_expired_tag: 'EXPIRED',
   renewal_cta_expired: 'Renew to start receiving meals again',
   renewal_cta_active: 'Renew to keep receiving your meals',
   renewal_current_plan: 'CURRENT PLAN',
-  renewal_meals_info: 'meals/day · Mon-Fri',
+  renewal_meals_info: 'meals/day',
   renewal_per_week: '/wk',
-  renewal_renew_btn: '✓  Renew this plan',
-  renewal_change_plan: 'Choose a different plan',
-  renewal_feedback: '💬  Leave us feedback',
+  renewal_renew_btn: 'Renew my plan',
+  renewal_feedback: 'Leave us feedback',
 
   // ── UNDER-REVIEW ───────────────────────────────────────────
   under_review_title: 'Reviewing your order',

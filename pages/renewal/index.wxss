@@ -39,20 +39,42 @@ page { background: #0b0b0c; }
   overflow-x: hidden;
 }
 
-/* ── ALERT ── */
-.alert-box {
-  background: #1a0808;
-  border: 1rpx solid #3a1010;
+/* ── STATUS HERO ── */
+.status-hero {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
   border-radius: 20rpx;
   padding: 28rpx;
   margin-bottom: 36rpx;
+  border: 1rpx solid;
   box-sizing: border-box;
   width: 100%;
 }
-.alert-top-row { display: flex; align-items: center; gap: 12rpx; margin-bottom: 12rpx; }
-.alert-icon { font-size: 28rpx; color: #f87171; }
-.alert-label { font-size: 22rpx; color: #f87171; font-weight: 800; letter-spacing: 3rpx; }
-.alert-text { font-size: 30rpx; color: #f3f3f4; font-weight: 700; display: block; line-height: 1.4; }
+.status-hero-expired { background: #1a0808; border-color: #3a1010; }
+.status-hero-due { background: #2a1a05; border-color: #92660a; }
+
+.status-hero-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 128rpx;
+  padding-right: 20rpx;
+  border-right: 1rpx solid rgba(255,255,255,0.08);
+}
+.status-hero-num { font-size: 52rpx; font-weight: 900; line-height: 1; display: block; }
+.status-hero-num-dash { font-size: 44rpx; }
+.status-hero-tag { font-size: 18rpx; font-weight: 800; letter-spacing: 2rpx; display: block; margin-top: 8rpx; text-align: center; }
+.status-hero-expired .status-hero-num, .status-hero-expired .status-hero-tag { color: #f87171; }
+.status-hero-due .status-hero-num, .status-hero-due .status-hero-tag { color: #eab308; }
+
+.status-hero-body { flex: 1; display: flex; flex-direction: column; gap: 8rpx; min-width: 0; }
+.status-hero-title { font-size: 22rpx; font-weight: 800; letter-spacing: 2rpx; display: block; }
+.status-hero-expired .status-hero-title { color: #f87171; }
+.status-hero-due .status-hero-title { color: #eab308; }
+.status-hero-text { font-size: 28rpx; color: #f3f3f4; font-weight: 700; display: block; line-height: 1.4; }
 
 /* ── SECTION LABEL ── */
 .section-label {
@@ -68,6 +90,7 @@ page { background: #0b0b0c; }
 .plan-card {
   background: #13131a;
   border: 1rpx solid #2a2a33;
+  border-left: 6rpx solid #A78BFA;
   border-radius: 20rpx;
   padding: 32rpx;
   margin-bottom: 48rpx;
@@ -126,7 +149,7 @@ button { margin: 0 !important; padding: 0 !important; background: transparent; b
 }
 
 .footer {
-  padding: 1rpx 32rpx 32rpx;
+  padding: 1rpx 32rpx 64rpx;
   box-sizing: border-box;
   width: 100%;
 }

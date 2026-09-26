@@ -40,6 +40,29 @@ Page({
       success: async (res) => {
         if (!res.confirm) return;
         const pendingOrderId = wx.getStorageSync('pendingOrderId');
+        // Si mientras tanto el admin aprobó este mismo pedido (o uno
+        // anterior), approveOrder ya creó la fila en `clients` -- borrar solo
+        // la orden no alcanza, o el usuario queda trabado para siempre en
+        // "ya tenés cuenta" la próxima vez que se registre.
+        //
+        // Esta página nunca cargó `order`/`client` (es un cartel estático),
+        // y en el camino normal (recién rechazado, nunca se llegó a pasar
+        // por el chequeo de "ya existe" de register.js) `clientId` tampoco
+        // está en storage -- hay que buscarlo por teléfono ANTES de borrar
+        // la orden, que es donde vive ese dato.
+        let clientId = wx.getStorageSync('clientId');
+        if (!clientId && pendingOrderId) {
+          try {
+            const orderData = await app.getOrder({ orderId: pendingOrderId });
+            const phone = orderData && orderData.length > 0 ? orderData[0].phone : null;
+            if (phone) {
+              const clientData = await app.getClient({ phone });
+              if (clientData && clientData.length > 0) clientId = clientData[0].id;
+            }
+          } catch (err) {
+            console.error('getClient by phone (start over) error:', err);
+          }
+        }
         if (pendingOrderId) {
           try {
             await app.deleteOrder({ orderId: pendingOrderId });
@@ -50,7 +73,15 @@ Page({
             console.error('deleteOrder error:', err);
           }
         }
+        if (clientId) {
+          try {
+            await app.deleteClient({ clientId });
+          } catch (err) {
+            console.error('deleteClient error:', err);
+          }
+        }
         wx.removeStorageSync('pendingOrderId');
+        wx.removeStorageSync('clientId');
         wx.removeStorageSync('selectedPlan');
         wx.removeStorageSync('mealSelections');
         wx.removeStorageSync('startDate');

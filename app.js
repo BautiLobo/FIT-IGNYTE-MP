@@ -1,5 +1,7 @@
 // app.js
 const config = require('./config');
+const { cachePublicHolidays } = require('./utils/holidays');
+const { shanghaiNow, toDateString } = require('./utils/business-days');
 
 
 // Template de WeChat Subscribe Message "Message notification" — único template
@@ -22,6 +24,27 @@ App({
     simulatePayments: config.SIMULATE_PAYMENTS === true,
   },
 
+  onLaunch() {
+    // La lista de feriados vive en settings.public_holidays -- una sola
+    // fuente compartida con create-payment y wx-notify-cron. Se refresca al
+    // arrancar y queda cacheada en storage, asi que el calculo de fechas
+    // (utils/business-days.js) la lee sincronicamente sin pegarle a la red.
+    // Si falla, utils/holidays.js cae en su lista bundleada.
+    this.fetchPublicHolidays();
+  },
+
+  fetchPublicHolidays() {
+    return this.supabase('GET', 'settings', null, 'key=eq.public_holidays&select=value')
+      .then((rows) => {
+        const raw = rows && rows.length > 0 ? rows[0].value : null;
+        if (!raw) return;
+        cachePublicHolidays(JSON.parse(raw));
+      })
+      .catch((err) => {
+        console.error('[fetchPublicHolidays] se sigue con la lista bundleada:', err);
+      });
+  },
+
   // ── WECHAT SUBSCRIBE MESSAGES (push notifications) ──────────────
   // 0) resolveOpenid: cambia un código fresco de wx.login por el openid real
   //    (vía wx-login, mismo Edge Function que usa el admin). El código expira
@@ -32,7 +55,7 @@ App({
         success: (loginRes) => {
           if (!loginRes.code) { resolve(null); return; }
           wx.request({
-            url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/wx-login',
+            url: `${config.SUPABASE_URL}/functions/v1/wx-login`,
             method: 'POST',
             header: { 'Content-Type': 'application/json' },
             data: { code: loginRes.code },
@@ -95,7 +118,7 @@ App({
 
     return new Promise((resolve) => {
       wx.request({
-        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/wx-notify',
+        url: `${config.SUPABASE_URL}/functions/v1/wx-notify`,
         method: 'POST',
         header: { 'Content-Type': 'application/json' },
         data: {
@@ -117,14 +140,18 @@ App({
   // start_date/expiry_date son las fuentes de verdad. El campo `status`
   // en la tabla clients ya no se usa para Active/Upcoming/Inactive —
   // se calcula siempre en el momento para que nunca se desincronice.
+  // "Hoy" se calcula en hora de Shanghai, no la del dispositivo -- mismo
+  // motivo que shanghaiNow() en utils/business-days.js: un cliente con el
+  // telefono en otro huso (o probando desde Buenos Aires) veia Active
+  // mostrado como Upcoming/Inactive un dia antes o despues que en China,
+  // que es donde vive/entrega el negocio. Comparar como strings ISO
+  // (startDate/expiryDate ya vienen 'YYYY-MM-DD' de la DB) evita además
+  // cualquier lio de parseo de Date en otro huso.
   getRealStatus(startDate, expiryDate) {
     if (!startDate || !expiryDate) return 'Inactive';
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const start = new Date(startDate + 'T00:00:00');
-    const expiry = new Date(expiryDate + 'T00:00:00');
-    if (today < start) return 'Upcoming';
-    if (today > expiry) return 'Inactive';
+    const todayStr = toDateString(shanghaiNow());
+    if (todayStr < startDate) return 'Upcoming';
+    if (todayStr > expiryDate) return 'Inactive';
     return 'Active';
   },
 
@@ -138,7 +165,7 @@ App({
   createOrder(orderData) {
     return new Promise((resolve, reject) => {
       wx.request({
-        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/create-order',
+        url: `${config.SUPABASE_URL}/functions/v1/create-order`,
         method: 'POST',
         header: { 'Content-Type': 'application/json' },
         data: orderData,
@@ -169,7 +196,7 @@ App({
   getClient({ clientId, phone, openid } = {}) {
     return new Promise((resolve, reject) => {
       wx.request({
-        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/get-client',
+        url: `${config.SUPABASE_URL}/functions/v1/get-client`,
         method: 'POST',
         header: { 'Content-Type': 'application/json' },
         data: { clientId, phone, openid },
@@ -198,7 +225,7 @@ App({
   updateClient({ clientId, patch }) {
     return new Promise((resolve, reject) => {
       wx.request({
-        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/update-client',
+        url: `${config.SUPABASE_URL}/functions/v1/update-client`,
         method: 'POST',
         header: { 'Content-Type': 'application/json' },
         data: { clientId, patch },
@@ -224,7 +251,7 @@ App({
   getOrder({ orderId }) {
     return new Promise((resolve, reject) => {
       wx.request({
-        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/get-order',
+        url: `${config.SUPABASE_URL}/functions/v1/get-order`,
         method: 'POST',
         header: { 'Content-Type': 'application/json' },
         data: { orderId },
@@ -247,7 +274,7 @@ App({
   updateOrder({ orderId, patch }) {
     return new Promise((resolve, reject) => {
       wx.request({
-        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/update-order',
+        url: `${config.SUPABASE_URL}/functions/v1/update-order`,
         method: 'POST',
         header: { 'Content-Type': 'application/json' },
         data: { orderId, patch },
@@ -273,7 +300,7 @@ App({
   deleteOrder({ orderId }) {
     return new Promise((resolve, reject) => {
       wx.request({
-        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/delete-order',
+        url: `${config.SUPABASE_URL}/functions/v1/delete-order`,
         method: 'POST',
         header: { 'Content-Type': 'application/json' },
         data: { orderId },
@@ -293,16 +320,44 @@ App({
     });
   },
 
+  // Borra un cliente propio en 'Pending Payment' (vía Edge Function
+  // delete-pending-client) -- usado desde "Start over" en rejected.js y
+  // payment.js, junto con deleteOrder, cuando approveOrder ya creó la fila
+  // en `clients` antes de que el usuario pagara. El servidor solo lo permite
+  // si el cliente sigue en 'Pending Payment' (ver comentario en la Edge Function).
+  deleteClient({ clientId }) {
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url: `${config.SUPABASE_URL}/functions/v1/delete-pending-client`,
+        method: 'POST',
+        header: { 'Content-Type': 'application/json' },
+        data: { clientId },
+        success: (res) => {
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            resolve(res.data);
+          } else {
+            console.error('[deleteClient] failed:', res.statusCode, res.data);
+            reject(new Error(`deleteClient error: ${JSON.stringify(res.data)}`));
+          }
+        },
+        fail: (err) => {
+          console.error('[deleteClient] network error:', err);
+          reject(err);
+        }
+      });
+    });
+  },
+
   // ── CREATE PAYMENT (vía Edge Function create-payment) ────────────
   // Crea la orden JSAPI real en WeChat Pay y devuelve los parámetros
   // firmados listos para pasarle directo a wx.requestPayment().
-  createPayment({ type, clientId, pendingOrderId, planId, startDate, expiryDate, cutlery, referralCode }) {
+  createPayment({ type, clientId, pendingOrderId, planId, startDate, expiryDate, cutlery, referralCode, selections }) {
     return new Promise((resolve, reject) => {
       wx.request({
-        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/create-payment',
+        url: `${config.SUPABASE_URL}/functions/v1/create-payment`,
         method: 'POST',
         header: { 'Content-Type': 'application/json' },
-        data: { type, clientId, pendingOrderId, planId, startDate, expiryDate, cutlery, referralCode },
+        data: { type, clientId, pendingOrderId, planId, startDate, expiryDate, cutlery, referralCode, selections },
         success: (res) => {
           if (res.statusCode >= 200 && res.statusCode < 300 && res.data && res.data.ok) {
             resolve(res.data);
@@ -334,7 +389,7 @@ App({
   simulatePayment({ outTradeNo }) {
     return new Promise((resolve, reject) => {
       wx.request({
-        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/dev-simulate-payment',
+        url: `${config.SUPABASE_URL}/functions/v1/dev-simulate-payment`,
         method: 'POST',
         header: { 'Content-Type': 'application/json' },
         data: { out_trade_no: outTradeNo },
@@ -363,7 +418,7 @@ App({
   getPaymentStatus({ outTradeNo }) {
     return new Promise((resolve, reject) => {
       wx.request({
-        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/get-payment-status',
+        url: `${config.SUPABASE_URL}/functions/v1/get-payment-status`,
         method: 'POST',
         header: { 'Content-Type': 'application/json' },
         data: { out_trade_no: outTradeNo },
@@ -408,16 +463,14 @@ App({
     return { anchor, order };
   },
 
-  // Calcula a qué week_index corresponde un día (mon..fri) según la fecha
-  // calendario real de entrega. Si ese día de "esta semana" ya pasó (ej.
-  // hoy es miércoles y se pregunta por lunes/martes), se usa la fecha del
-  // lunes/martes de la PRÓXIMA semana, porque esos días ya no se pueden
-  // entregar en la semana actual.
-  // startDateStr (YYYY-MM-DD) es la referencia real: el primer día de
-  // entrega que eligió el cliente. Si no se pasa, se usa "hoy" (caso del
-  // cliente activo editando la semana en curso desde home, donde no hay
-  // una decisión de start_date futura involucrada).
-  getWeekIndexForDay(dayKey, anchor, order, startDateStr) {
+  // Calcula a qué week_index corresponde una fecha real de entrega, según
+  // la rotación mensual del menú (anchor + order alternan cada 2 meses).
+  // Antes esto reconstruía la fecha a partir de un weekKey ('mon'..'fri') +
+  // una semana de referencia porque el cliente elegía un template Lun-Vie
+  // fijo, no fechas puntuales -- ahora que cada día de entrega ya es una
+  // fecha real (calendario propio, ver pages/start-date), no hace falta
+  // reconstruir nada: alcanza con ubicar esa fecha en su "mes de menú".
+  getWeekIndexForDay(dateStr, anchor, order) {
     if (!anchor || !order || order.length !== 2) return 1;
 
     // Devuelve el primer día hábil (lunes a viernes) del mes dado (year, month 0-based)
@@ -439,29 +492,7 @@ App({
       return { year: y, month: m };
     };
 
-    const dayNumMap = { mon: 1, tue: 2, wed: 3, thu: 4, fri: 5 };
-    const targetDow = dayNumMap[dayKey] || 1;
-
-    const toMonday = (d) => {
-      const dow = d.getDay();
-      const m = new Date(d);
-      m.setDate(d.getDate() + (dow === 0 ? -6 : 1 - dow));
-      return m;
-    };
-
-    const refDate = startDateStr ? new Date(startDateStr + 'T00:00:00') : new Date();
-    refDate.setHours(0, 0, 0, 0);
-    const refMonday = toMonday(refDate);
-
-    // Fecha calendario real del día pedido (no el lunes de la semana): el
-    // corte de mes puede caer en medio de una semana de entrega si el mes
-    // no arranca en lunes, así que cada día se evalúa con su propia fecha.
-    const dayDate = new Date(refMonday);
-    dayDate.setDate(refMonday.getDate() + (targetDow - 1));
-    const targetDate = (startDateStr && dayDate < refDate)
-      ? new Date(dayDate.getTime() + 7 * 24 * 60 * 60 * 1000)
-      : dayDate;
-
+    const targetDate = new Date(dateStr + 'T00:00:00');
     const anchorDate = new Date(anchor + 'T00:00:00');
     const anchorMenu = menuMonthOf(anchorDate);
     const targetMenu = menuMonthOf(targetDate);
@@ -484,6 +515,55 @@ App({
     return meal.name || '';
   },
 
+  // Abre el PDF del menu completo. Vivia solo en tiers.js; ahora tambien lo
+  // usa order-summary, asi que la logica (bajar + abrir + los tres errores
+  // posibles) queda en un solo lugar.
+  //
+  // Elige el folleto segun el idioma del dispositivo: `brochure_cn` en chino,
+  // `brochure_en` en el resto. Antes pedia siempre `brochure_en`, asi que a
+  // un usuario en chino se le abria el PDF en ingles aunque el folleto en
+  // chino estuviera cargado.
+  openBrochure() {
+    const t = require('./i18n/index');
+    let key = 'brochure_en';
+    try {
+      const lang = wx.getAppBaseInfo().language || 'en';
+      if (lang.startsWith('zh')) key = 'brochure_cn';
+    } catch (e) {}
+
+    wx.showLoading({ title: t('loading') });
+    return this.supabase('GET', 'settings', null, `key=eq.${key}`)
+      .then((data) => {
+        wx.hideLoading();
+        const url = data && data.length > 0 ? data[0].value : '';
+        if (!url) {
+          wx.showToast({ title: t('brochure_not_found'), icon: 'none' });
+          return;
+        }
+        wx.downloadFile({
+          url,
+          success: (res) => {
+            wx.openDocument({
+              filePath: res.tempFilePath,
+              showMenu: true,
+              fail: (err) => {
+                console.error('openDocument error:', err);
+                wx.showToast({ title: err.errMsg || t('failed_open'), icon: 'none' });
+              },
+            });
+          },
+          fail: (err) => {
+            console.error('downloadFile error:', err);
+            wx.showToast({ title: err.errMsg || t('failed_download'), icon: 'none' });
+          },
+        });
+      })
+      .catch(() => {
+        wx.hideLoading();
+        wx.showToast({ title: t('failed_load'), icon: 'none' });
+      });
+  },
+
   // Enriches a plan object with displayName and displayTier for i18n display.
   // Call this whenever a plan is loaded from DB or storage before showing to user.
   getDisplayPlan(plan) {
@@ -502,7 +582,7 @@ App({
   getAddressChanges({ clientId }) {
     return new Promise((resolve, reject) => {
       wx.request({
-        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/get-address-changes',
+        url: `${config.SUPABASE_URL}/functions/v1/get-address-changes`,
         method: 'POST',
         header: { 'Content-Type': 'application/json' },
         data: { clientId },
@@ -525,7 +605,7 @@ App({
   submitAddressChange({ clientId, oldDistrict, oldAddress, newDistrict, newAddress }) {
     return new Promise((resolve, reject) => {
       wx.request({
-        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/submit-address-change',
+        url: `${config.SUPABASE_URL}/functions/v1/submit-address-change`,
         method: 'POST',
         header: { 'Content-Type': 'application/json' },
         data: { clientId, oldDistrict, oldAddress, newDistrict, newAddress },
@@ -553,7 +633,7 @@ App({
   getNotifications({ clientId }) {
     return new Promise((resolve, reject) => {
       wx.request({
-        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/get-notifications',
+        url: `${config.SUPABASE_URL}/functions/v1/get-notifications`,
         method: 'POST',
         header: { 'Content-Type': 'application/json' },
         data: { clientId },
@@ -576,7 +656,7 @@ App({
   markNotificationRead({ id }) {
     return new Promise((resolve, reject) => {
       wx.request({
-        url: 'https://ychpcxloiwelyrwcsebf.supabase.co/functions/v1/mark-notification-read',
+        url: `${config.SUPABASE_URL}/functions/v1/mark-notification-read`,
         method: 'POST',
         header: { 'Content-Type': 'application/json' },
         data: { id },
@@ -597,6 +677,79 @@ App({
   },
 
   // ── SUPABASE HELPER ──────────────────────────────────────────
+  // Guarda el set COMPLETO de comidas de un cliente. Vivia duplicada, palabra
+  // por palabra, en edit-meals.js y en payment.js -- y ya hubo que arreglar
+  // el mismo bug dos veces (ver el comentario de abajo sobre el DELETE).
+  //
+  // `deferToPending`: si el ciclo actual del cliente todavia corre, estas
+  // elecciones son del ciclo SIGUIENTE y van a pending_meal_selections; el
+  // cron las aplica el dia que arranca. Escribirlas en meal_selections
+  // pisaria la semana que la cocina esta preparando ahora mismo.
+  //
+  // Reemplaza el set entero en vez de hacer GET-then-PATCH-or-POST por
+  // fecha: con fechas reales, una renovacion nunca matchea las filas del
+  // ciclo anterior, asi que se acumulaban 5 filas mas por renovacion en vez
+  // de reemplazarse. Para un cliente nuevo el DELETE es un no-op.
+  // Guarda el set COMPLETO de comidas de un cliente, a traves de la Edge
+  // Function save-meal-selections (service_role del lado del servidor).
+  //
+  // Antes esto hacia DELETE + POST directo a /rest/v1/meal_selections con la
+  // anon key, y estaba roto en silencio: la tabla le da a anon INSERT y
+  // UPDATE pero el DELETE esta restringido a is_admin(), y PostgREST
+  // responde 204 igual cuando RLS no deja borrar nada. El DELETE no borraba,
+  // el codigo creia que si, y reescribir las mismas fechas explotaba con
+  // 409 duplicate key contra UNIQUE(client_id, day, slot) -- el error que
+  // aparecia al rehacer un alta despues de "start over". Con fechas nuevas
+  // no explotaba, pero dejaba las filas viejas acumulandose.
+  //
+  // `from`/`to` acotan el reemplazo a un rango de fechas. Sin ellos se
+  // reemplaza el set completo del cliente, que es lo que corresponde cuando
+  // las selecciones SON el ciclo entero (alta nueva y renovacion). Con ellos
+  // se reemplaza solo ese tramo, para que editar un ciclo no borre las filas
+  // de otro (ver edit-meals.js).
+  saveMealSelections(clientId, allSelections, { deferToPending = false, from = null, to = null } = {}) {
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url: `${config.SUPABASE_URL}/functions/v1/save-meal-selections`,
+        method: 'POST',
+        // Esta funcion si exige la anon key (verify_jwt), a diferencia del
+        // resto de las functions del proyecto, que estan abiertas.
+        header: {
+          'Content-Type': 'application/json',
+          'apikey': config.SUPABASE_KEY,
+          'Authorization': `Bearer ${config.SUPABASE_KEY}`,
+        },
+        data: { clientId, selections: allSelections, deferToPending, from, to },
+        success: (res) => {
+          if (res.statusCode >= 200 && res.statusCode < 300 && res.data && res.data.ok) {
+            resolve(res.data);
+          } else {
+            console.error('[saveMealSelections] failed:', res.statusCode, res.data);
+            reject(new Error(`saveMealSelections error: ${JSON.stringify(res.data)}`));
+          }
+        },
+        fail: (err) => {
+          console.error('[saveMealSelections] network error:', err);
+          reject(err);
+        },
+      });
+    });
+  },
+
+  // Trae un plan por id y lo deja en storage como `selectedPlan`, que es de
+  // donde lo leen order-summary, payment y meal-select. Devuelve el plan, o
+  // null si no hay planId o no existe. El mismo bloque de 4 lineas estaba
+  // repetido en discovery.js (x2) y register.js (x2), siempre para retomar
+  // un flujo a medio terminar.
+  async cacheSelectedPlan(planId) {
+    if (!planId) return null;
+    const planData = await this.supabase('GET', 'plans', null, `id=eq.${planId}`);
+    if (!planData || planData.length === 0) return null;
+    const plan = this.getDisplayPlan(planData[0]);
+    wx.setStorageSync('selectedPlan', plan);
+    return plan;
+  },
+
   supabase(method, table, body, query) {
     return new Promise((resolve, reject) => {
       let url = `${config.SUPABASE_URL}/rest/v1/${table}`;

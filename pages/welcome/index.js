@@ -1,8 +1,9 @@
 // pages/welcome/index.js
 const app = getApp();
 const t = require('../../i18n/index');
+const { formatShortDate } = require('../../utils/date-format');
 
-const DAY_LABELS = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday' };
+const _isZh = (wx.getAppBaseInfo().language || '').startsWith('zh');
 
 Page({
   data: {
@@ -42,14 +43,14 @@ Page({
     const firstName = client.name ? client.name.split(' ')[0] : 'there';
 
     // Cargar primera meal selection
-    const selectionsData = await app.supabase('GET', 'meal_selections', null, `client_id=eq.${clientId}&order=day.asc&limit=1`);
+    const selectionsData = await app.supabase('GET', 'meal_selections', null, `client_id=eq.${clientId}&delivery_date=not.is.null&order=delivery_date.asc&limit=1`);
     if (!selectionsData || selectionsData.length === 0) {
       this.setData({ clientName: firstName });
       return;
     }
 
     const first = selectionsData[0];
-    const firstDay = DAY_LABELS[first.day] || first.day || 'Monday';
+    const firstDay = first.delivery_date ? formatShortDate(first.delivery_date, _isZh ? 'zh' : 'en') : '';
     const firstTime = first.delivery_time || '09:45';
     const mealIds = first.meals_json || [];
 

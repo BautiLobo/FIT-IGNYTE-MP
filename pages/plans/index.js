@@ -36,6 +36,7 @@ Page({
     lbl_meals_per_day: '',
     lbl_per_week: '',
     lbl_tap_hint: '',
+    lbl_current_plan: '',
   },
 
   async onLoad(options) {
@@ -46,6 +47,7 @@ Page({
       lbl_meals_per_day: t('plans_meals_per_day'),
       lbl_per_week: t('plans_per_week'),
       lbl_tap_hint: t('plans_tap_hint'),
+      lbl_current_plan: t('plans_current_plan'),
     });
     const fromRenewal = options.from === 'renewal';
     const tier = options.tier ? decodeURIComponent(options.tier) : null;
@@ -63,6 +65,7 @@ Page({
       const data = await app.supabase('GET', 'plans', null, query);
 
       const tierColor = this.data.tierColor || '#E8342A';
+      const currentPlanId = this.data.fromRenewal ? wx.getStorageSync('currentPlanId') : '';
       const plans = (data || []).map((plan) => ({
         ...plan,
         displayName: app.getMealName(plan),
@@ -76,6 +79,11 @@ Page({
         // Color propio de cada plan desde la DB; fallback al color del tier
         color: plan.color || tierColor,
         is_popular: plan.name === 'Small x 2',
+        // Renovación: el plan que está corriendo hoy va marcado, para que
+        // confirmarlo sea tan directo como cambiarlo. Lo deja guardado
+        // startRenewal() en renewal/index.js; en un alta nueva no existe y
+        // ningún plan queda marcado.
+        is_current: !!currentPlanId && plan.id === currentPlanId,
       }));
 
       this.setData({ plans, loading: false });
@@ -91,8 +99,8 @@ Page({
     wx.setStorageSync('selectedPlan', plan);
 
     const url = this.data.fromRenewal
-      ? '/pages/start-date/index?from=renewal&next=meal-select'
-      : '/pages/start-date/index?next=meal-select';
+      ? '/pages/start-date/index?from=renewal'
+      : '/pages/start-date/index';
 
     wx.navigateTo({
       url,

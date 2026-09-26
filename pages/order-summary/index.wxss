@@ -62,3 +62,19 @@ button { margin:0 !important; padding:0 !important; background:transparent; bord
 .card-header-row .card-label { margin-bottom:0; }
 .btn-edit { background:#1a1a22; border-radius:12rpx; padding:8rpx 18rpx; }
 .btn-edit text { font-size:24rpx; color:#e8342a; font-weight:700; }
+
+/* Botón del menú en PDF -- mismo estilo que en pages/tiers. */
+.btn-pdf {
+  background: rgba(167,139,250,0.12) !important;
+  border: 2rpx solid #e8342a !important;
+  border-radius: 24rpx !important;
+  height: 92rpx;
+  line-height: 92rpx;
+  color: #e8342a !important;
+  font-size: 30rpx !important;
+  font-weight: 800 !important;
+  text-align: center;
+  width: 100% !important;
+  box-sizing: border-box;
+  display: block;
+}
