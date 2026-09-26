@@ -136,7 +136,20 @@ se tocó.
 - **Ramas para revisar**: `FIT-IGNYTE-MP` → `dev`; `FIT-IGNYTE` →
   `migration-dev` (la `dev` vieja de ese repo tiene código de mini-program
   de junio sin relación con `master` — no se tocó, se puede borrar).
-- **Falta**: recorrido end-to-end en WeChat DevTools + panel dev.
+- **✅ Probado end-to-end en dev (2026-09-26/27)** con el usuario en
+  WeChat DevTools + panel dev, cliente de prueba `#36` / pedido `#22`:
+  alta con 5 fechas no consecutivas → aprobación en el panel (upsert con
+  `delivery_date` OK) → pago simulado (`complete-payment` aplica start /
+  expiry reales) → Edit Meals → Change date (movió 2 entregas, expiry
+  sincronizado a 22/10) → renovación anticipada con cambio de plan y
+  **dos lunes** (quedaron como filas separadas en pendientes, Home muestra
+  "Renewal confirmed") → `apply_pending_renewals()` simulado en
+  transacción con rollback: aplica plan/expiry nuevos y las 5 fechas
+  intactas, vacía pendientes, notifica. El ciclo de `#36` se ajustó a mano
+  para poder renovar; el cron de dev aplica la renovación real el 29/9.
+- **Siguiente**: el usuario revisa/mergea `dev` y `migration-dev`; después
+  prod, cada paso con OK aparte: migración 20260926 → 3 Edge Functions →
+  panel → mini-program (restaurar `config.js` en `miniprogram-1`).
 - **Mini-program**: `edit-meals`, `home`, `welcome`, `start-date` leen
   `delivery_date` y omiten filas NULL.
 - **Panel admin** (`FIT-IGNYTE-dev/src/lib/supabase.js`): lecturas,
