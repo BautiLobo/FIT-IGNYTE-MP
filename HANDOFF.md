@@ -128,7 +128,15 @@ se tocó.
   `wx-notify-cron`): a `delivery_date`. `save-meal-selections` además borra
   filas NULL legacy al reemplazar un rango; `complete-payment` ignora
   duplicados y ya no deja al cliente sin comidas si falla el fallback.
-  **Sin desplegar ni siquiera en dev** (el CLI no estaba logueado).
+  Desplegadas en **dev** (2026-09-26, CLI con `--project-ref` explícito;
+  prod verificado sin cambios). `save-meal-selections` probada contra dev
+  con cliente descartable: borra la fila legacy NULL al reemplazar un
+  rango, respeta filas fuera del rango, guarda "dos martes" y sincroniza
+  `expiry_date`, rechaza fechas fuera de la ventana de 14 días hábiles.
+- **Ramas para revisar**: `FIT-IGNYTE-MP` → `dev`; `FIT-IGNYTE` →
+  `migration-dev` (la `dev` vieja de ese repo tiene código de mini-program
+  de junio sin relación con `master` — no se tocó, se puede borrar).
+- **Falta**: recorrido end-to-end en WeChat DevTools + panel dev.
 - **Mini-program**: `edit-meals`, `home`, `welcome`, `start-date` leen
   `delivery_date` y omiten filas NULL.
 - **Panel admin** (`FIT-IGNYTE-dev/src/lib/supabase.js`): lecturas,
