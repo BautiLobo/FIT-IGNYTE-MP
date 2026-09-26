@@ -185,8 +185,19 @@ Hallazgos de ese día:
   NO — sin ella la función nueva habría fallado en TODAS las renovaciones.
   Diff completo de schema dev vs prod hecho: era la única diferencia.
   Código de las 3 funciones idéntico a dev (hash). Dry-run con rollback OK.
-- ⏳ **Paso 3**: bloqueado para Claude por el clasificador de permisos
-  (deploy a prod). Lo corre el usuario.
+- ✅ **Paso 3**: desplegado por el usuario (el clasificador de permisos no
+  deja a Claude hacer deploys a prod). `complete-payment` v19,
+  `wx-notify-cron` v23, `save-meal-selections` v1 (`verify_jwt` true);
+  bundles idénticos (hash) a los probados en dev.
+- ✅ **Paso 4**: `migration-dev` mergeado (`8ee3403`) y promovido por el
+  usuario en Vercel. Verificado en el JS servido por
+  `fit-ignyte.vercel.app`: incluye el arreglo de `approveOrder`. La
+  promoción automática desde `master` vuelve a estar activa.
+- ✅ **Paso 5** (`20260928`) aplicado (respuesta `success`). La consulta de
+  verificación fue bloqueada por el clasificador — confirmar a mano que
+  solo queden los UNIQUE `..._client_delivery_slot_key`. Antes de aplicarlo
+  se verificó que la app publicada no usa `on_conflict` (escribe con
+  GET→PATCH/POST), así que no dependía del índice.
 - Nota aparte: 2 pagos huérfanos `paid/applied=false` de clientes borrados
   (#220 y #240, agosto) — el cron los reintenta cada día y falla por FK de
   `notifications`. Inofensivo; limpiar cuando se decida.
