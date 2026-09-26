@@ -15,12 +15,31 @@
 .topbar-title { flex:1; text-align:center; font-size:32rpx; font-weight:800; color:#f3f3f4; }
 
 /* Day Tabs */
-.day-tabs { display:flex; padding:16rpx 16rpx; gap:8rpx; background:#0b0b0c; border-bottom:1rpx solid #1a1a22; flex-shrink:0; box-sizing:border-box; width:100%; }
-.day-tab { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4rpx; background:#13131a; border:1rpx solid #2a2a33; color:#9f9fa8; padding:14rpx 0; border-radius:16rpx; box-sizing:border-box; }
+/* .day-tab vuelve a flex:1 -- ocupa todo el ancho de la barra sea cual sea
+   la cantidad de días (varía desde que se filtran los días bloqueados, ver
+   edit-meals.js). El tamaño de fuente de fecha/día/tick NO es fijo acá: se
+   calcula en JS según la cantidad de tabs (this.data.dayTabFontScale) y se
+   aplica inline en el WXML, para que el texto se vea proporcional tanto con
+   3 tabs como con 5. */
+.day-tabs { display:flex; padding:12rpx 16rpx; gap:6rpx; background:#0b0b0c; border-bottom:1rpx solid #1a1a22; flex-shrink:0; box-sizing:border-box; width:100%; }
+.day-tab { flex:1; min-width:0; display:flex; flex-direction:row; align-items:baseline; justify-content:center; gap:6rpx; background:#13131a; border:1rpx solid #2a2a33; color:#9f9fa8; padding:12rpx 2rpx; border-radius:10rpx; box-sizing:border-box; }
 .day-tab-active { background:#1a0808; border-color:#e8342a; color:#e8342a; }
-.day-tab-short { font-size:28rpx; font-weight:800; }
-.day-tab-sub { font-size:20rpx; color:#9f9fa8; }
+.day-tab-date { font-weight:800; white-space:nowrap; }
+.day-tab-weekday { font-weight:600; color:#9f9fa8; text-transform:uppercase; }
+.day-tab-check { font-weight:800; }
 
+/* Horario de la entrega -- solo aparece cuando ese día tiene más de una,
+   que es lo único que distingue un tab del otro. */
+.day-tab-slot {
+  color: #8b8b95;
+  margin-top: 2rpx;
+}
+.day-tab-active .day-tab-weekday { color:#e8342a; }
+
+
+/* Change dates (bloque completo del ciclo) */
+.change-date-row { display:flex; align-items:center; justify-content:flex-end; padding:10rpx 24rpx 0; flex-shrink:0; box-sizing:border-box; width:100%; }
+.change-date-link { font-size:24rpx; color:#e8342a; font-weight:700; text-decoration:underline; }
 
 /* Scroll */
 .scroll { flex:1; padding:16rpx 24rpx; box-sizing:border-box; overflow-x:hidden; }

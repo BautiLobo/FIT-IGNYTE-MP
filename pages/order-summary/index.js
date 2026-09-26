@@ -1,12 +1,9 @@
 // pages/order-summary/index.js
 const app = getApp();
 const t = require('../../i18n/index');
+const { formatShortDate } = require('../../utils/date-format');
 
 const _isZh = (wx.getAppBaseInfo().language || '').startsWith('zh');
-const DAY_LABELS = _isZh
-  ? { mon: '周一', tue: '周二', wed: '周三', thu: '周四', fri: '周五' }
-  : { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday' };
-const DAY_ORDER = ['mon', 'tue', 'wed', 'thu', 'fri'];
 
 Page({
   data: {
@@ -27,6 +24,8 @@ Page({
     lbl_discount: '',
     lbl_delivery: '',
     lbl_delivery_tbc: '',
+    lbl_brochure: '',
+    deliveryFee: null,
     lbl_submitting: '',
     lbl_place_order: '',
     lbl_continue_payment: '',
@@ -46,6 +45,7 @@ Page({
       lbl_discount: t('order_summary_discount'),
       lbl_delivery: t('order_summary_delivery'),
       lbl_delivery_tbc: t('order_summary_delivery_tbc'),
+      lbl_brochure: t('tiers_brochure'),
       lbl_submitting: t('order_summary_submitting'),
       lbl_place_order: t('order_summary_place_order'),
       lbl_continue_payment: t('order_summary_continue_payment'),
@@ -77,6 +77,14 @@ Page({
 
     const pendingOrderId = wx.getStorageSync('pendingOrderId');
     if (!pendingOrderId) {
+      // Cliente ya aprobado (llegó por register.js/discovery.js sin
+      // pendingOrderId en este storage -- ver payment.js) repitiendo
+      // fecha/comidas por vencimiento: no hay `new_orders` que actualizar,
+      // se arma el resumen directo desde `clients` + lo recién elegido.
+      if (repay) {
+        await this.loadRepayFromClient(selectedPlan);
+        return;
+      }
       wx.navigateBack();
       return;
     }
@@ -124,7 +132,15 @@ Page({
     }
     if (!this.data.order) return;
     const pendingOrderId = wx.getStorageSync('pendingOrderId');
-    if (!pendingOrderId) return;
+    if (!pendingOrderId) {
+      // Mismo camino sin orden que onLoad (ver loadRepayFromClient): no hay
+      // nada que persistir server-side, solo re-armar el resumen con lo que
+      // haya quedado en storage tras volver de editar comidas.
+      if (this.data.repay && this.data.selectedPlan) {
+        await this.loadRepayFromClient(this.data.selectedPlan);
+      }
+      return;
+    }
 
     try {
       // Si el usuario edita los meals y vuelve, meal-select dejó los cambios en
@@ -153,18 +169,35 @@ Page({
       const data = await app.getClient({ clientId });
       const order = data && data.length > 0 ? data[0] : null;
 
-      let mealSelections = wx.getStorageSync('mealSelections') || {};
+      // Sin storage no hay resumen que mostrar: con el camino único, las
+      // comidas de la renovación SIEMPRE se acaban de elegir en meal-select
+      // y viven acá. Antes, si esto estaba vacío se caía a leer
+      // meal_selections (el ciclo viejo) y se seguía hasta el pago con esas
+      // comidas, sin mirar cuántas permitía el plan elegido. Ahora se vuelve
+      // a elegirlas en vez de arrastrar datos de otro ciclo.
+      const mealSelections = wx.getStorageSync('mealSelections') || {};
       if (Object.keys(mealSelections).length === 0) {
-        // "Keep same meals" guarda directo en meal_selections sin pasar por storage
-        mealSelections = await this.loadMealSelectionsFromDb(clientId);
-        wx.setStorageSync('mealSelections', mealSelections);
+        wx.showToast({ title: t('order_summary_failed'), icon: 'none' });
+        setTimeout(() => wx.navigateBack(), 1200);
+        return;
       }
       const mealSummary = await this.buildMealSummary(mealSelections);
 
       const planPrice = selectedPlan.price || 0;
-      const total = planPrice;
+      // En una renovación el envío YA está fijado en el cliente (lo puso el
+      // admin al aprobar su alta), así que se muestra el monto real en vez
+      // de "se confirma al aprobar" -- ese cartel solo tiene sentido la
+      // primera vez, cuando la orden todavía no pasó por el admin.
+      //
+      // Y se suma al total: create-payment cobra planPrice - discount +
+      // deliveryFee, así que mostrar solo el plan hacía que el cliente viera
+      // un número y se le cobrara otro. Mismo fallback que usa esa función
+      // (clients.delivery_fee ?? 35) para que lo mostrado sea exactamente lo
+      // que se va a cobrar.
+      const deliveryFee = (order && order.delivery_fee != null) ? order.delivery_fee : 35;
+      const total = planPrice + deliveryFee;
 
-      this.setData({ order, selectedPlan, mealSummary, total, discount: 0, fromRenewal: true });
+      this.setData({ order, selectedPlan, mealSummary, total, discount: 0, deliveryFee, fromRenewal: true });
 
     } catch (err) {
       console.error('Load renewal order error:', err);
@@ -172,30 +205,51 @@ Page({
     }
   },
 
-  async loadMealSelectionsFromDb(clientId) {
-    const dayKeyMap = { 'Monday': 'mon', 'Tuesday': 'tue', 'Wednesday': 'wed', 'Thursday': 'thu', 'Friday': 'fri' };
-    const selections = {};
+  // Alta nueva ya aprobada (fila en `clients`, status 'Pending Payment')
+  // repitiendo fecha/comidas por vencimiento, sin `pendingOrderId` en este
+  // storage -- pasa cuando register.js/discovery.js detectan el cliente por
+  // openid/clientId en vez de retomar una orden (ver payment.js). No hay
+  // `new_orders` que leer ni actualizar: mismo criterio que loadRenewalOrder,
+  // usando `clients` como fuente y las selecciones recién elegidas en
+  // storage, pero con el descuento de alta nueva (25%), no el de renovación.
+  async loadRepayFromClient(selectedPlan) {
     try {
-      const rows = await app.supabase('GET', 'meal_selections', null, `client_id=eq.${clientId}&order=day.asc,slot.asc`);
-      (rows || []).forEach(row => {
-        const key = dayKeyMap[row.day];
-        if (!key) return;
-        selections[key] = {
-          meal_ids: row.meals_json || [],
-          time: row.delivery_time || '',
-          notes: row.note || '',
-        };
-      });
+      const clientId = wx.getStorageSync('clientId');
+      const data = clientId ? await app.getClient({ clientId }) : null;
+      const client = data && data.length > 0 ? data[0] : null;
+      if (!client) {
+        wx.navigateBack();
+        return;
+      }
+
+      const mealSelections = wx.getStorageSync('mealSelections') || {};
+      if (Object.keys(mealSelections).length === 0) {
+        wx.showToast({ title: t('order_summary_failed'), icon: 'none' });
+        setTimeout(() => wx.navigateBack(), 1200);
+        return;
+      }
+      const mealSummary = await this.buildMealSummary(mealSelections);
+
+      const planPrice = selectedPlan.price || 0;
+      const discount = Math.round(planPrice * 0.25);
+      const deliveryFee = client.delivery_fee != null ? client.delivery_fee : 35;
+      const total = planPrice - discount + deliveryFee;
+
+      this.setData({ order: client, selectedPlan, mealSummary, total, discount, deliveryFee, fromRenewal: false, repay: true });
+
     } catch (err) {
-      console.error('Load meal_selections error:', err);
+      console.error('Load repay-from-client error:', err);
+      wx.showToast({ title: t('order_summary_failed'), icon: 'none' });
     }
-    return selections;
   },
 
   async buildMealSummary(selections) {
-    // New structure: { mon: { meal_ids, snack_id, time, notes, sauces: { mealId: sauceId } } }
+    // Structure: { '2026-09-19': { meal_ids, snack_id, time, notes, sauces: { mealId: sauceId } } }
+    // Las claves son fechas ISO reales -- ordenan bien lexicográficamente,
+    // no hace falta un orden fijo aparte.
+    const dayOrder = Object.keys(selections).sort();
     const allIds = [];
-    DAY_ORDER.forEach(day => {
+    dayOrder.forEach(day => {
       const sel = selections[day];
       if (sel && sel.meal_ids) {
         sel.meal_ids.forEach(id => { if (id && !allIds.includes(id)) allIds.push(id); });
@@ -208,13 +262,13 @@ Page({
       (meals || []).forEach(m => { mealMap[m.id] = m; });
     }
 
-    return DAY_ORDER
+    return dayOrder
       .filter(day => selections[day] && selections[day].meal_ids && selections[day].meal_ids.length > 0)
       .map(day => {
         const sel = selections[day];
         return {
           day,
-          dayLabel: DAY_LABELS[day],
+          dayLabel: formatShortDate(day, _isZh ? 'zh' : 'en'),
           time: sel.time || '',
           meals: (sel.meal_ids || []).map((id, i) => ({
             slot: i,
@@ -233,6 +287,14 @@ Page({
     }
 
     if (this.data.repay) {
+      // Señal de un solo uso para payment.js: la fecha en storage se acaba
+      // de elegir de verdad AHORA (viene de start-date.js/meal-select.js,
+      // recién). Sin esto, payment.js no puede distinguir esta fecha fresca
+      // de cualquier storage viejo que haya quedado de un intento anterior
+      // sin terminar -- y una fecha vieja que por casualidad todavía no
+      // esté vencida pasaba el chequeo sin pedir nada nuevo, dejando pagar
+      // sobre datos que no son los de este intento.
+      wx.setStorageSync('freshResyncDate', true);
       wx.navigateTo({ url: '/pages/payment/index' });
       return;
     }
@@ -249,18 +311,37 @@ Page({
     }
   },
 
+  openBrochure() {
+    app.openBrochure();
+  },
+
   editMeals() {
-    // Precargamos las selecciones actuales para que la página destino no arranque vacía
-    wx.setStorageSync('mealSelections', (this.data.order && this.data.order.meals) || {});
-    // En renovación llegamos desde edit-meals, así que editar vuelve a edit-meals;
-    // en el flujo normal (alta nueva) viene de meal-select.
-    const url = this.data.fromRenewal
-      ? '/pages/edit-meals/index?from=renewal'
-      : '/pages/meal-select/index?from=order-summary';
-    wx.navigateTo({ url });
+    // Precargamos las selecciones actuales para que la página destino no
+    // arranque vacía. En alta nueva viven en la orden; en renovación ya
+    // están en storage porque se acaban de elegir en este mismo flujo, y
+    // pisarlas con `order.meals` (que en renovación es el cliente, sin ese
+    // campo) las borraría y obligaría a elegir las 5 de nuevo.
+    const stored = wx.getStorageSync('mealSelections') || {};
+    if (Object.keys(stored).length === 0 && this.data.order && this.data.order.meals) {
+      wx.setStorageSync('mealSelections', this.data.order.meals);
+    }
+    // Renovación y alta nueva llegan las dos desde meal-select (camino
+    // único), así que editar vuelve siempre ahí.
+    wx.navigateTo({ url: '/pages/meal-select/index?from=order-summary' });
   },
 
   editAddress() {
+    // Sin pendingOrderId (cliente ya aprobado, llegó por el camino
+    // client-only de repay -- ver loadRepayFromClient) no hay una orden que
+    // register.js pueda cargar: entraba con el form vacío, y al guardar
+    // (editing=false, sin pendingOrderId) el openid volvía a matchear este
+    // mismo cliente y mostraba "ya tenés cuenta" en loop. edit-profile.js
+    // ya es el camino correcto para que un cliente existente edite sus
+    // datos (usa clientId + updateClient), así que va ahí en ese caso.
+    if (!wx.getStorageSync('pendingOrderId')) {
+      wx.navigateTo({ url: '/pages/edit-profile/index' });
+      return;
+    }
     wx.navigateTo({ url: '/pages/register/index?from=order-summary' });
   },
 

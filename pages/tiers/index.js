@@ -104,36 +104,7 @@ Page({
   },
 
   openBrochure() {
-    wx.showLoading({ title: t('loading') });
-    app.supabase('GET', 'settings', null, 'key=eq.brochure_en')
-      .then(data => {
-        wx.hideLoading();
-        if (data && data.length > 0 && data[0].value) {
-          wx.downloadFile({
-            url: data[0].value,
-            success: (res) => {
-              wx.openDocument({
-                filePath: res.tempFilePath,
-                showMenu: true,
-                fail: (err) => {
-                  console.error('openDocument error:', err);
-                  wx.showToast({ title: err.errMsg || t('failed_open'), icon: 'none' });
-                }
-              });
-            },
-            fail: (err) => {
-              console.error('downloadFile error:', err);
-              wx.showToast({ title: err.errMsg || t('failed_download'), icon: 'none' });
-            }
-          });
-        } else {
-          wx.showToast({ title: t('brochure_not_found'), icon: 'none' });
-        }
-      })
-      .catch(() => {
-        wx.hideLoading();
-        wx.showToast({ title: t('failed_load'), icon: 'none' });
-      });
+    app.openBrochure();
   },
 
   goBack() {

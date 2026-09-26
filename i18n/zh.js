@@ -43,6 +43,7 @@ module.exports = {
   home_snack: '零食',
   sauce: '酱料',
   home_contact: '联系 FIT IGNYTE',
+  home_view_menu: '☰  查看完整菜单 PDF',
   home_renewal_title: '您的套餐即将到期',
   home_renewal_sub: '还剩 %s 天 · 现在续费，餐食不中断',
   home_renewal_sub_tomorrow: '明天到期 · 现在续费，餐食不中断',
@@ -88,6 +89,7 @@ module.exports = {
   plans_price: '¥%s',
   plans_per_week: '/周',
   plans_tap_hint: '点击套餐继续',
+  plans_current_plan: '当前套餐',
   plans_failed: '加载套餐失败',
 
   // ── MEAL-SELECT ────────────────────────────────────────────
@@ -121,6 +123,21 @@ module.exports = {
   edit_meals_save_next: '保存并继续  →',
   edit_meals_updated: '餐食已更新！',
   edit_meals_failed: '保存失败',
+  edit_meals_unsaved_save: '保存修改',
+  edit_meals_unsaved_discard: '放弃修改',
+
+  // ── CHANGE-DATE（重新安排本周期剩余的配送日期）─────────────────
+  change_date_link: '更改日期',
+  change_date_topbar: '更改配送日期',
+  change_date_heading: '选择您的配送日期',
+  change_date_subtitle: '取消选择某一天，再选择其他空闲的工作日（仅工作日，节假日不可选）',
+  change_date_counter: '已选 %s/%s 天',
+  change_date_legend_selected: '已选',
+  change_date_legend_available: '可选',
+  change_date_legend_unavailable: '不可选',
+  change_date_out_of_range: '请选择高亮范围内的日期',
+  change_date_confirm: '使用这些日期  →',
+  change_date_multi_slot_unsupported: '当天有多次配送时暂不支持更改日期',
 
   // ── REGISTER ───────────────────────────────────────────────
   edit_profile_title: '编辑资料',
@@ -162,20 +179,23 @@ module.exports = {
   register_account_exists_title: '账号已存在',
   register_account_exists_body: '检测到您的微信已关联一个账号，正在跳转…',
 
-  // ── START-DATE ─────────────────────────────────────────────
-  start_date_topbar: '选择开始日期',
-  start_date_heading: '选择您的开始日期',
-  start_date_subtitle: '周一至周五配送 · 共 5 个工作日',
-  start_date_label: '开始日期',
-  start_date_plan_ends: '套餐结束',
-  start_date_5_days: '共 5 个工作日',
+  // ── START-DATE（配送日历）───────────────────────────────────
+  start_date_topbar: '配送日期',
+  start_date_heading: '选择您的配送日期',
+  start_date_subtitle: '选择 5 天 · 仅工作日，节假日不可选',
+  start_date_counter: '已选 %s/5 天',
+  start_date_legend_selected: '已选',
+  start_date_legend_available: '可选',
+  start_date_legend_unavailable: '不可选',
+  start_date_max_reached: '已选满 %s 天，先取消一天再改选',
   start_date_continue: '继续  →',
   start_date_no_delivery: '周末及法定节假日不配送，请选择其他日期',
+  start_date_out_of_range: '请选择高亮范围内的日期',
 
   // ── ORDER-SUMMARY ──────────────────────────────────────────
   order_summary_title: '订单摘要',
   order_summary_your_plan: '您的套餐',
-  order_summary_meals_day: '餐/天 · 周一至周五',
+  order_summary_meals_day: '餐/天',
   order_summary_chosen_meals: '本周餐食',
   order_summary_edit: '编辑  ›',
   order_summary_address: '配送地址',
@@ -233,15 +253,16 @@ module.exports = {
   // ── RENEWAL ────────────────────────────────────────────────
   renewal_title: '续费套餐',
   renewal_expired: '套餐已到期',
-  renewal_due: '本周五到期',
+  renewal_due: '套餐即将到期',
+  renewal_days_left_tag: '剩余天数',
+  renewal_expired_tag: '已到期',
   renewal_cta_expired: '续费以重新开始接收餐食',
   renewal_cta_active: '续费以继续接收餐食',
   renewal_current_plan: '当前套餐',
-  renewal_meals_info: '餐/天 · 周一至周五',
+  renewal_meals_info: '餐/天',
   renewal_per_week: '/周',
-  renewal_renew_btn: '✓  续费此套餐',
-  renewal_change_plan: '更换套餐',
-  renewal_feedback: '💬  留下您的反馈',
+  renewal_renew_btn: '续费我的套餐',
+  renewal_feedback: '留下您的反馈',
 
   // ── UNDER-REVIEW ───────────────────────────────────────────
   under_review_title: '订单审核中',

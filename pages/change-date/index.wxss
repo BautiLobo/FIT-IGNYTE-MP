@@ -1,4 +1,4 @@
-/* pages/start-date/index.wxss */
+/* pages/change-date/index.wxss */
 
 .container { display:flex; flex-direction:column; height:75vh; background:#0b0b0c; }
 
@@ -31,7 +31,7 @@
 .heading { font-size:34rpx; font-weight:800; color:#f3f3f4; display:block; }
 .heading-sub { font-size:24rpx; color:#beb6b6; line-height:1.5; display:block; font-weight:600; }
 
-/* ── COUNTER ── */
+/* ── CURRENT-DATE PILL ── */
 .counter-pill {
   align-self: center;
   background: #13131a;

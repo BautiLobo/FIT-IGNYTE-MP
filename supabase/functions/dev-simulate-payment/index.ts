@@ -86,6 +86,19 @@ Deno.serve(async (req: Request) => {
     });
     const completeData = await completeRes.json();
 
+    // Si complete-payment falla, esto tiene que fallar tambien -- devolver
+    // ok:true igual (como hacia antes) escondia el error: el pago quedaba
+    // 'paid' pero applied=false para siempre, y el mini-program mostraba
+    // el flujo de pago exitoso (pay-processing -> home) sin que nadie se
+    // enterara. Asi paso desapercibido el bug de pendingOrderId en
+    // complete-payment (ver ese archivo) durante una prueba entera.
+    if (!completeRes.ok) {
+      return new Response(JSON.stringify({ error: 'complete-payment failed', detail: completeData }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     return new Response(JSON.stringify({ ok: true, simulated: true, complete: completeData }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

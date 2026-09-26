@@ -5,7 +5,8 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 //   1) Plan que vence mañana          (activo hoy, expiry_date = mañana)
 //   2) Plan que arranca mañana        (start_date = mañana, o una renovación
 //      anticipada pagada cuyo start_date = mañana pero todavía sin aplicar)
-//   3) Feriado mañana → sin delivery  (si mañana es Lun-Vie Y está en PUBLIC_HOLIDAYS)
+//   3) Feriado mañana → sin delivery  (si mañana es Lun-Vie Y está en
+//      settings.public_holidays)
 //
 // IMPORTANTE: clients.status NO se mantiene sincronizado (se escribe una vez
 // al pagar y nunca más) -- el resto del sistema (mini-program, panel admin)
@@ -17,21 +18,37 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 //
 // Protegido con un secret compartido (header x-cron-secret) porque el endpoint
 // no requiere JWT — solo pg_cron lo debe poder llamar.
+
+// Los feriados viven en settings.public_holidays -- una sola fuente,
+// compartida con create-payment y con el mini-program (que la cachea al
+// arrancar, ver utils/holidays.js). Antes esta funcion tenia su propia copia
+// hardcodeada de la lista, que habia que acordarse de actualizar en dos
+// lugares cada noviembre.
 //
-// IMPORTANTE: esta lista de feriados debe mantenerse igual a
-// pages/start-date/holidays.js (son dos copias porque el mini-programa y el
-// Edge Function no comparten build).
-const PUBLIC_HOLIDAYS = [
-  '2026-01-01', '2026-01-02', '2026-01-03',
-  '2026-02-15', '2026-02-16', '2026-02-17', '2026-02-18', '2026-02-19',
-  '2026-02-20', '2026-02-21', '2026-02-22', '2026-02-23',
-  '2026-04-04', '2026-04-05', '2026-04-06',
-  '2026-05-01', '2026-05-02', '2026-05-03', '2026-05-04', '2026-05-05',
-  '2026-06-19', '2026-06-20', '2026-06-21',
-  '2026-09-25', '2026-09-26', '2026-09-27',
-  '2026-10-01', '2026-10-02', '2026-10-03', '2026-10-04',
-  '2026-10-05', '2026-10-06', '2026-10-07',
-];
+// Si no se puede leer NO se inventa nada: se devuelve vacio, el aviso de
+// "manana es feriado" no sale, y queda el error en la respuesta del cron
+// para que se vea en los logs. Preferible a mandarle a 60 clientes un aviso
+// equivocado.
+async function loadHolidays(
+  supabaseUrl: string,
+  headers: Record<string, string>,
+  errors: string[],
+): Promise<string[]> {
+  try {
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/settings?key=eq.public_holidays&select=value`,
+      { headers },
+    );
+    const rows = await res.json();
+    const raw = rows && rows.length > 0 ? rows[0].value : null;
+    const parsed = raw ? JSON.parse(raw) : null;
+    if (Array.isArray(parsed)) return parsed.filter((x: unknown) => typeof x === 'string');
+    errors.push('public_holidays: fila ausente o no es una lista');
+  } catch (err) {
+    errors.push(`public_holidays: ${String(err)}`);
+  }
+  return [];
+}
 
 const WX_TEMPLATE_ID = 'A7o5PTcftFBe1nYsidWchFofz2z_DN9Whn_96H60x2M';
 
@@ -175,18 +192,34 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    if (tomorrowIsWeekday && PUBLIC_HOLIDAYS.includes(tomorrow)) {
-      // Activo hoy: start_date <= hoy <= expiry_date.
-      const activeRes = await fetch(
-        `${supabaseUrl}/rest/v1/clients?start_date=lte.${today}&expiry_date=gte.${today}&select=id,wechat_openid`,
+    const holidays = await loadHolidays(supabaseUrl!, headers, results.errors);
+    if (tomorrowIsWeekday && holidays.includes(tomorrow)) {
+      // Antes esto avisaba a cualquier cliente Active por rango de fechas
+      // (start_date <= hoy <= expiry_date) -- valido cuando el ciclo era
+      // siempre 5 dias corridos (todo el rango eran dias de entrega), pero
+      // desde el calendario propio (ver pages/start-date) un cliente puede
+      // tener huecos dentro de ese rango. Ahora se chequea directo contra
+      // meal_selections: solo le llega el aviso a quien de verdad tenia una
+      // entrega agendada para mañana.
+      const scheduledRes = await fetch(
+        `${supabaseUrl}/rest/v1/meal_selections?delivery_date=eq.${tomorrow}&select=client_id`,
         { headers }
       );
-      const activeClients = await activeRes.json();
-      for (const c of activeClients || []) {
-        if (!c.wechat_openid) continue;
-        const r = await sendTo(c.wechat_openid, 'No delivery tomorrow');
-        if (r.errcode && r.errcode !== 0) results.errors.push(`holiday ${c.id}: ${JSON.stringify(r)}`);
-        else results.holiday++;
+      const scheduledRows = ((await scheduledRes.json()) || []) as { client_id: number }[];
+      const scheduledClientIds = [...new Set(scheduledRows.map(r => r.client_id))];
+
+      if (scheduledClientIds.length > 0) {
+        const activeRes = await fetch(
+          `${supabaseUrl}/rest/v1/clients?id=in.(${scheduledClientIds.join(',')})&select=id,wechat_openid`,
+          { headers }
+        );
+        const activeClients = await activeRes.json();
+        for (const c of activeClients || []) {
+          if (!c.wechat_openid) continue;
+          const r = await sendTo(c.wechat_openid, 'No delivery tomorrow');
+          if (r.errcode && r.errcode !== 0) results.errors.push(`holiday ${c.id}: ${JSON.stringify(r)}`);
+          else results.holiday++;
+        }
       }
     }
 

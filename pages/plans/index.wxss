@@ -107,6 +107,25 @@
   border-left-color: #A78BFA;
 }
 
+/* Renovación: el plan que el cliente está corriendo hoy. Mismo peso visual
+   que "más popular" -- es una referencia, no una recomendación, y confirmarlo
+   tiene que costar lo mismo que elegir otro. */
+.current-badge {
+  background: #0a1f14;
+  color: #34D399;
+  font-size: 18rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 8rpx;
+  display: inline-block;
+  margin-bottom: 6rpx;
+}
+
+.plan-card-current {
+  border-color: #34D399;
+}
+
 .plan-left { display: flex; flex-direction: column; gap: 4rpx; flex: 1; overflow: hidden; }
 .plan-category { font-size: 20rpx; font-weight: 700; letter-spacing: 2rpx; text-transform: uppercase; }
 .plan-name { font-size: 36rpx; font-weight: 800; color: #f3f3f4; }

@@ -1,15 +1,16 @@
 // pages/meal-select/index.js
 const app = getApp();
 const t = require('../../i18n/index');
+const { formatShortDate, formatDateParts } = require('../../utils/date-format');
 
 const _isZh = (wx.getAppBaseInfo().language || '').startsWith('zh');
-const DAYS = [
-  { key: 'mon', label: 'Monday',    short: _isZh ? '周一' : 'Mon' },
-  { key: 'tue', label: 'Tuesday',   short: _isZh ? '周二' : 'Tue' },
-  { key: 'wed', label: 'Wednesday', short: _isZh ? '周三' : 'Wed' },
-  { key: 'thu', label: 'Thursday',  short: _isZh ? '周四' : 'Thu' },
-  { key: 'fri', label: 'Friday',    short: _isZh ? '周五' : 'Fri' },
-];
+const WEEKDAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+// La tabla `menu` (catálogo de rotación) sigue siendo por día de semana --
+// esto solo traduce una fecha real a ese nombre para poder consultarla.
+function weekdayLabelForDate(dateStr) {
+  return WEEKDAY_LABELS[new Date(dateStr + 'T00:00:00').getDay()];
+}
 
 Page({
   data: {
@@ -20,24 +21,22 @@ Page({
     days: [],
     rotationAnchor: null,
     rotationOrder: [1, 2, 3, 4],
-    startDateStr: null,
-    currentDay: 'mon',
-    currentDayLabel: 'Monday',
+    currentDay: '',
+    currentDayLabel: '',
     menuMeals: [],
     // Selected meals for current day (before confirming)
     selectedMealIds: [],   // array of meal IDs selected for this day (can repeat)
-    // Snack
     // Time — one per day
-    selectedTime: '10:00',
-    // Horario "default" propagado desde el lunes a los días que el usuario
-    // todavía no cambió manualmente.
-    defaultTime: '10:00',
+    selectedTime: '10:15',
+    // Horario "default" propagado desde el primer día elegido a los días
+    // que el usuario todavía no cambió manualmente.
+    defaultTime: '10:15',
     // Días donde el usuario ya eligió un horario propio (no se pisan
-    // cuando el lunes cambia).
+    // cuando el primer día cambia).
     timeOverridden: {},
     // Notes
     currentNotes: '',
-    // All selections across days: { mon: { meal_ids, time, notes }, ... }
+    // All selections across days: { '2026-09-19': { meal_ids, time, notes }, ... }
     allSelections: {},
     isLastDay: false,
     canGoNext: false,
@@ -85,7 +84,7 @@ Page({
     });
     const fromRenewal = options.from === 'renewal' || wx.getStorageSync('flowContext') === 'renewal';
     const fromOrderSummary = options.from === 'order-summary';
-if (fromRenewal) wx.removeStorageSync('flowContext');
+    if (fromRenewal) wx.removeStorageSync('flowContext');
     const selectedPlan = app.getDisplayPlan(wx.getStorageSync('selectedPlan'));
 
     if (!selectedPlan) {
@@ -93,47 +92,50 @@ if (fromRenewal) wx.removeStorageSync('flowContext');
       return;
     }
 
-    const freshMeals = wx.getStorageSync('renewalFreshMeals');
-    if (freshMeals) wx.removeStorageSync('renewalFreshMeals');
+    // Las 5 fechas reales elegidas en el calendario que precede a esta
+    // página (pages/start-date) -- alta nueva y renovación pasan siempre
+    // por ahí antes de llegar acá.
+    const selectedDates = (wx.getStorageSync('selectedDates') || []).slice().sort();
+    if (selectedDates.length === 0) { wx.navigateBack(); return; }
+    const days = selectedDates.map((dateStr) => {
+      const parts = formatDateParts(dateStr, _isZh ? 'zh' : 'en');
+      return {
+        key: dateStr,
+        label: weekdayLabelForDate(dateStr),
+        short: formatShortDate(dateStr, _isZh ? 'zh' : 'en'),
+        shortDate: parts.date,
+        shortWeekday: parts.weekday,
+        done: false,
+      };
+    });
+    const firstDayKey = days[0].key;
 
-    // Only restore saved selections when returning from order-summary to edit.
-    // Fresh signup and renewal both start empty (renewal then populates from DB).
-    let allSelections = fromOrderSummary ? (wx.getStorageSync('mealSelections') || {}) : {};
-    if (fromRenewal && !freshMeals) {
-      const clientId = wx.getStorageSync('clientId');
-      try {
-        const data = await app.supabase('GET', 'meal_selections', null, `client_id=eq.${clientId}&order=day.asc,slot.asc`);
-        if (data && data.length > 0) {
-          const dayKeyMap = { 'Monday': 'mon', 'Tuesday': 'tue', 'Wednesday': 'wed', 'Thursday': 'thu', 'Friday': 'fri' };
-          data.forEach(row => {
-            const dayKey = dayKeyMap[row.day];
-            if (!dayKey) return;
-            allSelections[dayKey] = {
-              meal_ids: row.meals_json || [],
-              time: row.delivery_time || '10:00',
-              notes: row.note || '',
-            };
-          });
-        }
-      } catch (err) {
-        console.error('Load existing selections error:', err);
-      }
-    }
+    // Alta nueva y renovación arrancan SIEMPRE en blanco. Lo único que se
+    // restaura es volver desde el resumen a corregir lo que se acaba de
+    // elegir en este mismo flujo.
+    //
+    // Acá vivía un precargado de las comidas del ciclo anterior (traídas de
+    // meal_selections y copiadas por posición) que corría cuando el flag
+    // `renewalFreshMeals` no estaba. Ese flag se consumía en la primera
+    // lectura, así que bastaba volver atrás y re-entrar para que la
+    // renovación se precargara con el ciclo viejo -- incluso con un plan
+    // nuevo de otra cantidad de comidas, porque ningún chequeo comparaba
+    // una cosa con la otra. Ver el comentario de startRenewal() en
+    // renewal/index.js.
+    const allSelections = fromOrderSummary ? (wx.getStorageSync('mealSelections') || {}) : {};
 
     // Si ya había selecciones previas (volviendo a editar), el horario del
-    // lunes pasa a ser el default, y los días con un horario distinto al
-    // del lunes quedan marcados como "override" para no pisarlos.
-    const defaultTime = (allSelections.mon && allSelections.mon.time) || '10:00';
+    // primer día pasa a ser el default, y los días con un horario distinto
+    // quedan marcados como "override" para no pisarlos.
+    const defaultTime = (allSelections[firstDayKey] && allSelections[firstDayKey].time) || '10:15';
     const timeOverridden = {};
-    DAYS.forEach(d => {
-      if (d.key !== 'mon' && allSelections[d.key] && allSelections[d.key].time && allSelections[d.key].time !== defaultTime) {
+    days.forEach(d => {
+      if (d.key !== firstDayKey && allSelections[d.key] && allSelections[d.key].time && allSelections[d.key].time !== defaultTime) {
         timeOverridden[d.key] = true;
       }
     });
 
-    const startDateStr = wx.getStorageSync('startDate') || null;
-    const days = DAYS.map(d => Object.assign({}, d, { done: false }));
-    this.setData({ fromRenewal, fromOrderSummary, selectedPlan, days, allSelections, startDateStr, defaultTime, timeOverridden });
+    this.setData({ fromRenewal, fromOrderSummary, selectedPlan, days, allSelections, defaultTime, timeOverridden });
 
     try {
       const { anchor, order } = await app.getMenuRotation();
@@ -142,17 +144,18 @@ if (fromRenewal) wx.removeStorageSync('flowContext');
       console.error('Load menu rotation error:', err);
     }
 
-    await this.loadMenu('mon');
+    await this.loadMenu(firstDayKey);
   },
 
   async loadMenu(dayKey) {
     this.setData({ loading: true, selectedMealIds: [], lastSelectedPhoto: '', lastSelectedName: '', dayConfirmed: false });
 
     try {
-      const dayLabel = DAYS.find(d => d.key === dayKey)?.label || '';
+      const { days } = this.data;
+      const dayLabel = weekdayLabelForDate(dayKey);
       const planTier = this.data.selectedPlan ? this.data.selectedPlan.tier : null;
-      const { rotationAnchor, rotationOrder, startDateStr } = this.data;
-      const weekIndex = app.getWeekIndexForDay(dayKey, rotationAnchor, rotationOrder, startDateStr);
+      const { rotationAnchor, rotationOrder } = this.data;
+      const weekIndex = app.getWeekIndexForDay(dayKey, rotationAnchor, rotationOrder);
 
       const menuQuery = planTier
         ? `day=eq.${dayLabel}&tier=eq.${planTier}&week_index=eq.${weekIndex}`
@@ -166,8 +169,8 @@ if (fromRenewal) wx.removeStorageSync('flowContext');
         meals = await app.supabase('GET', 'meal_library', null, `id=in.(${ids.join(',')})`);
       }
 
-      const dayIndex = DAYS.findIndex(d => d.key === dayKey);
-      const isLastDay = dayIndex === DAYS.length - 1;
+      const dayIndex = days.findIndex(d => d.key === dayKey);
+      const isLastDay = dayIndex === days.length - 1;
 
       // Restore existing selections for this day
       const existing = this.data.allSelections[dayKey];
@@ -189,7 +192,7 @@ if (fromRenewal) wx.removeStorageSync('flowContext');
       const maxMeals = Math.max((this.data.selectedPlan && this.data.selectedPlan.meals) || 1, 1);
       const dayConfirmed = existingMealIds.length >= maxMeals;
 
-      const days = this.data.days.map(d =>
+      const updatedDays = days.map(d =>
         d.key === dayKey ? Object.assign({}, d, { done: dayConfirmed }) : d
       );
 
@@ -211,7 +214,7 @@ if (fromRenewal) wx.removeStorageSync('flowContext');
         lastSelectedName,
         dayConfirmed,
         canGoNext: dayConfirmed,
-        days,
+        days: updatedDays,
       });
 
     } catch (err) {
@@ -281,25 +284,27 @@ if (fromRenewal) wx.removeStorageSync('flowContext');
 
   onTimeChange(e) {
     const newTime = e.detail.value;
-    const { currentDay, allSelections, timeOverridden } = this.data;
+    const { currentDay, allSelections, timeOverridden, days } = this.data;
+    const firstDayKey = days[0].key;
 
     let updatedSelections = allSelections;
     let defaultTime = this.data.defaultTime;
     let updatedOverrides = timeOverridden;
 
-    if (currentDay === 'mon') {
-      // El lunes define el horario "default": se propaga a los demás días
-      // que el usuario todavía no cambió a mano (esos quedan como están).
+    if (currentDay === firstDayKey) {
+      // El primer día elegido define el horario "default": se propaga a
+      // los demás días que el usuario todavía no cambió a mano (esos
+      // quedan como están).
       defaultTime = newTime;
       updatedSelections = Object.assign({}, allSelections);
-      DAYS.forEach(d => {
-        if (d.key !== 'mon' && !timeOverridden[d.key] && updatedSelections[d.key]) {
+      days.forEach(d => {
+        if (d.key !== firstDayKey && !timeOverridden[d.key] && updatedSelections[d.key]) {
           updatedSelections[d.key] = Object.assign({}, updatedSelections[d.key], { time: newTime });
         }
       });
     } else {
       // Cambiar el horario de otro día lo marca como override: de ahí en
-      // más, cambiar el lunes ya no le pisa el horario a este día.
+      // más, cambiar el primer día ya no le pisa el horario a este día.
       updatedOverrides = Object.assign({}, timeOverridden);
       updatedOverrides[currentDay] = true;
     }
@@ -359,16 +364,16 @@ if (fromRenewal) wx.removeStorageSync('flowContext');
 
   async goNext() {
     if (!this.data.canGoNext) return;
-    const { currentDay, isLastDay, allSelections, fromRenewal, fromOrderSummary, selectedPlan } = this.data;
+    const { currentDay, isLastDay, allSelections, fromRenewal, fromOrderSummary, selectedPlan, days } = this.data;
 
     if (isLastDay) {
       const requiredMeals = Math.max((selectedPlan && selectedPlan.meals) || 1, 1);
-      const incompleteDay = DAYS.find(d => {
+      const incompleteDay = days.find(d => {
         const sel = allSelections[d.key];
         return !sel || !sel.meal_ids || sel.meal_ids.length < requiredMeals;
       });
       if (incompleteDay) {
-        wx.showToast({ title: t('meal_select_incomplete_day', incompleteDay.label), icon: 'none' });
+        wx.showToast({ title: t('meal_select_incomplete_day', incompleteDay.short), icon: 'none' });
         return;
       }
 
@@ -392,8 +397,8 @@ if (fromRenewal) wx.removeStorageSync('flowContext');
         wx.navigateTo({ url: '/pages/register/index' });
       }
     } else {
-      const dayIndex = DAYS.findIndex(d => d.key === currentDay);
-      const nextDay = DAYS[dayIndex + 1].key;
+      const dayIndex = days.findIndex(d => d.key === currentDay);
+      const nextDay = days[dayIndex + 1].key;
       this.loadMenu(nextDay);
     }
   },
@@ -406,13 +411,60 @@ if (fromRenewal) wx.removeStorageSync('flowContext');
     wx.navigateBack();
   },
 
+  // Antes esto asumía que SIEMPRE se llega por plans → start-date →
+  // meal-select (exactamente 2 pantallas atrás, navigateBack delta:2), y
+  // solo dejaba cambiar la cantidad de comidas DENTRO del mismo tier (nunca
+  // volvía hasta tiers.js). Dejó de ser cierto en cuanto meal-select
+  // empezó a alcanzarse por otros caminos con menos niveles de por medio
+  // -- por ejemplo pagar tarde (payment.js hace redirectTo a start-date, no
+  // navigateTo, así que no queda en la pila) o una renovación. Con
+  // delta:2 en esos casos la pila no tenía 2 niveles para volver, y WeChat
+  // se quedaba corto: terminaba en start-date en vez de en plans.
+  //
+  // Primer intento: mandar siempre a tiers.js con redirectTo. Eso arregló
+  // el caso "pagar tarde" pero rompió el de renovación -- redirectTo solo
+  // reemplaza la pantalla actual (meal-select), no limpia lo que quedó
+  // debajo (tiers → plans → start-date, la instancia VIEJA, de antes de
+  // cambiar de plan). Quedaba una tiers.js nueva arriba de esa pila vieja
+  // sin tocar, y "atrás" desde ahí caía en el start-date.js enterrado en
+  // vez de en renewal.js.
+  //
+  // Ahora se usa getCurrentPages() para mirar la pila real en vez de
+  // asumir ninguna profundidad fija: si ya hay una tiers.js más abajo (alta
+  // nueva o renovación normal), se vuelve a ESA con navigateBack -- mismo
+  // "atrás" de siempre, sin duplicar pantallas. Si no hay ninguna (pagar
+  // tarde: payment.js llegó a start-date con redirectTo, tiers.js nunca
+  // estuvo en la pila), se despilan las pantallas de este mismo sub-flujo
+  // que sí haya y se entra a tiers.js de cero recién ahí.
   changePlan() {
-    // La pila es .../plans → start-date → meal-select: 2 saltos atrás
-    // devuelve directo a plans, salteando start-date.
-    wx.navigateBack({
-      delta: 2,
-      fail: () => wx.navigateBack(),
-    });
+    const { fromRenewal } = this.data;
+    if (fromRenewal) wx.setStorageSync('flowContext', 'renewal');
+
+    const FUNNEL_ROUTES = ['pages/meal-select/index', 'pages/start-date/index', 'pages/plans/index', 'pages/tiers/index'];
+    const pages = getCurrentPages();
+    let tiersIndex = -1;
+    for (let i = pages.length - 1; i >= 0; i--) {
+      if (FUNNEL_ROUTES.indexOf(pages[i].route) === -1) break;
+      if (pages[i].route === 'pages/tiers/index') tiersIndex = i;
+    }
+
+    if (tiersIndex !== -1) {
+      wx.navigateBack({ delta: (pages.length - 1) - tiersIndex });
+      return;
+    }
+
+    // No hay ningún tiers.js en la pila para volver con navigateBack (pagar
+    // tarde: payment.js llegó acá con reLaunch + redirectTo, nunca hubo
+    // tiers.js de por medio). Antes esto hacía navigateBack({delta:
+    // popCount, success/fail: entrar a tiers}) para despilar lo que sí
+    // hubiera de este sub-flujo antes de entrar -- pero wx.navigateBack NO
+    // siempre dispara success/fail (sobre todo con delta mayor a la
+    // cantidad de páginas reales, que es exactamente este caso: pila de 2
+    // por pagar tarde), así que "entrar a tiers" nunca llegaba a correr y
+    // el cliente quedaba varado en start-date. reLaunch no depende de
+    // ningún callback de navegación: cierra TODA la pila actual de una,
+    // así que no hace falta popCount para despilar nada antes.
+    wx.reLaunch({ url: fromRenewal ? '/pages/tiers/index?from=renewal' : '/pages/tiers/index' });
   },
 
   contactUs() {

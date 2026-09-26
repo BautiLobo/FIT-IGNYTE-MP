@@ -78,7 +78,8 @@
 .renewal-btn { background:transparent; border:2rpx solid #e8342a; border-radius:100rpx; padding:14rpx 28rpx; flex-shrink:0; }
 .renewal-btn-text { font-size:24rpx; font-weight:700; color:#e8342a; }
 
-/* ── CONTACT ── */
+/* ── CONTACT / MENU ── */
 .btn-wrap { width:100%; box-sizing:border-box; margin-bottom:60rpx; }
 button { margin:0 !important; padding:0 !important; background:transparent; border:none; }
 .btn-contact { background:#13131a !important; border:1rpx solid #1a1a22 !important; color:#beb6b6 !important; border-radius:20rpx !important; height:88rpx; line-height:88rpx; font-size:28rpx !important; font-weight:600 !important; width:100% !important; text-align:center; box-sizing:border-box; display:block; }
+.btn-pdf { background:rgba(167,139,250,0.12) !important; border:2rpx solid #e8342a !important; border-radius:24rpx !important; height:92rpx; line-height:92rpx; color:#e8342a !important; font-size:30rpx !important; font-weight:800 !important; width:100% !important; text-align:center; box-sizing:border-box; display:block; margin-bottom:16rpx !important; }

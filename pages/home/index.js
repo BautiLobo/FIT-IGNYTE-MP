@@ -1,15 +1,10 @@
 // pages/home/index.js
 const app = getApp();
 const t = require('../../i18n/index');
+const { toDateString } = require('../../utils/business-days');
+const { formatShortDate } = require('../../utils/date-format');
 
 const _isZh = (wx.getAppBaseInfo().language || '').startsWith('zh');
-const DAYS = [
-  { key: 'mon', short: _isZh ? '周一' : 'MON', full: 'Monday', idx: 1 },
-  { key: 'tue', short: _isZh ? '周二' : 'TUE', full: 'Tuesday', idx: 2 },
-  { key: 'wed', short: _isZh ? '周三' : 'WED', full: 'Wednesday', idx: 3 },
-  { key: 'thu', short: _isZh ? '周四' : 'THU', full: 'Thursday', idx: 4 },
-  { key: 'fri', short: _isZh ? '周五' : 'FRI', full: 'Friday', idx: 5 },
-];
 
 Page({
   data: {
@@ -30,6 +25,7 @@ Page({
     lbl_this_weeks_meals: '',
     lbl_edit: '',
     lbl_contact: '',
+    lbl_view_menu: '',
     lbl_renewal_title: '',
     lbl_renewal_sub: '',
     lbl_renewal_btn: '',
@@ -45,6 +41,7 @@ Page({
       lbl_this_weeks_meals: t('home_this_weeks_meals'),
       lbl_edit: t('home_edit'),
       lbl_contact: t('home_contact'),
+      lbl_view_menu: t('home_view_menu'),
       lbl_renewal_title: t('home_renewal_title'),
       lbl_renewal_btn: t('home_renewal_btn'),
       lbl_renewal_pending_title: t('home_renewal_pending_title'),
@@ -102,13 +99,6 @@ Page({
 
       const client = data[0];
 
-      if (client.plan_id) {
-        const planData = await app.supabase('GET', 'plans', null, `id=eq.${client.plan_id}`);
-        if (planData && planData.length > 0) {
-          client.plan_name = app.getMealName(planData[0]);
-        }
-      }
-
       const firstName = client.name ? client.name.split(' ')[0] : 'there';
       const daysLeft = this.getDaysLeft(client.expiry_date);
       const realStatus = app.getRealStatus(client.start_date, client.expiry_date);
@@ -136,23 +126,45 @@ Page({
       const isUpcoming = realStatus === 'Upcoming' || inRenewalGap;
       const effectiveStartDate = inRenewalGap ? pendingRenewal.start_date : client.start_date;
 
+      // El nombre de plan a mostrar tiene que ser el del ciclo que este
+      // texto describe: en el hueco eso es el ciclo nuevo (pending_renewal),
+      // no client.plan_id -- ese sigue siendo el plan VIEJO hasta que el
+      // cron aplica el cambio. Mismo criterio que edit-meals.js.
+      const planIdToShow = (inRenewalGap && pendingRenewal.plan_id) ? pendingRenewal.plan_id : client.plan_id;
+      if (planIdToShow) {
+        const planData = await app.supabase('GET', 'plans', null, `id=eq.${planIdToShow}`);
+        if (planData && planData.length > 0) {
+          client.plan_name = app.getMealName(planData[0]);
+        }
+      }
+
       const selectionsTable = inRenewalGap ? 'pending_meal_selections' : 'meal_selections';
-      const selectionsData = await app.supabase('GET', selectionsTable, null, `client_id=eq.${clientId}&order=day.asc,slot.asc`);
-      const selections = selectionsData || [];
+      const selectionsData = await app.supabase('GET', selectionsTable, null, `client_id=eq.${clientId}&order=delivery_date.asc,slot.asc`);
+      // Acotar al ciclo vigente. `meal_selections` puede tener filas de otro
+      // ciclo: un cliente con una renovación anticipada ya paga, o slots
+      // cargados desde el panel para fechas posteriores a su expiry. Sin
+      // esto, "This week's meals" listaba entregas que no son de esta
+      // semana -- el caso visto: ciclo 15→21 sept mostrando también el 23.
+      //
+      // `pending_meal_selections` no necesita filtro: se vacía al aplicarse,
+      // así que todo lo que tiene pertenece al ciclo que todavía no arrancó.
+      const selections = inRenewalGap
+        ? (selectionsData || [])
+        : (selectionsData || []).filter((s) => (
+            (!client.start_date || s.delivery_date >= client.start_date) &&
+            (!client.expiry_date || s.delivery_date <= client.expiry_date)
+          ));
 
-      // Determinar qué día le corresponde "hoy" dentro del plan, basado en start_date
-      const planDayKey = this.getPlanDayKey(client.start_date, client.expiry_date);
-
-      const weekMeals = await this.buildWeekMeals(selections, planDayKey);
+      const weekMeals = await this.buildWeekMeals(selections);
       const todayDelivery = this.getTodayDelivery(weekMeals);
 
+      // effectiveStartDate ya es siempre una fecha real de entrega elegida
+      // en el calendario (ver pages/start-date) -- nunca cae en fin de
+      // semana ni feriado, así que no hace falta correrla al lunes más
+      // próximo como en el viejo modelo "5 días corridos".
       let startDateFormatted = '';
       if (isUpcoming && effectiveStartDate) {
-        const d = new Date(effectiveStartDate + 'T00:00:00');
-        const dow = d.getDay();
-        if (dow === 6) d.setDate(d.getDate() + 2);
-        if (dow === 0) d.setDate(d.getDate() + 1);
-        startDateFormatted = this.formatFullDate(d);
+        startDateFormatted = this.formatFullDate(new Date(effectiveStartDate + 'T00:00:00'));
       }
 
       const realToday = new Date().getDay();
@@ -206,34 +218,18 @@ Page({
     }
   },
 
-  // Devuelve la key del próximo día de entrega dentro del ciclo del plan.
-  // Si hoy es lunes-viernes y está dentro del plan → hoy.
-  // Si hoy es sábado o domingo → el lunes próximo (si cae dentro del plan).
-  getPlanDayKey(startDateStr, expiryDateStr) {
-    const dowToKey = { 1: 'mon', 2: 'tue', 3: 'wed', 4: 'thu', 5: 'fri' };
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const dow = today.getDay();
-
-    // Encontrar el próximo día hábil (hoy si ya es semana, si no el lunes siguiente)
-    let candidate = new Date(today);
-    if (dow === 6) candidate.setDate(today.getDate() + 2); // sábado → lunes
-    if (dow === 0) candidate.setDate(today.getDate() + 1); // domingo → lunes
-
-    if (startDateStr && expiryDateStr) {
-      const start = new Date(startDateStr + 'T00:00:00');
-      const expiry = new Date(expiryDateStr + 'T00:00:00');
-      if (candidate < start || candidate > expiry) return null;
-    }
-
-    return dowToKey[candidate.getDay()] || null;
-  },
-
-  async buildWeekMeals(selections, planDayKey) {
-    const dayLabelMap = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday' };
+  // "Hoy" es la fila cuyo `delivery_date` coincide con la fecha de hoy.
+  // Filas con delivery_date NULL (legacy, sin fecha resoluble todavía) no
+  // se pueden ubicar en el calendario y se omiten.
+  async buildWeekMeals(selections) {
+    const todayStr = toDateString(new Date());
+    const sorted = selections
+      .filter(s => s.slot === 1 && s.delivery_date)
+      .slice()
+      .sort((a, b) => (a.delivery_date < b.delivery_date ? -1 : 1));
 
     const allIds = [];
-    selections.forEach(s => {
+    sorted.forEach(s => {
       if (s.meals_json) s.meals_json.forEach(id => { if (id && !allIds.includes(id)) allIds.push(id); });
     });
 
@@ -243,10 +239,8 @@ Page({
       (meals || []).forEach(m => { mealMap[m.id] = m; });
     }
 
-    return DAYS.map(d => {
-      const dayLabel = dayLabelMap[d.key];
-      const row = selections.find(s => s.day === dayLabel && s.slot === 1);
-      const mealIds = row ? (row.meals_json || []) : [];
+    return sorted.map(row => {
+      const mealIds = row.meals_json || [];
       // `key` combina id + posición: un cliente puede elegir la misma
       // comida más de una vez en el mismo día (2 porciones), así que el
       // nombre solo no alcanza como wx:key único en el wxml.
@@ -255,9 +249,17 @@ Page({
         return { name: app.getMealName(mealMap[id]), key: `${id}_${i}` };
       }).filter(Boolean);
       const photo = mealIds.length > 0 && mealMap[mealIds[0]] ? mealMap[mealIds[0]].photo_url || '' : '';
-      const time = row ? row.delivery_time : '';
-      const isToday = d.key === planDayKey;
-      return { day: d.full, dayShort: d.short, mealNames, time, isToday, photo };
+      return {
+        day: row.delivery_date,
+        // Un cliente puede tener más de una entrega el mismo día (slots),
+        // así que la fecha sola no alcanza como wx:key único.
+        key: `${row.delivery_date}#${row.slot}`,
+        dayShort: formatShortDate(row.delivery_date, _isZh ? 'zh' : 'en'),
+        mealNames,
+        time: row.delivery_time || '',
+        isToday: row.delivery_date === todayStr,
+        photo,
+      };
     });
   },
 
@@ -301,6 +303,10 @@ Page({
 
   goToRenewal() {
     wx.navigateTo({ url: '/pages/renewal/index' });
+  },
+
+  viewMenu() {
+    app.openBrochure();
   },
 
   onShareAppMessage() {

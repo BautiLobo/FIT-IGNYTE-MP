@@ -50,7 +50,7 @@ Deno.serve(async (req: Request) => {
       await Promise.all(rows.map(async (row: any) => {
         if (!row || row.id === undefined) return;
         const payRes = await fetch(
-          `${supabaseUrl}/rest/v1/payments?client_id=eq.${row.id}&status=eq.paid&applied=eq.false&select=start_date,out_trade_no&order=paid_at.desc&limit=1`,
+          `${supabaseUrl}/rest/v1/payments?client_id=eq.${row.id}&status=eq.paid&applied=eq.false&select=start_date,out_trade_no,plan_id&order=paid_at.desc&limit=1`,
           { headers: dbHeaders },
         );
         const payRows = await payRes.json();
