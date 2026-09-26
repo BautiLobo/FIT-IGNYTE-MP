@@ -55,6 +55,23 @@ Deno.serve(async (req: Request) => {
         );
         const payRows = await payRes.json();
         row.pending_renewal = (payRows && payRows.length > 0) ? payRows[0] : null;
+
+        // Última entrega real del ciclo vigente. En prod conviven dos
+        // convenciones de expiry_date: la vieja guarda el lunes en que
+        // arranca la semana siguiente (última entrega el viernes antes), la
+        // nueva guarda el día de la última entrega. La primera fecha de una
+        // renovación sale de acá, no de expiry_date, para que las dos den el
+        // mismo resultado. Acotado a [start_date, expiry_date]: filas de un
+        // ciclo anterior no pueden adelantar la renovación.
+        row.last_delivery_date = null;
+        if (row.start_date && row.expiry_date) {
+          const lastRes = await fetch(
+            `${supabaseUrl}/rest/v1/meal_selections?client_id=eq.${row.id}&delivery_date=gte.${row.start_date}&delivery_date=lte.${row.expiry_date}&select=delivery_date&order=delivery_date.desc&limit=1`,
+            { headers: dbHeaders },
+          );
+          const lastRows = await lastRes.json();
+          if (Array.isArray(lastRows) && lastRows.length > 0) row.last_delivery_date = lastRows[0].delivery_date;
+        }
       }));
     }
 

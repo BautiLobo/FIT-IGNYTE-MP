@@ -81,6 +81,15 @@ function getMinStartDate({ currentExpiryDate } = {}) {
   return toDateString(min);
 }
 
+// Fecha contra la que se mide "el ciclo actual termina" al renovar: la
+// última entrega real (get-client la calcula) y no expiry_date, que en
+// clientes del sistema viejo es el lunes en que arranca la semana siguiente.
+// Con esa convención, usar expiry_date saltaba el lunes de continuidad.
+function renewalCycleEnd(client) {
+  if (!client) return null;
+  return client.last_delivery_date || client.expiry_date || null;
+}
+
 // The N valid delivery dates (business days, skipping weekends/holidays)
 // starting at minDateStr itself (included if it's already a business day).
 // Used to paint the calendar day-picker and to bound its selectable window
@@ -135,6 +144,7 @@ module.exports = {
   getNextBusinessDay,
   addBusinessDays,
   getMinStartDate,
+  renewalCycleEnd,
   shanghaiNow,
   getValidDeliveryWindow,
   getBusinessDayOffsets,

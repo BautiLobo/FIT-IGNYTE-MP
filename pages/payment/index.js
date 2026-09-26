@@ -1,6 +1,6 @@
 // pages/payment/index.js
 const app = getApp();
-const { getMinStartDate, getValidDeliveryWindow } = require('../../utils/business-days');
+const { getMinStartDate, getValidDeliveryWindow, renewalCycleEnd } = require('../../utils/business-days');
 const t = require('../../i18n/index');
 
 Page({
@@ -141,7 +141,7 @@ Page({
       : wx.getStorageSync('startDate');
     if (storedStart && !fromRenewal) wx.setStorageSync('startDate', storedStart);
     if (storedStart) {
-      const liveMin = getMinStartDate({ currentExpiryDate: fromRenewal && client ? client.expiry_date : null });
+      const liveMin = getMinStartDate({ currentExpiryDate: fromRenewal ? renewalCycleEnd(client) : null });
       if (storedStart < liveMin) {
         if (fromRenewal) {
           // Las fechas quedaron viejas: se vuelve a elegirlas y, con ellas,
@@ -303,7 +303,7 @@ Page({
       // el cliente abre esta pantalla 22:58 y toca Pagar 23:05, la fecha que
       // tiene guardada ya no es valida y el pago se creaba igual.
       const liveMin = getMinStartDate({
-        currentExpiryDate: fromRenewal && client.expiry_date ? client.expiry_date : null,
+        currentExpiryDate: fromRenewal ? renewalCycleEnd(client) : null,
       });
       if (startDate < liveMin) {
         wx.hideLoading();

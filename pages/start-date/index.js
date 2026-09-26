@@ -8,6 +8,7 @@ const {
   toDateString,
   getValidDeliveryWindow,
   deriveRenewalDates,
+  renewalCycleEnd,
 } = require('../../utils/business-days');
 const t = require('../../i18n/index');
 
@@ -78,7 +79,7 @@ Page({
         if (clientId) {
           const data = await app.getClient({ clientId });
           const client = data && data[0];
-          if (client && client.expiry_date) currentExpiryDate = client.expiry_date;
+          currentExpiryDate = renewalCycleEnd(client);
 
           const rows = await app.supabase('GET', 'meal_selections', null, `client_id=eq.${clientId}&order=delivery_date.asc`);
           const dates = Array.from(new Set((rows || []).map((r) => r.delivery_date).filter(Boolean))).sort();

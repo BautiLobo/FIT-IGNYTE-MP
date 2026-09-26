@@ -265,7 +265,24 @@ Deno.serve(async (req: Request) => {
     // renovacion no puede arrancar antes del dia siguiente a su expiry.
     if (validateDates) {
       const holidays = await loadHolidays(supabaseUrl, dbHeaders);
-      const minStart = getMinStartDate(holidays, type === 'renewal' ? client.expiry_date : null);
+      // Una renovación arranca después de la ÚLTIMA ENTREGA real del ciclo
+      // vigente, no de expiry_date: en clientes del sistema viejo expiry_date
+      // es el lunes en que arranca la semana siguiente, y medir desde ahí
+      // rechazaba justo ese lunes. Mismo cálculo que get-client
+      // (last_delivery_date); sin entregas en el ciclo, se usa expiry_date.
+      let cycleEnd: string | null = null;
+      if (type === 'renewal') {
+        cycleEnd = client.expiry_date || null;
+        if (client.start_date && client.expiry_date) {
+          const lastRes = await fetch(
+            `${supabaseUrl}/rest/v1/meal_selections?client_id=eq.${clientId}&delivery_date=gte.${client.start_date}&delivery_date=lte.${client.expiry_date}&select=delivery_date&order=delivery_date.desc&limit=1`,
+            { headers: dbHeaders },
+          );
+          const lastRows = await lastRes.json();
+          if (Array.isArray(lastRows) && lastRows.length > 0) cycleEnd = lastRows[0].delivery_date;
+        }
+      }
+      const minStart = getMinStartDate(holidays, cycleEnd);
       if (startDate < minStart) {
         return json({ error: 'start_date_too_early', minStartDate: minStart, sent: startDate }, 409);
       }
