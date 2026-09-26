@@ -177,6 +177,42 @@ Hallazgos de ese día:
   `20260928000000_drop_day_unique.sql` — va DESPUÉS del panel nuevo (el
   viejo depende de él) y ANTES del mini-program.
 
+### ✅ MIGRACIÓN COMPLETA — mini-program nuevo publicado (2026-09-27, ~05:30 Shanghai)
+
+Todo en producción: Fase 1 + migraciones 20260926/27/28, las Edge
+Functions (prod == `main` en código, verificado función por función; dev
+difiere solo en comentarios), panel (`approveOrder` para la app vieja,
+Meal Selections y Delivery Sheet con tabs de a 10 días) y el mini-program.
+Primer pedido de la app nueva en prod: #297 (claves ISO). Sin errores en
+logs tras publicar.
+
+Cambios de la última parte, después del paso 5:
+- **Dos convenciones de `expiry_date` en prod**: la vieja guarda el lunes
+  en que arranca la semana siguiente (47 clientes al 2026-09-27, última
+  entrega el viernes antes); la nueva, el día de la última entrega. La
+  primera fecha de una renovación ahora se mide desde la **última entrega
+  real** (`get-client` expone `last_delivery_date`, acotada a
+  [start_date, expiry_date]; `start-date`, `payment` y `create-payment` la
+  usan). Sin esto, la app nueva saltaba el lunes de continuidad.
+- `create-payment` valida fechas solo con `appVersion >= 2` (la app vieja
+  no maneja esos 409). `delete-pending-client` exige código de `wx.login`
+  y que el openid coincida.
+- Meal Selections muestra solo clientes con entrega ese día (el resto a
+  pedido); Meal Selections y Delivery Sheet usan `DateWindowTabs`.
+- Se trabaja directo sobre `main`/`master` (sin ramas `dev`). **Push a
+  `master` del panel publica a prod en Vercel.**
+
+Pendiente, sin apuro:
+1. `supabase migration repair` en prod: las migraciones quedaron
+   registradas con versiones distintas a los archivos (se aplicaron por
+   MCP). **No correr `supabase db push` contra prod** hasta alinearlo.
+2. Borrar `dev-simulate-payment` de prod (apagada por secret en `false`).
+3. Pagos huérfanos #220 y #240 (clientes borrados) que el cron reintenta.
+4. Cliente de prueba #368 con 5 pendientes sin fecha: se deja así.
+5. **Fase 6** (semanas): borrar `day` + triggers de sincronización cuando
+   no quede nadie con la app vieja. Antes, revisar que nada lea `day` de
+   `meal_selections` (la tabla `menu` tiene su propio `day`, no se toca).
+
 ### Avance en producción (2026-09-27, ~00:45 Shanghai)
 - ✅ **Paso 1** (`20260927`) aplicado: trigger activo, 0 filas desfasadas.
 - ✅ **Paso 2** (`20260926`) aplicado. Se le agregó
