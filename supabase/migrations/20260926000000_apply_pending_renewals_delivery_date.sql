@@ -9,6 +9,11 @@
 -- Tambien trae a produccion la rama que lee payments.selections (las comidas
 -- elegidas al pagar), que hasta ahora existia solo en dev.
 
+-- Las comidas elegidas al pagar viajan en la fila del pago. En dev esta
+-- columna se habia agregado a mano (nunca estuvo en una migracion); sin ella
+-- la funcion de abajo falla en runtime para TODAS las renovaciones.
+alter table payments add column if not exists selections jsonb;
+
 create or replace function public.apply_pending_renewals()
 returns table(out_client_id integer, out_trade_no text, ok boolean, error_message text)
 language plpgsql

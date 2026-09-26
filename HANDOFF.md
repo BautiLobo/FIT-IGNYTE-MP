@@ -147,9 +147,70 @@ se tocó.
   transacción con rollback: aplica plan/expiry nuevos y las 5 fechas
   intactas, vacía pendientes, notifica. El ciclo de `#36` se ajustó a mano
   para poder renovar; el cron de dev aplica la renovación real el 29/9.
-- **Siguiente**: el usuario revisa/mergea `dev` y `migration-dev`; después
-  prod, cada paso con OK aparte: migración 20260926 → 3 Edge Functions →
-  panel → mini-program (restaurar `config.js` en `miniprogram-1`).
+- Ramas `dev` y `migration-dev` mergeadas por el usuario (2026-09-27).
+
+### 🔴 Incidente 2026-09-27: el panel nuevo salió solo a producción
+
+Vercel (proyecto `fit-ignyte`) despliega `master` a producción
+automáticamente: el merge de `migration-dev` publicó el panel nuevo antes
+de las migraciones. El panel nuevo **no podía aprobar pedidos de la app
+vieja** (`order.meals` con claves `mon..fri`, las tomaba como fechas).
+Nadie llegó a sufrirlo (0 pedidos pendientes). El usuario hizo Instant
+Rollback a `93bc313`; el proyecto quedó con `live: false` → **los próximos
+merges a `master` NO se publican solos, hay que promoverlos a mano en
+Vercel**. Verificado con un pedido real de prueba (#295, borrado) que el
+flujo viejo aprueba bien con la Fase 1 aplicada.
+
+Hallazgos de ese día:
+- **`approveOrder` arreglado** (`FIT-IGNYTE-dev`): claves ISO → escribe
+  `delivery_date`; claves `mon..fri` → escribe solo `day` (como el panel
+  viejo) y deja que el trigger derive la fecha. Probado en dev (#23).
+- **`delivery_date` se desfasaba** con la app vieja: se escribe al aprobar
+  con `start_date` provisorio y nadie la recalculaba al pagar. Migración
+  `20260927000000_resync_delivery_date_on_start_change.sql`: trigger en
+  `clients` que re-deriva las filas calculadas desde el start viejo + un
+  recálculo único (0 filas desfasadas al 2026-09-27; NO correrlo después
+  de publicar la app nueva, ni en dev). Trigger probado en dev.
+- **Prod SÍ tiene `UNIQUE(client_id, day, slot)`** (lo de "no existe" de
+  la sesión 2026-09-18 estaba mal; dev no lo tiene, por eso los tests
+  pasaron). Con ese índice los "dos lunes" fallan. Migración
+  `20260928000000_drop_day_unique.sql` — va DESPUÉS del panel nuevo (el
+  viejo depende de él) y ANTES del mini-program.
+
+### Avance en producción (2026-09-27, ~00:45 Shanghai)
+- ✅ **Paso 1** (`20260927`) aplicado: trigger activo, 0 filas desfasadas.
+- ✅ **Paso 2** (`20260926`) aplicado. Se le agregó
+  `alter table payments add column if not exists selections jsonb`: en dev
+  la columna existía (agregada a mano, nunca en una migración) y en prod
+  NO — sin ella la función nueva habría fallado en TODAS las renovaciones.
+  Diff completo de schema dev vs prod hecho: era la única diferencia.
+  Código de las 3 funciones idéntico a dev (hash). Dry-run con rollback OK.
+- ✅ **Paso 3**: desplegado por el usuario (el clasificador de permisos no
+  deja a Claude hacer deploys a prod). `complete-payment` v19,
+  `wx-notify-cron` v23, `save-meal-selections` v1 (`verify_jwt` true);
+  bundles idénticos (hash) a los probados en dev.
+- ✅ **Paso 4**: `migration-dev` mergeado (`8ee3403`) y promovido por el
+  usuario en Vercel. Verificado en el JS servido por
+  `fit-ignyte.vercel.app`: incluye el arreglo de `approveOrder`. La
+  promoción automática desde `master` vuelve a estar activa.
+- ✅ **Paso 5** (`20260928`) aplicado (respuesta `success`). La consulta de
+  verificación fue bloqueada por el clasificador — confirmar a mano que
+  solo queden los UNIQUE `..._client_delivery_slot_key`. Antes de aplicarlo
+  se verificó que la app publicada no usa `on_conflict` (escribe con
+  GET→PATCH/POST), así que no dependía del índice.
+- Nota aparte: 2 pagos huérfanos `paid/applied=false` de clientes borrados
+  (#220 y #240, agosto) — el cron los reintenta cada día y falla por FK de
+  `notifications`. Inofensivo; limpiar cuando se decida.
+
+### Orden a producción (cada paso con OK aparte)
+1. Migración `20260927` (trigger + recálculo único).
+2. Migración `20260926` (`apply_pending_renewals` + backfill en `payments`).
+3. Deploy de `complete-payment`, `wx-notify-cron`, `save-meal-selections`.
+4. Panel: mergear el arreglo de `approveOrder` → **promover a mano en
+   Vercel** (lo hace el usuario; Claude no tiene permiso de deploy a prod).
+5. Migración `20260928` (drop del UNIQUE de `day`).
+6. Mini-program: `git pull` en `miniprogram-1`, confirmar `config.js` a
+   prod, subir, publicar. **No hacer `git pull` ahí antes del paso 5.**
 - **Mini-program**: `edit-meals`, `home`, `welcome`, `start-date` leen
   `delivery_date` y omiten filas NULL.
 - **Panel admin** (`FIT-IGNYTE-dev/src/lib/supabase.js`): lecturas,
