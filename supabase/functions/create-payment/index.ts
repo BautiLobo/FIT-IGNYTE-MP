@@ -199,17 +199,26 @@ Deno.serve(async (req: Request) => {
   try {
     const {
       type, clientId, pendingOrderId, planId,
-      startDate, expiryDate, cutlery, referralCode, selections,
+      startDate, expiryDate, cutlery, referralCode, selections, appVersion,
     } = await req.json();
 
     if (!type || !clientId || !planId || !startDate || !expiryDate) {
       return json({ error: 'Missing required fields' }, 400);
     }
-    if (!ISO_DATE.test(startDate) || !ISO_DATE.test(expiryDate)) {
-      return json({ error: 'startDate/expiryDate must be YYYY-MM-DD' }, 400);
-    }
-    if (expiryDate < startDate) {
-      return json({ error: 'expiryDate cannot be before startDate' }, 400);
+
+    // La validacion de fechas solo aplica a la version nueva del mini-program,
+    // que sabe manejar estos 409 (re-elegir fecha). La vieja no los maneja: un
+    // cliente que paga tarde se quedaba trabado en un error generico, y esa
+    // version sigue en celulares con el paquete cacheado dias despues de
+    // publicar. Con la vieja se comporta como antes.
+    const validateDates = Number(appVersion) >= 2;
+    if (validateDates) {
+      if (!ISO_DATE.test(startDate) || !ISO_DATE.test(expiryDate)) {
+        return json({ error: 'startDate/expiryDate must be YYYY-MM-DD' }, 400);
+      }
+      if (expiryDate < startDate) {
+        return json({ error: 'expiryDate cannot be before startDate' }, 400);
+      }
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -254,17 +263,19 @@ Deno.serve(async (req: Request) => {
     // Corte de las 23 (hora de China) y dia habil, validados aca y no solo
     // en el cliente. Se hace despues de traer al cliente porque una
     // renovacion no puede arrancar antes del dia siguiente a su expiry.
-    const holidays = await loadHolidays(supabaseUrl, dbHeaders);
-    const minStart = getMinStartDate(holidays, type === 'renewal' ? client.expiry_date : null);
-    if (startDate < minStart) {
-      return json({ error: 'start_date_too_early', minStartDate: minStart, sent: startDate }, 409);
-    }
-    // No alcanza con estar despues del minimo: la fecha tiene que ser un dia
-    // de reparto. El calendario del cliente ya saltea findes y feriados, pero
-    // el servidor no puede confiar en eso -- sin este chequeo se podia pagar
-    // un plan que arranca un domingo o en pleno Mid-Autumn.
-    if (isNonWorkingDay(new Date(startDate + 'T00:00:00Z'), holidays)) {
-      return json({ error: 'start_date_not_a_delivery_day', sent: startDate }, 409);
+    if (validateDates) {
+      const holidays = await loadHolidays(supabaseUrl, dbHeaders);
+      const minStart = getMinStartDate(holidays, type === 'renewal' ? client.expiry_date : null);
+      if (startDate < minStart) {
+        return json({ error: 'start_date_too_early', minStartDate: minStart, sent: startDate }, 409);
+      }
+      // No alcanza con estar despues del minimo: la fecha tiene que ser un dia
+      // de reparto. El calendario del cliente ya saltea findes y feriados, pero
+      // el servidor no puede confiar en eso -- sin este chequeo se podia pagar
+      // un plan que arranca un domingo o en pleno Mid-Autumn.
+      if (isNonWorkingDay(new Date(startDate + 'T00:00:00Z'), holidays)) {
+        return json({ error: 'start_date_not_a_delivery_day', sent: startDate }, 409);
+      }
     }
 
     // Fee de delivery: ya no es un constante global -- lo define el admin

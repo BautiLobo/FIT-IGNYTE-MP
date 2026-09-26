@@ -325,23 +325,34 @@ App({
   // payment.js, junto con deleteOrder, cuando approveOrder ya creó la fila
   // en `clients` antes de que el usuario pagara. El servidor solo lo permite
   // si el cliente sigue en 'Pending Payment' (ver comentario en la Edge Function).
+  // El servidor exige un código fresco de wx.login y resuelve el openid del
+  // lado de WeChat: solo el dueño del cliente puede borrarlo.
   deleteClient({ clientId }) {
     return new Promise((resolve, reject) => {
-      wx.request({
-        url: `${config.SUPABASE_URL}/functions/v1/delete-pending-client`,
-        method: 'POST',
-        header: { 'Content-Type': 'application/json' },
-        data: { clientId },
-        success: (res) => {
-          if (res.statusCode >= 200 && res.statusCode < 300) {
-            resolve(res.data);
-          } else {
-            console.error('[deleteClient] failed:', res.statusCode, res.data);
-            reject(new Error(`deleteClient error: ${JSON.stringify(res.data)}`));
-          }
+      wx.login({
+        success: (loginRes) => {
+          if (!loginRes.code) { reject(new Error('deleteClient: wx.login sin code')); return; }
+          wx.request({
+            url: `${config.SUPABASE_URL}/functions/v1/delete-pending-client`,
+            method: 'POST',
+            header: { 'Content-Type': 'application/json' },
+            data: { clientId, code: loginRes.code },
+            success: (res) => {
+              if (res.statusCode >= 200 && res.statusCode < 300) {
+                resolve(res.data);
+              } else {
+                console.error('[deleteClient] failed:', res.statusCode, res.data);
+                reject(new Error(`deleteClient error: ${JSON.stringify(res.data)}`));
+              }
+            },
+            fail: (err) => {
+              console.error('[deleteClient] network error:', err);
+              reject(err);
+            }
+          });
         },
         fail: (err) => {
-          console.error('[deleteClient] network error:', err);
+          console.error('[deleteClient] wx.login error:', err);
           reject(err);
         }
       });
@@ -357,7 +368,9 @@ App({
         url: `${config.SUPABASE_URL}/functions/v1/create-payment`,
         method: 'POST',
         header: { 'Content-Type': 'application/json' },
-        data: { type, clientId, pendingOrderId, planId, startDate, expiryDate, cutlery, referralCode, selections },
+        // appVersion: create-payment solo valida fechas server-side para esta
+        // versión, que sabe manejar esos 409 (la vieja no).
+        data: { type, clientId, pendingOrderId, planId, startDate, expiryDate, cutlery, referralCode, selections, appVersion: 2 },
         success: (res) => {
           if (res.statusCode >= 200 && res.statusCode < 300 && res.data && res.data.ok) {
             resolve(res.data);
