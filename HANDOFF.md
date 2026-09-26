@@ -177,6 +177,20 @@ Hallazgos de ese día:
   `20260928000000_drop_day_unique.sql` — va DESPUÉS del panel nuevo (el
   viejo depende de él) y ANTES del mini-program.
 
+### Avance en producción (2026-09-27, ~00:45 Shanghai)
+- ✅ **Paso 1** (`20260927`) aplicado: trigger activo, 0 filas desfasadas.
+- ✅ **Paso 2** (`20260926`) aplicado. Se le agregó
+  `alter table payments add column if not exists selections jsonb`: en dev
+  la columna existía (agregada a mano, nunca en una migración) y en prod
+  NO — sin ella la función nueva habría fallado en TODAS las renovaciones.
+  Diff completo de schema dev vs prod hecho: era la única diferencia.
+  Código de las 3 funciones idéntico a dev (hash). Dry-run con rollback OK.
+- ⏳ **Paso 3**: bloqueado para Claude por el clasificador de permisos
+  (deploy a prod). Lo corre el usuario.
+- Nota aparte: 2 pagos huérfanos `paid/applied=false` de clientes borrados
+  (#220 y #240, agosto) — el cron los reintenta cada día y falla por FK de
+  `notifications`. Inofensivo; limpiar cuando se decida.
+
 ### Orden a producción (cada paso con OK aparte)
 1. Migración `20260927` (trigger + recálculo único).
 2. Migración `20260926` (`apply_pending_renewals` + backfill en `payments`).
