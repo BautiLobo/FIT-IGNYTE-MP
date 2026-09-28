@@ -554,7 +554,7 @@ App({
           return;
         }
         wx.downloadFile({
-          url,
+          url: this.proxyUrl(url),
           success: (res) => {
             wx.openDocument({
               filePath: res.tempFilePath,
@@ -763,6 +763,17 @@ App({
     return plan;
   },
 
+  // En China el firewall corta *.supabase.co, asi que config.SUPABASE_URL
+  // apunta al proxy (api.fitignyte.com). Las fotos del menu y los folletos
+  // estan guardados en la DB como URLs completas de supabase.co: aca se les
+  // cambia el host por el del proxy. Se hace en el cliente y no en la DB
+  // para que las versiones viejas de la app sigan andando igual. Si
+  // SUPABASE_URL es un *.supabase.co (config.dev.js) no se toca nada.
+  proxyUrl(url) {
+    if (!url || /\.supabase\.co\/?$/.test(config.SUPABASE_URL)) return url;
+    return url.replace(/^https:\/\/[a-z0-9]+\.supabase\.co/, config.SUPABASE_URL);
+  },
+
   supabase(method, table, body, query) {
     return new Promise((resolve, reject) => {
       let url = `${config.SUPABASE_URL}/rest/v1/${table}`;
@@ -784,6 +795,9 @@ App({
         data: body ? JSON.stringify(body) : undefined,
         success: (res) => {
           if (res.statusCode >= 200 && res.statusCode < 300) {
+            if (table === 'meal_library' && Array.isArray(res.data)) {
+              res.data.forEach((m) => { if (m.photo_url) m.photo_url = this.proxyUrl(m.photo_url); });
+            }
             resolve(res.data);
           } else {
             console.error(`[supabase] ${method} ${table} failed:`, res.statusCode, res.data);
