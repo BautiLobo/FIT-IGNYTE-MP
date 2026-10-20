@@ -362,7 +362,7 @@ App({
   // ── CREATE PAYMENT (vía Edge Function create-payment) ────────────
   // Crea la orden JSAPI real en WeChat Pay y devuelve los parámetros
   // firmados listos para pasarle directo a wx.requestPayment().
-  createPayment({ type, clientId, pendingOrderId, planId, startDate, expiryDate, cutlery, referralCode, selections }) {
+  createPayment({ type, clientId, pendingOrderId, planId, startDate, expiryDate, cutlery, referralCode, discountCode, selections }) {
     return new Promise((resolve, reject) => {
       wx.request({
         url: `${config.SUPABASE_URL}/functions/v1/create-payment`,
@@ -370,7 +370,7 @@ App({
         header: { 'Content-Type': 'application/json' },
         // appVersion: create-payment solo valida fechas server-side para esta
         // versión, que sabe manejar esos 409 (la vieja no).
-        data: { type, clientId, pendingOrderId, planId, startDate, expiryDate, cutlery, referralCode, selections, appVersion: 2 },
+        data: { type, clientId, pendingOrderId, planId, startDate, expiryDate, cutlery, referralCode, discountCode, selections, appVersion: 2 },
         success: (res) => {
           if (res.statusCode >= 200 && res.statusCode < 300 && res.data && res.data.ok) {
             resolve(res.data);
@@ -390,6 +390,14 @@ App({
         }
       });
     });
+  },
+
+  // ── CHECK DISCOUNT CODE (código de un solo uso, solo renovación) ──
+  // La tabla discount_codes no se lee directo (con la anon key se podrían
+  // listar todos): la RPC devuelve solo este código, y solo si sigue sin
+  // usar. El monto real lo vuelve a calcular create-payment.
+  checkDiscountCode(code) {
+    return this.supabase('POST', 'rpc/check_discount_code', { p_code: code });
   },
 
   // ── SIMULATE PAYMENT (solo dev/local, ver config.js) ─────────────

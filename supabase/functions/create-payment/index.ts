@@ -8,7 +8,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 // {
 //   type: 'new' | 'renewal',
 //   clientId, pendingOrderId?, planId,
-//   startDate, expiryDate, cutlery?, referralCode?
+//   startDate, expiryDate, cutlery?, referralCode?, discountCode?
 // }
 //
 // Secrets requeridos (Project Settings -> Edge Functions -> Secrets):
@@ -199,7 +199,7 @@ Deno.serve(async (req: Request) => {
   try {
     const {
       type, clientId, pendingOrderId, planId,
-      startDate, expiryDate, cutlery, referralCode, selections, appVersion,
+      startDate, expiryDate, cutlery, referralCode, discountCode, selections, appVersion,
     } = await req.json();
 
     if (!type || !clientId || !planId || !startDate || !expiryDate) {
@@ -325,6 +325,41 @@ Deno.serve(async (req: Request) => {
       }
     }
 
+    // 3b) Codigo de descuento de un solo uso (tabla discount_codes, se
+    // generan desde Referrals en el panel). Solo en renovaciones -- los
+    // codigos de coach no sirven aca porque se buscan en otra tabla. Mismo
+    // calculo que applyDiscountCode() en payment.js. Un codigo invalido o ya
+    // usado se ignora (se cobra sin descuento), igual que el de referido.
+    //
+    // Se gasta recien cuando el pago queda 'paid' (trigger
+    // payments_mark_discount_code_used), asi que aca tambien se rechaza si
+    // OTRO cliente tiene un pago pendiente reciente con el mismo codigo:
+    // sin esto, dos personas podian pagar con el mismo codigo a la vez.
+    let normalizedDiscount = '';
+    if (discountCode && type === 'renewal') {
+      const code = String(discountCode).trim().toUpperCase();
+      const dcRes = await fetch(
+        `${supabaseUrl}/rest/v1/discount_codes?code=eq.${encodeURIComponent(code)}&used_at=is.null&select=kind,value`,
+        { headers: dbHeaders },
+      );
+      const dcRows = await dcRes.json();
+      if (Array.isArray(dcRows) && dcRows.length > 0) {
+        const since = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+        const heldRes = await fetch(
+          `${supabaseUrl}/rest/v1/payments?discount_code=eq.${encodeURIComponent(code)}&status=eq.pending&client_id=neq.${clientId}&created_at=gte.${since}&select=id&limit=1`,
+          { headers: dbHeaders },
+        );
+        const heldRows = await heldRes.json();
+        if (!Array.isArray(heldRows) || heldRows.length === 0) {
+          const { kind, value } = dcRows[0];
+          const off = kind === 'percent' ? Math.round(total * Number(value) / 100) : Math.round(Number(value));
+          // Nunca gratis: WeChat Pay no acepta montos de 0.
+          total = Math.max(1, total - off);
+          normalizedDiscount = code;
+        }
+      }
+    }
+
     // Alta nueva: las comidas ya viven en la orden que aprobo el admin, asi
     // que se toman de ahi en vez de confiar en lo que mande el cliente.
     let finalSelections = normalizeSelections(selections);
@@ -354,6 +389,7 @@ Deno.serve(async (req: Request) => {
       plan_id: planId,
       amount_fen: amountFen,
       referral_code: normalizedReferral,
+      discount_code: normalizedDiscount,
       start_date: startDate,
       expiry_date: expiryDate,
       cutlery: cutlery === true,

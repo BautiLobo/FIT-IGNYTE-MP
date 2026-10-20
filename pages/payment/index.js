@@ -20,6 +20,12 @@ Page({
     referralDiscount: 0,
     referralAlreadyUsed: false,
     referralChecking: false,
+    // Código de descuento de un solo uso (solo renovación, ver applyDiscountCode)
+    discountInput: '',
+    discountApplied: false,
+    discountCode: '',
+    discountAmount: 0,
+    discountChecking: false,
     lbl_title: '',
     lbl_order_summary: '',
     lbl_plan: '',
@@ -37,6 +43,10 @@ Page({
     lbl_referral_apply: '',
     lbl_referral_row: '',
     lbl_referral_applied: '',
+    lbl_discount_label: '',
+    lbl_discount_placeholder: '',
+    lbl_discount_row: '',
+    lbl_discount_applied: '',
     lbl_contact_btn: '',
     lbl_start_over_btn: '',
     lbl_start_over_title: '',
@@ -193,6 +203,10 @@ Page({
       lbl_referral_apply: t('payment_referral_apply'),
       lbl_referral_row: t('payment_referral_row'),
       lbl_referral_applied: t('payment_referral_applied'),
+      lbl_discount_label: t('payment_discount_label'),
+      lbl_discount_placeholder: t('payment_discount_placeholder'),
+      lbl_discount_row: t('payment_discount_row'),
+      lbl_discount_applied: t('payment_discount_applied'),
       lbl_contact_btn: t('payment_contact_btn'),
       lbl_start_over_btn: t('payment_start_over_btn'),
       lbl_start_over_title: t('payment_start_over_title'),
@@ -262,6 +276,48 @@ Page({
     }
   },
 
+  onDiscountInput(e) {
+    this.setData({ discountInput: e.detail.value });
+  },
+
+  // Códigos generados en Referrals del panel (tabla discount_codes), de un
+  // solo uso y solo para renovar. Los códigos de coach no pasan: se buscan
+  // en otra tabla. Mismo cálculo que create-payment (3b), que es el que
+  // cobra de verdad.
+  async applyDiscountCode() {
+    const code = (this.data.discountInput || '').trim().toUpperCase();
+    if (!code) return;
+    if (this.data.discountChecking || this.data.discountApplied) return;
+
+    this.setData({ discountChecking: true });
+    try {
+      const res = await app.checkDiscountCode(code);
+      if (!res || !res.valid) {
+        wx.showToast({ title: t('payment_discount_invalid'), icon: 'none' });
+        return;
+      }
+
+      const { total: baseTotal } = this.data;
+      const off = res.kind === 'percent'
+        ? Math.round(baseTotal * Number(res.value) / 100)
+        : Math.round(Number(res.value));
+      const total = Math.max(1, baseTotal - off);
+
+      this.setData({
+        discountApplied: true,
+        discountCode: code,
+        discountAmount: baseTotal - total,
+        total,
+      });
+      wx.showToast({ title: t('payment_discount_success'), icon: 'success' });
+    } catch (err) {
+      console.error('applyDiscountCode error:', err);
+      wx.showToast({ title: t('payment_discount_invalid'), icon: 'none' });
+    } finally {
+      this.setData({ discountChecking: false });
+    }
+  },
+
   getExpiryDate() {
     // Use stored expiry date from start-date page if available
     const stored = wx.getStorageSync('expiryDate');
@@ -277,7 +333,7 @@ Page({
     // disparar dos create-payment casi simultáneos.
     if (this.data.submitting) return;
 
-    const { fromRenewal, selectedPlan, referralApplied, referralCode, client } = this.data;
+    const { fromRenewal, selectedPlan, referralApplied, referralCode, discountApplied, discountCode, client } = this.data;
 
     if (!client || !client.id) {
       wx.showModal({ title: t('payment_error_title'), content: t('payment_error_content'), showCancel: false });
@@ -335,6 +391,7 @@ Page({
         expiryDate,
         cutlery,
         referralCode: referralApplied ? referralCode : undefined,
+        discountCode: fromRenewal && discountApplied ? discountCode : undefined,
         selections,
       });
 

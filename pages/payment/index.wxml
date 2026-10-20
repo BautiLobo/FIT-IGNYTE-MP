@@ -32,6 +32,11 @@
         <text class="row-val">¥{{deliveryFee}}</text>
       </view>
 
+      <view class="row row-border" wx:if="{{discountApplied}}">
+        <text class="row-key row-key-green">{{lbl_discount_row}}</text>
+        <text class="row-val row-val-green">−¥{{discountAmount}}</text>
+      </view>
+
       <view class="row row-border" wx:if="{{referralApplied}}">
         <text class="row-key row-key-green">{{lbl_referral_row}}</text>
         <text class="row-val row-val-green">−¥{{referralDiscount}}</text>
@@ -63,6 +68,29 @@
       <view class="referral-applied-row" wx:else>
         <text class="referral-applied-code">{{referralCode}}</text>
         <text class="referral-applied-check">✓ {{lbl_referral_applied}}</text>
+      </view>
+    </view>
+
+    <!-- Código de descuento de un solo uso: solo en renovación. Los de coach
+         no sirven acá (create-payment busca en discount_codes, no en coaches) -->
+    <view class="card" wx:if="{{fromRenewal}}">
+      <text class="card-label">{{lbl_discount_label}}</text>
+
+      <view class="referral-row" wx:if="{{!discountApplied}}">
+        <input
+          class="referral-input"
+          placeholder="{{lbl_discount_placeholder}}"
+          value="{{discountInput}}"
+          bindinput="onDiscountInput"
+        />
+        <view class="referral-btn {{discountChecking ? 'referral-btn-disabled' : ''}}" bindtap="applyDiscountCode">
+          <text>{{lbl_referral_apply}}</text>
+        </view>
+      </view>
+
+      <view class="referral-applied-row" wx:else>
+        <text class="referral-applied-code">{{discountCode}}</text>
+        <text class="referral-applied-check">✓ {{lbl_discount_applied}}</text>
       </view>
     </view>
 
