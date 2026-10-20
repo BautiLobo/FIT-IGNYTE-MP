@@ -8,6 +8,15 @@
 
   <scroll-view class="scroll" scroll-y>
 
+    <view wx:for="{{notifications}}" wx:key="id" class="notif-banner">
+      <view class="notif-banner-icon">🔔</view>
+      <view class="notif-banner-body">
+        <text class="notif-banner-title">{{item.title}}</text>
+        <text class="notif-banner-message">{{item.message}}</text>
+      </view>
+      <text class="notif-banner-close" bindtap="dismissNotification" data-id="{{item.id}}">✕</text>
+    </view>
+
     <view class="status-hero {{expired ? 'status-hero-expired' : 'status-hero-due'}}">
       <view class="status-hero-stat">
         <text class="status-hero-num {{expired ? 'status-hero-num-dash' : ''}}">{{expired ? '—' : daysLeft}}</text>

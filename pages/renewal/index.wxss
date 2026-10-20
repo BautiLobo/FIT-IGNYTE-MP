@@ -39,6 +39,14 @@ page { background: #0b0b0c; }
   overflow-x: hidden;
 }
 
+/* ── NOTIFICATION BANNER (igual que home) ── */
+.notif-banner { background:linear-gradient(135deg, #2a1416, #1a1014); border:1rpx solid #e8342a; border-left:6rpx solid #e8342a; border-radius:20rpx; padding:24rpx 22rpx; display:flex; align-items:flex-start; gap:18rpx; margin-bottom:18rpx; box-shadow:0 4rpx 20rpx rgba(232,52,42,0.25); }
+.notif-banner-icon { font-size:36rpx; flex-shrink:0; line-height:1; margin-top:2rpx; }
+.notif-banner-body { flex:1; }
+.notif-banner-title { font-size:30rpx; font-weight:900; color:#ffffff; display:block; }
+.notif-banner-message { font-size:26rpx; color:#beb6b6; display:block; margin-top:8rpx; line-height:1.5; }
+.notif-banner-close { font-size:28rpx; color:#beb6b6; flex-shrink:0; padding:0 4rpx; }
+
 /* ── STATUS HERO ── */
 .status-hero {
   display: flex;

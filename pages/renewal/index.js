@@ -11,6 +11,7 @@ Page({
     planTier: '',
     planName: '',
     planMeals: 0,
+    notifications: [],
     lbl_title: '',
     lbl_expired: '',
     lbl_due: '',
@@ -42,6 +43,7 @@ Page({
     });
     const clientId = wx.getStorageSync('clientId');
     if (!clientId) return;
+    this.loadNotifications();
 
     try {
       const data = await app.getClient({ clientId });
@@ -83,6 +85,39 @@ Page({
 
     } catch (err) {
       console.error('Load renewal error:', err);
+    }
+  },
+
+  // Mismas notificaciones que Home: un cliente con el plan vencido cae acá
+  // directo (discovery.js) y nunca pasa por Home, así que sin esto no veía
+  // los avisos que le manda el admin.
+  onShow() {
+    // onLoad ya las carga la primera vez; esto cubre volver a la pantalla.
+    if (this._shown) this.loadNotifications();
+    this._shown = true;
+  },
+
+  async loadNotifications() {
+    const clientId = wx.getStorageSync('clientId');
+    if (!clientId) return;
+
+    try {
+      const data = await app.getNotifications({ clientId });
+      this.setData({ notifications: data || [] });
+    } catch (err) {
+      console.error('Load notifications error:', err);
+    }
+  },
+
+  async dismissNotification(e) {
+    const id = e.currentTarget.dataset.id;
+    const notifications = this.data.notifications.filter(n => n.id !== id);
+    this.setData({ notifications });
+
+    try {
+      await app.markNotificationRead({ id });
+    } catch (err) {
+      console.error('Dismiss notification error:', err);
     }
   },
 
