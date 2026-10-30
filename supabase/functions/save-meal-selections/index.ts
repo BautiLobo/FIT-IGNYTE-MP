@@ -116,6 +116,26 @@ function getMaxAllowedDay(startDateStr: string, businessDaysCount: number, holid
   return last;
 }
 
+// Primer dia habil DESPUES de dateStr.
+function nextBusinessDay(dateStr: string, holidays: string[]): string {
+  let d = new Date(dateStr + 'T00:00:00Z');
+  do { d = new Date(d.getTime() + 24 * 60 * 60 * 1000); } while (isNonWorkingDay(d, holidays));
+  return toDateString(d);
+}
+
+// Clave de una entrada en payments.selections: la fecha sola para el slot 1
+// (como la arma create-payment), fecha#slot para los demas.
+// apply_pending_renewals lee `date`/`slot` de adentro, no la clave.
+function selectionKey(date: string, slot: number): string {
+  return slot === 1 ? date : `${date}#${slot}`;
+}
+
+function countSelections(selections: unknown): number {
+  if (!selections || typeof selections !== 'object') return 0;
+  return Object.values(selections as Record<string, { meal_ids?: unknown }>)
+    .filter((v) => v && Array.isArray(v.meal_ids) && v.meal_ids.length > 0).length;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
@@ -139,12 +159,75 @@ Deno.serve(async (req: Request) => {
       'Content-Type': 'application/json',
     };
 
-    // `pending_meal_selections` es siempre el ciclo que TODAVIA no arranco
-    // (lo vacia apply_pending_renewals/complete-payment al aplicarse) -- el
-    // corte de "no toques HOY" no aplica ahi, ninguna de esas fechas esta
-    // siendo preparada todavia. Solo aplica al ciclo vigente.
-    const holidays = table === 'meal_selections' ? await loadHolidays(supabaseUrl!, headers) : [];
-    const minEditableDay = table === 'meal_selections' ? getMinEditableDay(holidays) : null;
+    // El corte de "no toques HOY" aplica a los dos ciclos: el proximo
+    // (pending_meal_selections) tambien puede arrancar manana, y desde que
+    // edit-meals deja cambiarle las fechas ya no alcanza con suponer que
+    // todas sus fechas estan lejos.
+    const holidays = await loadHolidays(supabaseUrl!, headers);
+    const minEditableDay = getMinEditableDay(holidays);
+
+    // ── Ciclo pendiente (renovacion anticipada ya paga) ──────────────────
+    // Lo que edita el cliente en edit-meals (modo "proximo plan") es lo que
+    // se le tiene que aplicar el dia que arranca. Por eso, ademas de
+    // pending_meal_selections, este guardado reescribe el pago pendiente:
+    // `selections` (de donde apply_pending_renewals copiaba las comidas,
+    // ignorando las ediciones -- caso cliente #422, 2026-10-28) y
+    // start_date/expiry_date (el cron arranca el ciclo con start_date, asi
+    // que mover las entregas sin moverlo dejaba un ciclo inconsistente).
+    let pendingPayment: { id: string; selections: unknown } | null = null;
+    // Filas pendientes que la cocina ya tiene bloqueadas (antes del corte):
+    // no se muestran en edit-meals, asi que no se borran ni se cuentan.
+    let lockedPending: { delivery_date: string; slot: number; meals_json: unknown; delivery_time: string | null; note: string | null }[] = [];
+    let pendingFloor: string | null = null;
+    let pendingMax: string | null = null;
+    let expectedCount = 0;
+    if (table === 'pending_meal_selections') {
+      const payRes = await fetch(
+        `${supabaseUrl}/rest/v1/payments?client_id=eq.${clientId}&status=eq.paid&applied=eq.false&select=id,selections&order=paid_at.desc&limit=1`,
+        { headers },
+      );
+      const payRows = await payRes.json();
+      pendingPayment = Array.isArray(payRows) && payRows.length > 0 ? payRows[0] : null;
+
+      const pendRes = await fetch(
+        `${supabaseUrl}/rest/v1/pending_meal_selections?client_id=eq.${clientId}&select=delivery_date,slot,meals_json,delivery_time,note`,
+        { headers },
+      );
+      const pendRows: { delivery_date: string | null; slot: number; meals_json: unknown; delivery_time: string | null; note: string | null }[] = (await pendRes.json()) || [];
+      lockedPending = pendRows.filter((r) => r.delivery_date && r.delivery_date < minEditableDay) as typeof lockedPending;
+      const editableCount = pendRows.length - lockedPending.length;
+
+      if (pendingPayment) {
+        // El proximo ciclo nunca puede pisar entregas del vigente:
+        // apply_pending_renewals borra TODO meal_selections del cliente al
+        // aplicarse. Ultima entrega real del vigente, acotada a
+        // [start_date, expiry_date] igual que get-client.last_delivery_date.
+        const clientRes = await fetch(`${supabaseUrl}/rest/v1/clients?id=eq.${clientId}&select=start_date,expiry_date`, { headers });
+        const c = ((await clientRes.json()) || [])[0] || {};
+        let lastCurrent: string | null = null;
+        if (c.start_date && c.expiry_date) {
+          const lastRes = await fetch(
+            `${supabaseUrl}/rest/v1/meal_selections?client_id=eq.${clientId}&delivery_date=gte.${c.start_date}&delivery_date=lte.${c.expiry_date}&select=delivery_date&order=delivery_date.desc&limit=1`,
+            { headers },
+          );
+          const lastRows = await lastRes.json();
+          lastCurrent = Array.isArray(lastRows) && lastRows.length > 0 ? lastRows[0].delivery_date : c.expiry_date;
+        }
+        const afterCurrent = lastCurrent ? nextBusinessDay(lastCurrent, holidays) : null;
+        pendingFloor = afterCurrent && afterCurrent > minEditableDay ? afterCurrent : minEditableDay;
+
+        // Misma ventana de 14 dias habiles que pages/change-date, sin dejar
+        // afuera fechas que el cliente ya tenia (las eligio al pagar, desde
+        // un piso que pudo ser anterior al de hoy).
+        const existingDates = pendRows.map((r) => r.delivery_date).filter(Boolean) as string[];
+        Object.values((pendingPayment.selections || {}) as Record<string, { date?: string }>).forEach((v) => { if (v && v.date) existingDates.push(v.date); });
+        pendingMax = [getMaxAllowedDay(pendingFloor, 14, holidays), ...existingDates].sort().pop()!;
+      }
+
+      // Lo que el pago trae y lo que hay en pendientes deberian coincidir;
+      // si no (un guardado viejo ya borro un dia), manda el mas grande.
+      expectedCount = Math.max(editableCount, countSelections(pendingPayment?.selections) - lockedPending.length);
+    }
 
     // pages/change-date deja reordenar las fechas restantes del ciclo vigente
     // dentro de una ventana de 14 dias habiles (misma ventana que
@@ -167,6 +250,17 @@ Deno.serve(async (req: Request) => {
       const rawStart = clientRow?.start_date || '';
       const cycleFloor = minEditableDay && rawStart > minEditableDay ? rawStart : minEditableDay;
       if (cycleFloor) maxAllowedDay = getMaxAllowedDay(cycleFloor, 14, holidays);
+
+      // Entregas que este guardado va a reemplazar (mismo tramo que el
+      // DELETE de abajo, sin las filas legacy sin fecha).
+      const range = from && to
+        ? `delivery_date=gte.${from}&delivery_date=lte.${to}`
+        : `delivery_date=gte.${minEditableDay}`;
+      const curRes = await fetch(`${supabaseUrl}/rest/v1/meal_selections?client_id=eq.${clientId}&${range}&select=id`, { headers });
+      const curRows = await curRes.json();
+      expectedCount = Array.isArray(curRows) ? curRows.length : 0;
+    } else if (pendingPayment) {
+      maxAllowedDay = pendingMax;
     }
 
     // Solo estas columnas: el cliente no decide nada mas de la fila.
@@ -195,6 +289,9 @@ Deno.serve(async (req: Request) => {
       if (minEditableDay && day < minEditableDay) {
         return json({ error: 'locked_day', day, minEditableDay }, 409);
       }
+      if (pendingFloor && day < pendingFloor) {
+        return json({ error: 'overlaps_current_cycle', day, pendingFloor }, 409);
+      }
       // Limite real de la ventana de pages/change-date (14 dias habiles
       // desde el piso del ciclo) -- independiente de lo que diga `to`, ver
       // el comentario de maxAllowedDay mas arriba.
@@ -212,6 +309,15 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    // Un guardado nunca puede achicar el ciclo. Un dia que quedo sin comida
+    // no viaja en `selections`, y el DELETE de abajo lo borraba igual: asi
+    // perdio un dia el cliente #422 (2026-10-28). Mover fechas sigue
+    // permitido (la cantidad no cambia), y una consolidacion hecha por el
+    // staff ya esta en la base, asi que tampoco salta.
+    if (rows.length < expectedCount) {
+      return json({ error: 'would_drop_days', expected: expectedCount, got: rows.length }, 409);
+    }
+
     // 1) Borrar el tramo que se va a reemplazar. Con la service key esto SI
     //    borra. Sin from/to se reemplaza el set completo del cliente, que es
     //    lo que corresponde cuando las selecciones son el ciclo entero.
@@ -221,6 +327,9 @@ Deno.serve(async (req: Request) => {
     // se borran igual, si no apply_pending_renewals las re-deriva al lado de
     // las nuevas y choca contra el UNIQUE.
     if (from && to) delQuery += `&or=(delivery_date.is.null,and(delivery_date.gte.${from},delivery_date.lte.${to}))`;
+    // En el ciclo pendiente se reemplaza todo menos lo ya bloqueado para la
+    // cocina (lockedPending), que edit-meals ni muestra.
+    else if (table === 'pending_meal_selections') delQuery += `&or=(delivery_date.is.null,delivery_date.gte.${minEditableDay})`;
 
     const delRes = await fetch(`${supabaseUrl}/rest/v1/${table}?${delQuery}`, {
       method: 'DELETE',
@@ -269,6 +378,30 @@ Deno.serve(async (req: Request) => {
           // bien, y el vencimiento se corrige solo en el proximo guardado.
           console.error('save-meal-selections: no se pudo sincronizar expiry_date:', errBody);
         }
+      }
+    }
+
+    // 4) Ciclo pendiente: el pago queda igual a lo que se acaba de guardar
+    // (ver el comentario de pendingPayment, arriba). start/expiry salen de
+    // las fechas que el servidor mismo valido, nunca del body.
+    if (table === 'pending_meal_selections' && pendingPayment && rows.length > 0) {
+      const all = [
+        ...lockedPending.map((r) => ({ date: r.delivery_date, slot: r.slot || 1, time: r.delivery_time || '', notes: r.note || '', meal_ids: r.meals_json })),
+        ...rows.map((r) => ({ date: r.delivery_date as string, slot: r.slot as number, time: r.delivery_time as string, notes: r.note as string, meal_ids: r.meals_json })),
+      ];
+      const newSelections: Record<string, unknown> = {};
+      all.forEach((s) => { newSelections[selectionKey(s.date, s.slot)] = s; });
+      const dates = all.map((s) => s.date).sort();
+      const patchRes = await fetch(`${supabaseUrl}/rest/v1/payments?id=eq.${pendingPayment.id}&applied=eq.false`, {
+        method: 'PATCH',
+        headers: { ...headers, Prefer: 'return=minimal' },
+        body: JSON.stringify({ selections: newSelections, start_date: dates[0], expiry_date: dates[dates.length - 1] }),
+      });
+      if (!patchRes.ok) {
+        // Aca si se corta: si el pago no queda igual, el ciclo arrancaria
+        // con otras comidas u otras fechas que las que el cliente ve.
+        const errBody = await patchRes.text();
+        return json({ error: `payments sync failed: ${errBody}` }, 500);
       }
     }
 

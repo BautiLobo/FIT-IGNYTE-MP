@@ -147,6 +147,28 @@ App({
   // que es donde vive/entrega el negocio. Comparar como strings ISO
   // (startDate/expiryDate ya vienen 'YYYY-MM-DD' de la DB) evita además
   // cualquier lio de parseo de Date en otro huso.
+  // Entregas del proximo ciclo ya pago: pending_meal_selections + cualquier
+  // entrega que este en el pago (pending_renewal.selections) y falte en
+  // pendientes -- un guardado de una version vieja de edit-meals pudo
+  // borrarla (cliente #422). Es la que el cron aplica igual (si pendientes
+  // tiene menos dias que el pago, usa el pago), asi que Home y edit-meals
+  // tienen que mostrarla. Devuelve filas con forma de pending_meal_selections,
+  // ordenadas por fecha y slot; descarta las legacy sin fecha.
+  mergePendingWithPaid(pendingRows, pendingRenewal) {
+    const rows = (pendingRows || []).filter((r) => r.delivery_date);
+    const keys = new Set(rows.map((r) => `${r.delivery_date}#${r.slot}`));
+    const paid = (pendingRenewal && pendingRenewal.selections) || {};
+    Object.keys(paid).forEach((k) => {
+      const v = paid[k] || {};
+      const date = v.date || k;
+      const slot = Number.isInteger(v.slot) ? v.slot : 1;
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Array.isArray(v.meal_ids) || v.meal_ids.length === 0) return;
+      if (keys.has(`${date}#${slot}`)) return;
+      rows.push({ delivery_date: date, slot, meals_json: v.meal_ids, delivery_time: v.time || '', note: v.notes || '' });
+    });
+    return rows.sort((a, b) => (a.delivery_date === b.delivery_date ? a.slot - b.slot : (a.delivery_date < b.delivery_date ? -1 : 1)));
+  },
+
   getRealStatus(startDate, expiryDate) {
     if (!startDate || !expiryDate) return 'Inactive';
     const todayStr = toDateString(shanghaiNow());
@@ -746,7 +768,12 @@ App({
             resolve(res.data);
           } else {
             console.error('[saveMealSelections] failed:', res.statusCode, res.data);
-            reject(new Error(`saveMealSelections error: ${JSON.stringify(res.data)}`));
+            const err = new Error(`saveMealSelections error: ${JSON.stringify(res.data)}`);
+            // edit-meals mira `data.error` (would_drop_days, locked_day...)
+            // para avisar algo más útil que "Failed to save".
+            err.statusCode = res.statusCode;
+            err.data = res.data;
+            reject(err);
           }
         },
         fail: (err) => {

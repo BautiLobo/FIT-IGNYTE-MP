@@ -46,11 +46,13 @@ Deno.serve(async (req: Request) => {
     // puede ocultar el botón de renovar / mostrar el estado correcto sin
     // hacer otra llamada aparte. `applied` se pone en true recién cuando
     // el cron diario aplica el cambio de ciclo el día que corresponde.
+    // expiry_date/selections los usa edit-meals en modo "próximo plan"
+    // (rango para Change date, y recuperar un día que falte en pendientes).
     if (Array.isArray(rows) && rows.length > 0) {
       await Promise.all(rows.map(async (row: any) => {
         if (!row || row.id === undefined) return;
         const payRes = await fetch(
-          `${supabaseUrl}/rest/v1/payments?client_id=eq.${row.id}&status=eq.paid&applied=eq.false&select=start_date,out_trade_no,plan_id&order=paid_at.desc&limit=1`,
+          `${supabaseUrl}/rest/v1/payments?client_id=eq.${row.id}&status=eq.paid&applied=eq.false&select=start_date,expiry_date,out_trade_no,plan_id,selections&order=paid_at.desc&limit=1`,
           { headers: dbHeaders },
         );
         const payRows = await payRes.json();

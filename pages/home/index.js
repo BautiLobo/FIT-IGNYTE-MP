@@ -1,7 +1,7 @@
 // pages/home/index.js
 const app = getApp();
 const t = require('../../i18n/index');
-const { toDateString } = require('../../utils/business-days');
+const { toDateString, getMinStartDate } = require('../../utils/business-days');
 const { formatShortDate } = require('../../utils/date-format');
 
 const _isZh = (wx.getAppBaseInfo().language || '').startsWith('zh');
@@ -148,12 +148,21 @@ Page({
       //
       // `pending_meal_selections` no necesita filtro: se vacía al aplicarse,
       // así que todo lo que tiene pertenece al ciclo que todavía no arrancó.
+      // En el hueco se suman las entregas del pago que falten en pendientes
+      // (mismo criterio que edit-meals y que el cron).
       const selections = inRenewalGap
-        ? (selectionsData || [])
+        ? app.mergePendingWithPaid(selectionsData, pendingRenewal)
         : (selectionsData || []).filter((s) => (
             (!client.start_date || s.delivery_date >= client.start_date) &&
             (!client.expiry_date || s.delivery_date <= client.expiry_date)
           ));
+
+      // "Edit" abre directo el próximo plan cuando el vigente ya no tiene
+      // nada editable (último día, o el hueco): si no, edit-meals abría en
+      // modo vigente, no encontraba días y recién ahí saltaba -- se veía
+      // parpadear "Edit your meals" -> "Edit your next plan".
+      const minEditableDay = getMinStartDate({});
+      this.editNextPlan = hasPendingRenewal && (inRenewalGap || !selections.some((s) => s.delivery_date >= minEditableDay));
 
       const weekMeals = await this.buildWeekMeals(selections);
       const todayDelivery = this.getTodayDelivery(weekMeals);
@@ -297,7 +306,7 @@ Page({
     wx.showLoading({ title: t('loading') });
     setTimeout(() => {
       wx.hideLoading();
-      wx.navigateTo({ url: '/pages/edit-meals/index' });
+      wx.navigateTo({ url: this.editNextPlan ? '/pages/edit-meals/index?mode=upcoming' : '/pages/edit-meals/index' });
     }, 300);
   },
 

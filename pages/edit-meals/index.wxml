@@ -23,7 +23,12 @@
     </view>
   </view>
 
-  <view class="change-date-row" wx:if="{{!loading && !deferToPending}}">
+  <view class="next-plan-row" wx:if="{{nextPlanLabel && !deferToPending}}" bindtap="openNextPlan">
+    <text class="next-plan-text">{{nextPlanLabel}}</text>
+    <text class="next-plan-arrow">›</text>
+  </view>
+
+  <view class="change-date-row" wx:if="{{!loading}}">
     <text class="change-date-link" bindtap="openChangeDates">{{lbl_change_date}}</text>
   </view>
 

@@ -125,6 +125,10 @@ module.exports = {
   edit_meals_failed: '保存失败',
   edit_meals_unsaved_save: '保存修改',
   edit_meals_unsaved_discard: '放弃修改',
+  edit_meals_next_title: '修改下期餐食',
+  edit_meals_next_plan: '下期计划 · %s 开始 — 修改餐食',
+  edit_meals_meal_removed: '有餐品已下架，请重新选择',
+  edit_meals_date_unavailable: '有配送日期已不可用，请更改日期',
 
   // ── CHANGE-DATE（重新安排本周期剩余的配送日期）─────────────────
   change_date_link: '更改日期',

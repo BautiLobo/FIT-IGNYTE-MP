@@ -2,7 +2,7 @@
 const app = getApp();
 const t = require('../../i18n/index');
 const { formatShortDate, formatDateParts } = require('../../utils/date-format');
-const { getMinStartDate } = require('../../utils/business-days');
+const { getMinStartDate, renewalCycleEnd } = require('../../utils/business-days');
 
 const _isZh = (wx.getAppBaseInfo().language || '').startsWith('zh');
 const WEEKDAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -70,6 +70,9 @@ Page({
     lbl_carbs: '',
     lbl_fat: '',
     lbl_change_date: '',
+    // Boton "Next plan · starts ..." -- solo en la edicion del ciclo vigente
+    // de un cliente que ya pago la renovacion (ver openNextPlan).
+    nextPlanLabel: '',
   },
 
   // Fuera de `data`: no necesita re-render, solo lo usan hasUnsavedChanges()
@@ -77,8 +80,9 @@ Page({
   initialSnapshot: '',
 
   async onLoad(options) {
+    // lbl_title va recién cuando se sabe el modo (vigente / próximo plan),
+    // ver más abajo -- si no, se veía un título y enseguida el otro.
     this.setData({
-      lbl_title: t('edit_meals_title'),
       lbl_delivery_time: t('meal_select_delivery_time'),
       lbl_tap_to_change: t('meal_select_tap_to_change'),
       lbl_notes: t('meal_select_notes'),
@@ -113,13 +117,18 @@ Page({
       const pendingRenewal = client.pending_renewal || null;
       const inRenewalGap = realStatus === 'Inactive' && !!pendingRenewal;
 
-      // Un cliente en el hueco de renovación anticipada edita las filas del
-      // ciclo que todavía no arrancó: van a pending_meal_selections, no a
-      // meal_selections (esa es la semana que la cocina está preparando
-      // ahora mismo, y el cron la va a reemplazar). Fuera del hueco, esta
-      // pantalla edita el ciclo vigente y escribe donde siempre.
-      const deferToPending = inRenewalGap;
-      this.setData({ deferToPending });
+      // Modo "proximo plan": edita el ciclo ya pago que todavia no arranco
+      // (pending_meal_selections), sin tocar el vigente. Se entra solo en el
+      // hueco (no hay otro ciclo que editar) o con ?mode=upcoming, desde el
+      // boton "Next plan" de esta misma pantalla mientras el ciclo viejo
+      // sigue activo. save-meal-selections deja el pago pendiente igual a lo
+      // que se guarda, que es lo que el cron aplica el dia del arranque.
+      const upcomingMode = inRenewalGap || (options && options.mode === 'upcoming' && !!pendingRenewal);
+      const deferToPending = upcomingMode;
+      this.setData({ deferToPending, lbl_title: t(upcomingMode ? 'edit_meals_next_title' : 'edit_meals_title') });
+      if (!upcomingMode && pendingRenewal && pendingRenewal.start_date) {
+        this.setData({ nextPlanLabel: t('edit_meals_next_plan', formatShortDate(pendingRenewal.start_date, _isZh ? 'zh' : 'en')) });
+      }
 
       // En el hueco, el plan a usar (tier para el menu, cantidad de comidas
       // para la cuota/el check de "dia completo") es el de la renovacion
@@ -128,7 +137,7 @@ Page({
       // filtro de "comida ya no esta en el menu" (mas abajo) comparara
       // contra el tier equivocado y vaciara TODAS las selecciones nuevas si
       // el cliente cambio de tier al renovar.
-      const planIdToLoad = (inRenewalGap && pendingRenewal.plan_id) ? pendingRenewal.plan_id : client.plan_id;
+      const planIdToLoad = (upcomingMode && pendingRenewal.plan_id) ? pendingRenewal.plan_id : client.plan_id;
       const planData = await app.supabase('GET', 'plans', null, `id=eq.${planIdToLoad}`);
       const plan = planData && planData.length > 0 ? app.getDisplayPlan(planData[0]) : null;
       if (!plan) { wx.navigateBack(); return; }
@@ -145,7 +154,10 @@ Page({
       let pendingRows = [];
       if (deferToPending) {
         const pendingSelectionsData = await app.supabase('GET', 'pending_meal_selections', null, `client_id=eq.${clientId}&order=delivery_date.asc`);
-        pendingRows = (pendingSelectionsData || []).filter((r) => r.delivery_date).sort((a, b) => (a.delivery_date < b.delivery_date ? -1 : 1));
+        // Una entrega que esta en el pago pero no en pendientes vuelve a
+        // aparecer como tab, con las comidas que se eligieron al pagar.
+        // save-meal-selections exige que el guardado la incluya.
+        pendingRows = app.mergePendingWithPaid(pendingSelectionsData, pendingRenewal);
       }
 
       // edit-meals es ahora SOLO la edición del ciclo vigente (botón "Edit"
@@ -171,8 +183,17 @@ Page({
       let sourceRows;
       let cycleStart = null;
       let cycleEnd = null;
-      if (inRenewalGap) {
-        sourceRows = pendingRows;
+      if (upcomingMode) {
+        // Lo que la cocina ya tiene bloqueado (el arranque es mañana y pasó
+        // el corte) no se muestra ni se toca -- el servidor tampoco lo borra.
+        const minEditableDay = getMinStartDate({});
+        sourceRows = pendingRows.filter((row) => row.delivery_date >= minEditableDay);
+        // Piso de Change date: nunca antes del corte, y nunca encima del
+        // ciclo vigente (en el hueco ya terminó, no corre). El servidor lo
+        // revalida. cycleEnd solo lo usa applyDateSet; en este modo el
+        // guardado no manda from/to (ver saveAllSelections).
+        cycleStart = getMinStartDate({ currentExpiryDate: inRenewalGap ? null : renewalCycleEnd(client) });
+        cycleEnd = pendingRenewal.expiry_date || (sourceRows.length ? sourceRows[sourceRows.length - 1].delivery_date : null);
       } else {
         // Nunca dejar editar un día que la cocina ya tiene confirmado: hoy,
         // uno pasado, o mañana si ya pasó el corte de las 23 (hora de
@@ -188,7 +209,12 @@ Page({
           ? currentRows.filter((row) => row.delivery_date >= cycleStart && row.delivery_date <= cycleEnd)
           : currentRows.filter((row) => row.delivery_date >= minEditableDay);
       }
-      if (sourceRows.length === 0) { wx.navigateBack(); return; }
+      if (sourceRows.length === 0) {
+        // Nada editable en el ciclo vigente pero ya hay uno pago esperando:
+        // directo a ese.
+        if (!upcomingMode && pendingRenewal) { wx.redirectTo({ url: '/pages/edit-meals/index?mode=upcoming' }); return; }
+        wx.navigateBack(); return;
+      }
       this.setData({ cycleStart, cycleEnd });
 
       // Un cliente puede tener VARIAS entregas en el mismo día (el panel las
@@ -242,7 +268,10 @@ Page({
       // (rotación mensual) antes de que el cliente renueve. Se descarta acá
       // -- no solo al abrir ese día -- porque el tick de "día completo" en
       // las tabs de arriba se calcula para los 5 días de una, antes de que
-      // el cliente visite ninguno.
+      // el cliente visite ninguno. Los días que pierden una comida se
+      // anotan para avisar y abrir el primero: antes pasaba en silencio y el
+      // día podía guardarse vacío.
+      const trimmedKeys = new Set();
       await Promise.all(days.map(async (d) => {
         const sel = allSelections[d.key];
         if (!sel || !sel.meal_ids || sel.meal_ids.length === 0) return;
@@ -251,6 +280,7 @@ Page({
         const menu = menuData && menuData.length > 0 ? menuData[0] : null;
         const validIds = new Set((menu && menu.meals_json) || []);
         const filteredIds = sel.meal_ids.filter(id => validIds.has(id));
+        if (filteredIds.length < sel.meal_ids.length) trimmedKeys.add(d.key);
         if (filteredIds.length === 0) {
           delete allSelections[d.key];
         } else {
@@ -285,7 +315,13 @@ Page({
       // cliente toque nada.
       this.initialSnapshot = this.snapshotState();
 
-      await this.loadMenu(days[0].key);
+      const firstTrimmed = days.find(d => trimmedKeys.has(d.key));
+      if (firstTrimmed) {
+        wx.showToast({ title: t('edit_meals_meal_removed'), icon: 'none', duration: 2500 });
+        await this.loadMenu(firstTrimmed.key);
+      } else {
+        await this.loadMenu(days[0].key);
+      }
 
     } catch (err) {
       console.error('edit-meals onLoad error:', err);
@@ -476,9 +512,10 @@ Page({
   // Abre pages/change-date para reelegir en bloque las fechas restantes de
   // este ciclo (cycleStart..cycleEnd): las N fechas actuales llegan
   // pre-marcadas, el cliente deselecciona/reselecciona hasta volver a tener
-  // N. Solo disponible para el ciclo vigente -- en el hueco de renovacion
-  // anticipada (deferToPending) no hay cycleStart/cycleEnd calculados, ver
-  // onLoad. Tampoco soporta clientes con mas de una entrega el mismo dia
+  // N. Sirve para el ciclo vigente y para el proximo (modo "proximo plan",
+  // deferToPending): ahi save-meal-selections mueve tambien el
+  // start_date/expiry_date del pago pendiente, que es lo que mira el cron
+  // para arrancar el ciclo. Tampoco soporta clientes con mas de una entrega el mismo dia
   // (slot > 1, cargados a mano desde el panel): ese caso no tiene forma de
   // representarse en un set plano de fechas.
   openChangeDates() {
@@ -554,6 +591,13 @@ Page({
     });
   },
 
+  // Abre esta misma pantalla en modo "proximo plan" encima de la actual: al
+  // volver, lo que se estaba editando del ciclo vigente sigue ahi.
+  openNextPlan() {
+    this.persistCurrentDay();
+    wx.navigateTo({ url: '/pages/edit-meals/index?mode=upcoming' });
+  },
+
   saveAndNext() {
     const { selectedMealIds, plan } = this.data;
     const maxMeals = Math.max((plan && plan.meals) || 1, 1);
@@ -570,6 +614,15 @@ Page({
     const { currentDay, isLastDay, days } = this.data;
 
     if (isLastDay) {
+      // El botón del último tab solo validaba ese tab: si otro día había
+      // quedado sin comida, se guardaba igual y el servidor lo borraba
+      // (cliente #422, 2026-10-28). Se lleva al cliente a ese día.
+      const incomplete = days.find(d => !d.done);
+      if (incomplete) {
+        this.warnIncompleteDay();
+        this.loadMenu(incomplete.key);
+        return;
+      }
       await this.saveAllSelections();
     } else {
       const dayIndex = days.findIndex(d => d.key === currentDay);
@@ -589,9 +642,11 @@ Page({
         deferToPending: this.data.deferToPending,
         // Acotar el DELETE al mismo ciclo que se mostro: si no, guardar
         // borraria las filas de otras fechas que esta pantalla ni
-        // muestra (las del ciclo siguiente, por ejemplo).
-        from: this.data.cycleStart,
-        to: this.data.cycleEnd,
+        // muestra (las del ciclo siguiente, por ejemplo). En modo "proximo
+        // plan" no: ese ciclo se reemplaza entero, y el servidor ya deja
+        // afuera lo que la cocina tiene bloqueado.
+        from: this.data.deferToPending ? null : this.data.cycleStart,
+        to: this.data.deferToPending ? null : this.data.cycleEnd,
       });
       wx.hideLoading();
       wx.showToast({ title: t('edit_meals_updated'), icon: 'success' });
@@ -600,7 +655,14 @@ Page({
     } catch (err) {
       wx.hideLoading();
       console.error('Save error:', err);
-      wx.showToast({ title: t('edit_meals_failed'), icon: 'none' });
+      const code = err && err.data && err.data.error;
+      if (code === 'would_drop_days') {
+        this.warnIncompleteDay();
+      } else if (code === 'locked_day' || code === 'overlaps_current_cycle' || code === 'beyond_window') {
+        wx.showToast({ title: t('edit_meals_date_unavailable'), icon: 'none', duration: 2500 });
+      } else {
+        wx.showToast({ title: t('edit_meals_failed'), icon: 'none' });
+      }
       return false;
     }
   },

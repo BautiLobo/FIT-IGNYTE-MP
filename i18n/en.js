@@ -125,6 +125,10 @@ module.exports = {
   edit_meals_failed: 'Failed to save',
   edit_meals_unsaved_save: 'Save changes',
   edit_meals_unsaved_discard: 'Discard changes',
+  edit_meals_next_title: 'Edit your next plan',
+  edit_meals_next_plan: 'Next plan · starts %s — edit meals',
+  edit_meals_meal_removed: 'A meal is no longer on the menu — pick another',
+  edit_meals_date_unavailable: 'One of your dates is no longer available — change it',
 
   // ── CHANGE-DATE (rearrange this cycle's remaining delivery dates) ──
   change_date_link: 'Change dates',

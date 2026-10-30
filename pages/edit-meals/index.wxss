@@ -37,6 +37,11 @@
 .day-tab-active .day-tab-weekday { color:#e8342a; }
 
 
+/* Próximo plan ya pago (renovación anticipada) -- abre edit-meals en modo upcoming */
+.next-plan-row { display:flex; align-items:center; justify-content:space-between; margin:12rpx 24rpx 0; padding:16rpx 20rpx; border:1rpx solid #e8342a; border-radius:12rpx; flex-shrink:0; box-sizing:border-box; }
+.next-plan-text { font-size:24rpx; color:#e8342a; font-weight:700; }
+.next-plan-arrow { font-size:32rpx; color:#e8342a; }
+
 /* Change dates (bloque completo del ciclo) */
 .change-date-row { display:flex; align-items:center; justify-content:flex-end; padding:10rpx 24rpx 0; flex-shrink:0; box-sizing:border-box; width:100%; }
 .change-date-link { font-size:24rpx; color:#e8342a; font-weight:700; text-decoration:underline; }
