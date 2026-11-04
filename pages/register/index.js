@@ -243,6 +243,7 @@ Page({
             showCancel: false,
             success: async () => {
               wx.setStorageSync('clientId', existing.id);
+              wx.removeStorageSync('loggedOut');
               if (existing.status === 'Pending Payment') {
                 if (existing.plan_id) {
                   await app.cacheSelectedPlan(existing.plan_id);

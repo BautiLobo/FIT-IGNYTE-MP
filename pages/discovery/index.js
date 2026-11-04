@@ -75,42 +75,66 @@ Page({
         }
       }
 
-      const clientId = wx.getStorageSync('clientId');
+      let clientId = wx.getStorageSync('clientId');
+      let clientData = null;
       if (clientId) {
-        const clientData = await app.getClient({ clientId });
-        if (clientData && clientData.length > 0) {
-          const client = clientData[0];
-
-          if (client.status === 'Pending Payment') {
-            const stillPending = wx.getStorageSync('pendingOrderId');
-            if (stillPending) {
-              wx.reLaunch({ url: '/pages/approved/index' }); return;
-            } else if (client.plan_id) {
-              if (await app.cacheSelectedPlan(client.plan_id)) {
-                wx.setStorageSync('clientId', clientId);
-              }
-              wx.reLaunch({ url: '/pages/payment/index' }); return;
-            } else {
-              wx.reLaunch({ url: '/pages/tiers/index' }); return;
-            }
-          }
-
-          const realStatus = app.getRealStatus(client.start_date, client.expiry_date);
-
-          // Renovacion anticipada ya pagada pero todavia sin aplicar (el cron
-          // diario la aplica el dia que corresponde -- ver RENEWAL_PLAN.md,
-          // decision 4): el ciclo VIEJO en `clients` ya vencio, asi que
-          // realStatus da 'Inactive' aunque el cliente ya pago el proximo
-          // ciclo. `get-client` adjunta `pending_renewal` en la misma
-          // respuesta (mismo campo que ya usa home.js) -- sin este chequeo
-          // se lo mandaba a la pantalla "PLAN EXPIRED" recien pagado.
-          if (realStatus === 'Active' || realStatus === 'Upcoming' || client.pending_renewal) {
-            wx.reLaunch({ url: '/pages/home/index' }); return;
-          }
-
-          wx.reLaunch({ url: '/pages/renewal/index' }); return;
+        clientData = await app.getClient({ clientId });
+        if (!clientData || clientData.length === 0) {
+          wx.removeStorageSync('clientId');
+          clientId = null;
         }
-        wx.removeStorageSync('clientId');
+      }
+
+      // Sin clientId en storage (WeChat borró el caché, borró el
+      // mini-program de "recientes", otro teléfono, etc.) un cliente que ya
+      // existe caía en esta landing, rehacía todo el alta y recién en
+      // register.js, al chequear por openid, le salía "ya tenés cuenta".
+      // Pasaba en cada renovación (caso Chloe #319). Lo reconocemos acá
+      // por openid, igual que register.js. Si cerró sesión a propósito
+      // (edit-profile logout) no lo volvemos a loguear solo.
+      if (!clientId && !wx.getStorageSync('loggedOut')) {
+        const openid = await app.resolveOpenid();
+        if (openid) {
+          const byOpenid = await app.getClient({ openid });
+          if (byOpenid && byOpenid.length > 0) {
+            clientData = byOpenid;
+            clientId = byOpenid[0].id;
+            wx.setStorageSync('clientId', clientId);
+          }
+        }
+      }
+
+      if (clientId) {
+        const client = clientData[0];
+
+        if (client.status === 'Pending Payment') {
+          const stillPending = wx.getStorageSync('pendingOrderId');
+          if (stillPending) {
+            wx.reLaunch({ url: '/pages/approved/index' }); return;
+          } else if (client.plan_id) {
+            if (await app.cacheSelectedPlan(client.plan_id)) {
+              wx.setStorageSync('clientId', clientId);
+            }
+            wx.reLaunch({ url: '/pages/payment/index' }); return;
+          } else {
+            wx.reLaunch({ url: '/pages/tiers/index' }); return;
+          }
+        }
+
+        const realStatus = app.getRealStatus(client.start_date, client.expiry_date);
+
+        // Renovacion anticipada ya pagada pero todavia sin aplicar (el cron
+        // diario la aplica el dia que corresponde -- ver RENEWAL_PLAN.md,
+        // decision 4): el ciclo VIEJO en `clients` ya vencio, asi que
+        // realStatus da 'Inactive' aunque el cliente ya pago el proximo
+        // ciclo. `get-client` adjunta `pending_renewal` en la misma
+        // respuesta (mismo campo que ya usa home.js) -- sin este chequeo
+        // se lo mandaba a la pantalla "PLAN EXPIRED" recien pagado.
+        if (realStatus === 'Active' || realStatus === 'Upcoming' || client.pending_renewal) {
+          wx.reLaunch({ url: '/pages/home/index' }); return;
+        }
+
+        wx.reLaunch({ url: '/pages/renewal/index' }); return;
       }
     } catch (err) {
       // silencioso

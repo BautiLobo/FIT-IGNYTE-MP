@@ -185,6 +185,8 @@ Page({
       success: (res) => {
         if (res.confirm) {
           wx.removeStorageSync('clientId');
+          // discovery.js no lo re-loguea solo por openid tras un logout.
+          wx.setStorageSync('loggedOut', true);
           wx.reLaunch({ url: '/pages/discovery/index' });
         }
       }
