@@ -68,18 +68,6 @@ App({
     });
   },
 
-  // Código fresco de wx.login para las Edge Functions que verifican al dueño
-  // del cliente (update-client, submit-address-change, save-meal-selections).
-  // Nunca rechaza: sin código devuelve null y el servidor decide.
-  getLoginCode() {
-    return new Promise((resolve) => {
-      wx.login({
-        success: (res) => resolve(res.code || null),
-        fail: () => resolve(null),
-      });
-    });
-  },
-
   // 1) captureOpenid: resuelve el openid del cliente y lo guarda en
   //    clients.wechat_openid. Sin esto el backend no tiene a quién mandarle el push.
   async captureOpenid(clientId) {
@@ -256,16 +244,13 @@ App({
   // con la anon key (pública, va en el bundle del mini-program) marcar
   // cualquier cliente como pagado o pisarle datos a otro. Esta función solo
   // permite tocar columnas de perfil no sensibles del lado del servidor.
-  // Manda un código fresco de wx.login para que el servidor verifique que
-  // el cliente es de este usuario (ver checkOwner en la Edge Function).
-  async updateClient({ clientId, patch }) {
-    const code = await this.getLoginCode();
+  updateClient({ clientId, patch }) {
     return new Promise((resolve, reject) => {
       wx.request({
         url: `${config.SUPABASE_URL}/functions/v1/update-client`,
         method: 'POST',
         header: { 'Content-Type': 'application/json' },
-        data: { clientId, patch, code },
+        data: { clientId, patch },
         success: (res) => {
           if (res.statusCode >= 200 && res.statusCode < 300 && res.data && res.data.ok) {
             resolve(res.data.client);
@@ -660,14 +645,13 @@ App({
     });
   },
 
-  async submitAddressChange({ clientId, oldDistrict, oldAddress, newDistrict, newAddress }) {
-    const code = await this.getLoginCode();
+  submitAddressChange({ clientId, oldDistrict, oldAddress, newDistrict, newAddress }) {
     return new Promise((resolve, reject) => {
       wx.request({
         url: `${config.SUPABASE_URL}/functions/v1/submit-address-change`,
         method: 'POST',
         header: { 'Content-Type': 'application/json' },
-        data: { clientId, oldDistrict, oldAddress, newDistrict, newAddress, code },
+        data: { clientId, oldDistrict, oldAddress, newDistrict, newAddress },
         success: (res) => {
           if (res.statusCode >= 200 && res.statusCode < 300 && res.data && res.data.ok) {
             resolve(res.data.change);
@@ -766,8 +750,7 @@ App({
   // las selecciones SON el ciclo entero (alta nueva y renovacion). Con ellos
   // se reemplaza solo ese tramo, para que editar un ciclo no borre las filas
   // de otro (ver edit-meals.js).
-  async saveMealSelections(clientId, allSelections, { deferToPending = false, from = null, to = null } = {}) {
-    const code = await this.getLoginCode();
+  saveMealSelections(clientId, allSelections, { deferToPending = false, from = null, to = null } = {}) {
     return new Promise((resolve, reject) => {
       wx.request({
         url: `${config.SUPABASE_URL}/functions/v1/save-meal-selections`,
@@ -779,7 +762,7 @@ App({
           'apikey': config.SUPABASE_KEY,
           'Authorization': `Bearer ${config.SUPABASE_KEY}`,
         },
-        data: { clientId, selections: allSelections, deferToPending, from, to, code },
+        data: { clientId, selections: allSelections, deferToPending, from, to },
         success: (res) => {
           if (res.statusCode >= 200 && res.statusCode < 300 && res.data && res.data.ok) {
             resolve(res.data);

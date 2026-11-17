@@ -16,46 +16,9 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 // su perfil: lo unico permitido es la captura de wechat_openid, que hace
 // payment.js antes de pagar.
 //
-// Body esperado: { clientId: number, patch: { ...campos permitidos }, code?: string }
+// Body esperado: { clientId: number, patch: { ...campos permitidos } }
 
 const ALLOWED_FIELDS = ['wechat_openid', 'name', 'phone', 'access', 'allergies', 'goal'];
-
-// ── Dueño del cliente ─────────────────────────────────────────────
-// Antes esta funcion usaba el clientId del body sin mas: con el id de otro
-// cliente (y la anon key, que es publica) se le pisaban los datos. Ahora el
-// mini-program manda un codigo fresco de wx.login (`code`), el openid se
-// resuelve ACA contra WeChat (jscode2session, igual que wx-login y
-// delete-pending-client) y tiene que coincidir con clients.wechat_openid.
-// Un cliente sin wechat_openid guardado (cargado a mano) no se puede
-// verificar y pasa.
-//
-// Transicion: la version del mini-program publicada hoy no manda `code`.
-// Mientras REQUIRE_OWNER_CODE sea false, un pedido SIN code pasa (como
-// antes); uno CON code invalido o de otro dueño se rechaza. Pasar a true
-// cuando la version nueva este aprobada en WeChat y no queden paquetes
-// viejos en los celulares.
-const REQUIRE_OWNER_CODE = false;
-
-type OwnerCheck = { ok: true; openid: string | null } | { ok: false; status: number; error: string };
-
-async function checkOwner(storedOpenid: string | null | undefined, code: unknown): Promise<OwnerCheck> {
-  if (typeof code !== 'string' || !code) {
-    return REQUIRE_OWNER_CODE ? { ok: false, status: 401, error: 'missing_code' } : { ok: true, openid: null };
-  }
-  const appid = Deno.env.get('WECHAT_APPID');
-  const secret = Deno.env.get('WECHAT_APPSECRET');
-  const wxRes = await fetch(
-    `https://api.weixin.qq.com/sns/jscode2session?appid=${appid}&secret=${secret}&js_code=${encodeURIComponent(code)}&grant_type=authorization_code`,
-  );
-  const wxData = await wxRes.json();
-  const openid: string | undefined = wxData && wxData.openid;
-  if (!openid) {
-    console.error('checkOwner: jscode2session sin openid:', wxData && wxData.errcode);
-    return { ok: false, status: 403, error: 'invalid_code' };
-  }
-  if (storedOpenid && storedOpenid !== openid) return { ok: false, status: 403, error: 'not_owner' };
-  return { ok: true, openid };
-}
 
 Deno.serve(async (req: Request) => {
   const corsHeaders = {
@@ -68,7 +31,7 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { clientId, patch, code } = await req.json();
+    const { clientId, patch } = await req.json();
     if (!clientId || !patch || typeof patch !== 'object') {
       return new Response(JSON.stringify({ error: 'Missing clientId or patch' }), {
         status: 400,
@@ -92,7 +55,7 @@ Deno.serve(async (req: Request) => {
     const jsonHeaders = { ...corsHeaders, 'Content-Type': 'application/json' };
 
     const clientRes = await fetch(
-      `${supabaseUrl}/rest/v1/clients?id=eq.${encodeURIComponent(String(clientId))}&select=id,status,wechat_openid`,
+      `${supabaseUrl}/rest/v1/clients?id=eq.${encodeURIComponent(String(clientId))}&select=id,status`,
       { headers: { apikey: serviceKey!, Authorization: `Bearer ${serviceKey}` } },
     );
     const clientRows = await clientRes.json();
@@ -100,14 +63,6 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: 'Client not found' }), { status: 404, headers: jsonHeaders });
     }
     const current = clientRows[0];
-
-    const owner = await checkOwner(current.wechat_openid, code);
-    if (!owner.ok) {
-      return new Response(JSON.stringify({ error: owner.error }), { status: owner.status, headers: jsonHeaders });
-    }
-    // Con code verificado, el openid que se guarda es el que resolvio WeChat,
-    // no el que mando el cliente.
-    if ('wechat_openid' in safePatch && owner.openid) safePatch.wechat_openid = owner.openid;
 
     const onlyOpenid = Object.keys(safePatch).length === 1 && 'wechat_openid' in safePatch;
     if (current.status === 'Pending Payment' && !onlyOpenid) {

@@ -26,7 +26,6 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 //                              notes?: string, date?: string, slot?: number } },
 //   deferToPending?: boolean,   // true -> pending_meal_selections
 //   from?: string, to?: string  // acota el reemplazo a [from, to]
-//   code?: string               // wx.login fresco, ver checkOwner
 // }
 //
 // Un cliente en 'Pending Payment' (alta aprobada sin pagar) no puede guardar
@@ -37,43 +36,6 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 // La clave de cada entrada se usa como fecha cuando `date` no viene (asi lo
 // manda meal-select, que indexa por fecha); edit-meals manda `date`/`slot`
 // propios porque un cliente puede tener varias entregas el mismo dia.
-
-// ── Dueño del cliente ─────────────────────────────────────────────
-// Antes esta funcion usaba el clientId del body sin mas: con el id de otro
-// cliente (y la anon key, que es publica) se le pisaban los datos. Ahora el
-// mini-program manda un codigo fresco de wx.login (`code`), el openid se
-// resuelve ACA contra WeChat (jscode2session, igual que wx-login y
-// delete-pending-client) y tiene que coincidir con clients.wechat_openid.
-// Un cliente sin wechat_openid guardado (cargado a mano) no se puede
-// verificar y pasa.
-//
-// Transicion: la version del mini-program publicada hoy no manda `code`.
-// Mientras REQUIRE_OWNER_CODE sea false, un pedido SIN code pasa (como
-// antes); uno CON code invalido o de otro dueño se rechaza. Pasar a true
-// cuando la version nueva este aprobada en WeChat y no queden paquetes
-// viejos en los celulares.
-const REQUIRE_OWNER_CODE = false;
-
-type OwnerCheck = { ok: true; openid: string | null } | { ok: false; status: number; error: string };
-
-async function checkOwner(storedOpenid: string | null | undefined, code: unknown): Promise<OwnerCheck> {
-  if (typeof code !== 'string' || !code) {
-    return REQUIRE_OWNER_CODE ? { ok: false, status: 401, error: 'missing_code' } : { ok: true, openid: null };
-  }
-  const appid = Deno.env.get('WECHAT_APPID');
-  const secret = Deno.env.get('WECHAT_APPSECRET');
-  const wxRes = await fetch(
-    `https://api.weixin.qq.com/sns/jscode2session?appid=${appid}&secret=${secret}&js_code=${encodeURIComponent(code)}&grant_type=authorization_code`,
-  );
-  const wxData = await wxRes.json();
-  const openid: string | undefined = wxData && wxData.openid;
-  if (!openid) {
-    console.error('checkOwner: jscode2session sin openid:', wxData && wxData.errcode);
-    return { ok: false, status: 403, error: 'invalid_code' };
-  }
-  if (storedOpenid && storedOpenid !== openid) return { ok: false, status: 403, error: 'not_owner' };
-  return { ok: true, openid };
-}
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -183,7 +145,7 @@ Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
-    const { clientId, selections, deferToPending, from, to, code } = await req.json();
+    const { clientId, selections, deferToPending, from, to } = await req.json();
 
     if (!clientId || !selections || typeof selections !== 'object') {
       return json({ error: 'Missing clientId or selections' }, 400);
@@ -202,15 +164,13 @@ Deno.serve(async (req: Request) => {
       'Content-Type': 'application/json',
     };
 
-    const ownerRes = await fetch(
-      `${supabaseUrl}/rest/v1/clients?id=eq.${encodeURIComponent(String(clientId))}&select=id,status,wechat_openid`,
+    const statusRes = await fetch(
+      `${supabaseUrl}/rest/v1/clients?id=eq.${encodeURIComponent(String(clientId))}&select=id,status`,
       { headers },
     );
-    const ownerRows = await ownerRes.json();
-    if (!Array.isArray(ownerRows) || ownerRows.length === 0) return json({ error: 'Client not found' }, 404);
-    const owner = await checkOwner(ownerRows[0].wechat_openid, code);
-    if (!owner.ok) return json({ error: owner.error }, owner.status);
-    if (ownerRows[0].status === 'Pending Payment') return json({ error: 'pending_payment' }, 403);
+    const statusRows = await statusRes.json();
+    if (!Array.isArray(statusRows) || statusRows.length === 0) return json({ error: 'Client not found' }, 404);
+    if (statusRows[0].status === 'Pending Payment') return json({ error: 'pending_payment' }, 403);
 
     // El corte de "no toques HOY" aplica a los dos ciclos: el proximo
     // (pending_meal_selections) tambien puede arrancar manana, y desde que
