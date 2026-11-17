@@ -192,10 +192,11 @@ Page({
         startDateFormatted = this.formatFullDate(new Date(effectiveStartDate + 'T00:00:00'));
       }
 
-      const realToday = new Date().getDay();
-      // Nunca a un alta sin pagar (getDaysLeft(null) da 999 pero el viernes
-      // se mostraba igual, y pagaba como renovación en vez de alta).
-      const showRenewal = client.status !== 'Pending Payment' && !isUpcoming && !hasPendingRenewal && (realToday === 5 || daysLeft <= 2);
+      // Solo en los últimos 2 días del plan. Antes también salía todos los
+      // viernes (resto de cuando los planes eran siempre lun-vie): con fechas
+      // reales le aparecía a mitad de plan, y a un alta sin pagar
+      // (getDaysLeft(null) da 999), que pagaba como renovación en vez de alta.
+      const showRenewal = client.status !== 'Pending Payment' && !isUpcoming && !hasPendingRenewal && daysLeft <= 2;
 
       // Texto del banner: "hoy"/"mañana" en vez de "0/1 days left" cuando
       // corresponde; genérico con el número el resto de los casos (incluido
