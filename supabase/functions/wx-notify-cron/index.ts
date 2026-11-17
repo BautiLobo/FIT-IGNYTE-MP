@@ -133,9 +133,15 @@ Deno.serve(async (req: Request) => {
     const pendingRenewals = ((await pendingRenewalRes.json()) || []) as { client_id: number; start_date: string }[];
     const pendingRenewalClientIds = new Set(pendingRenewals.map(p => p.client_id));
 
+    // Altas aprobadas sin pagar: tienen start_date (approveOrder) y
+    // meal_selections desde el momento de la aprobación, así que sin este
+    // filtro recibían el aviso de feriado (y el de arranque/vencimiento si
+    // llegaban a tener fechas) como si fueran clientes activos.
+    const NOT_PENDING_PAYMENT = `status=neq.${encodeURIComponent('Pending Payment')}`;
+
     // Activo hoy (start_date <= hoy) y vence mañana.
     const expiringRes = await fetch(
-      `${supabaseUrl}/rest/v1/clients?expiry_date=eq.${tomorrow}&start_date=lte.${today}&select=id,wechat_openid`,
+      `${supabaseUrl}/rest/v1/clients?expiry_date=eq.${tomorrow}&start_date=lte.${today}&${NOT_PENDING_PAYMENT}&select=id,wechat_openid`,
       { headers }
     );
     const expiringClients = await expiringRes.json();
@@ -157,7 +163,7 @@ Deno.serve(async (req: Request) => {
     // Arranca mañana (implica Upcoming: hoy < start_date por construcción).
     const notifiedStarting = new Set<number>();
     const startingRes = await fetch(
-      `${supabaseUrl}/rest/v1/clients?start_date=eq.${tomorrow}&select=id,wechat_openid`,
+      `${supabaseUrl}/rest/v1/clients?start_date=eq.${tomorrow}&${NOT_PENDING_PAYMENT}&select=id,wechat_openid`,
       { headers }
     );
     const startingClients = await startingRes.json();
@@ -210,7 +216,7 @@ Deno.serve(async (req: Request) => {
 
       if (scheduledClientIds.length > 0) {
         const activeRes = await fetch(
-          `${supabaseUrl}/rest/v1/clients?id=in.(${scheduledClientIds.join(',')})&select=id,wechat_openid`,
+          `${supabaseUrl}/rest/v1/clients?id=in.(${scheduledClientIds.join(',')})&${NOT_PENDING_PAYMENT}&select=id,wechat_openid`,
           { headers }
         );
         const activeClients = await activeRes.json();

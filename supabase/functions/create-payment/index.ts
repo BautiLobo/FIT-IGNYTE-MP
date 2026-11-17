@@ -257,6 +257,13 @@ Deno.serve(async (req: Request) => {
     const clientRows = await clientRes.json();
     if (!clientRows || clientRows.length === 0) return json({ error: 'Client not found' }, 404);
     const client = clientRows[0];
+    // Un alta aprobada sin pagar no puede pagar como renovación (el banner
+    // "Renovar" de home le aparecía los viernes): se saltearía el descuento
+    // de cliente nuevo, tendría acceso a los códigos de un solo uso (solo
+    // para renovación) y el pedido quedaría colgado en 'approved'.
+    if (type === 'renewal' && client.status === 'Pending Payment') {
+      return json({ error: 'pending_payment_cannot_renew' }, 409);
+    }
     const openid = client.wechat_openid;
     if (!openid) return json({ error: 'Client has no wechat_openid captured yet' }, 400);
 

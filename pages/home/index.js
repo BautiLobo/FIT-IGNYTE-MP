@@ -99,6 +99,22 @@ Page({
 
       const client = data[0];
 
+      // Alta aprobada pero sin pagar: no tiene que ver home (desde acá se
+      // llega a edit-meals, edit-profile, change-date y renewal). Desde el
+      // re-login por openid (discovery guarda clientId aunque no haya pagado)
+      // se podía llegar acá por un push o un storage viejo. Mismo ruteo que
+      // discovery para 'Pending Payment'.
+      if (client.status === 'Pending Payment') {
+        if (wx.getStorageSync('pendingOrderId')) {
+          wx.reLaunch({ url: '/pages/approved/index' }); return;
+        }
+        if (client.plan_id) {
+          await app.cacheSelectedPlan(client.plan_id);
+          wx.reLaunch({ url: '/pages/payment/index' }); return;
+        }
+        wx.reLaunch({ url: '/pages/tiers/index' }); return;
+      }
+
       const firstName = client.name ? client.name.split(' ')[0] : 'there';
       const daysLeft = this.getDaysLeft(client.expiry_date);
       const realStatus = app.getRealStatus(client.start_date, client.expiry_date);
@@ -177,7 +193,9 @@ Page({
       }
 
       const realToday = new Date().getDay();
-      const showRenewal = !isUpcoming && !hasPendingRenewal && (realToday === 5 || daysLeft <= 2);
+      // Nunca a un alta sin pagar (getDaysLeft(null) da 999 pero el viernes
+      // se mostraba igual, y pagaba como renovación en vez de alta).
+      const showRenewal = client.status !== 'Pending Payment' && !isUpcoming && !hasPendingRenewal && (realToday === 5 || daysLeft <= 2);
 
       // Texto del banner: "hoy"/"mañana" en vez de "0/1 days left" cuando
       // corresponde; genérico con el número el resto de los casos (incluido
