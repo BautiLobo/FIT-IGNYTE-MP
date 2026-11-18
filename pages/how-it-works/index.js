@@ -33,12 +33,19 @@ Page({
     this.loadPhotos();
   },
 
-  // Fotos de platos (no snacks) para el carrusel del paso 2. La lista va
+  // Fotos de platos del menú (no snacks) para el carrusel del paso 2. La lista va
   // duplicada para que la animación (-50%) haga el loop sin salto.
   // Si falla o no hay fotos, el carrusel no se muestra.
   async loadPhotos() {
     try {
-      const rows = await app.supabase('GET', 'meal_library', null, 'select=photo_url&is_snack=eq.false&photo_url=neq.&limit=60');
+      // Solo platos que están en el menú (cualquier día / tier / semana de
+      // la rotación): la biblioteca tiene platos viejos o de prueba con
+      // fotos que no corresponden (ej. "Asia Mix").
+      const menuRows = await app.supabase('GET', 'menu', null, 'select=meals_json');
+      const ids = [];
+      (menuRows || []).forEach(r => (r.meals_json || []).forEach(id => { if (id && !ids.includes(id)) ids.push(id); }));
+      if (ids.length === 0) return;
+      const rows = await app.supabase('GET', 'meal_library', null, `select=photo_url&is_snack=eq.false&photo_url=neq.&id=in.(${ids.join(',')})`);
       const urls = (rows || []).map(r => r.photo_url).filter(Boolean);
       for (let i = urls.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
