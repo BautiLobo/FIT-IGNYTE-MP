@@ -3,57 +3,69 @@
   <view class="topbar">
     <view class="back-btn" bindtap="goBack"><text class="back-arrow">‹</text></view>
     <text class="topbar-title">{{lbl_title}}</text>
-    <view style="width:60rpx;"></view>
+    <view style="width:64rpx;"></view>
   </view>
 
   <scroll-view class="scroll" scroll-y>
+    <view class="scroll-inner">
 
-    <block wx:if="{{loading}}">
-      <view class="loading-wrap"><view class="spinner"></view></view>
-    </block>
+      <block wx:if="{{loading}}">
+        <view class="loading-wrap"><view class="spinner"></view></view>
+      </block>
 
-    <block wx:else>
+      <block wx:else>
 
-      <view class="list-header">
-        <text class="list-title" wx:if="{{tier}}" style="color:{{tierColor || '#f3f3f4'}};">{{tierZh || tier}}</text>
-        <text class="list-sub">{{lbl_subtitle}}</text>
-        <view class="header-divider" style="background:{{tierColor || '#e8342a'}};"></view>
-      </view>
-
-      <view wx:for="{{plans}}" wx:key="id" class="plan-wrap">
-        <view class="popular-badge" wx:if="{{item.is_popular && !item.is_current}}">
-          <text>{{lbl_most_popular}}</text>
+        <!-- HEADER — mismo diseño que la pantalla de tiers -->
+        <view class="header-block">
+          <view class="kicker-pill"><text class="kicker">{{lbl_kicker}}</text></view>
+          <text class="headline" style="color:{{tierColor || '#f3f3f4'}};">{{tierZh || tier || lbl_title}}</text>
+          <view class="header-divider" style="background:{{tierColor || '#e8342a'}};"></view>
+          <text class="intro">{{lbl_subtitle}}</text>
         </view>
-        <view class="current-badge" wx:if="{{item.is_current}}">
-          <text>{{lbl_current_plan}}</text>
-        </view>
+
+        <!-- PLAN CARDS -->
         <view
-          class="plan-card {{item.is_popular && !item.is_current ? 'plan-card-popular' : ''}} {{item.is_current ? 'plan-card-current' : ''}}"
+          wx:for="{{plans}}"
+          wx:key="id"
+          class="plan-card"
+          hover-class="plan-card-hover"
           bindtap="selectPlan"
           data-plan="{{item}}"
-          style="border-left-color:{{item.color}};"
-        >
-          <view class="plan-left">
-            <text class="plan-category" style="color:{{item.color}};">{{item.displayTier}}</text>
-            <text class="plan-name">{{item.displayName}}</text>
-            <text class="plan-meals">{{item.mealsHook}}</text>
-            <text class="plan-kcal" wx:if="{{item.kcal}}">{{item.lbl_kcal}}</text>
+          style="border-color:{{item.is_current ? '#34D399' : item.tintBorder}}; background:linear-gradient(160deg, {{item.tint}} 0%, #13131a 55%);">
+
+          <view class="plan-top">
+            <view class="plan-title-wrap">
+              <view class="plan-badges" wx:if="{{item.is_current || item.is_popular}}">
+                <text class="badge badge-current" wx:if="{{item.is_current}}">{{lbl_current_plan}}</text>
+                <text class="badge badge-popular" wx:elif="{{item.is_popular}}">{{lbl_most_popular}}</text>
+              </view>
+              <text class="plan-name" style="color:{{item.color}};">{{item.title}}</text>
+              <text class="plan-meals" wx:if="{{item.mealsLabel}}">{{item.mealsLabel}}</text>
+            </view>
+            <view class="plan-price-wrap">
+              <text class="plan-price" style="color:{{item.color}};">¥{{item.price}}</text>
+              <text class="plan-period">{{lbl_per_week}}</text>
+            </view>
           </view>
-          <view class="plan-right">
-            <text class="plan-price" style="color:{{item.color}};">¥{{item.price}}</text>
-            <text class="plan-period">{{lbl_per_week}}</text>
+
+          <text class="plan-hook">{{item.mealsHook}}</text>
+
+          <view class="plan-stats" wx:if="{{item.kcal}}" style="background:{{item.tint}}; border-color:{{item.tintBorder}};">
+            <view class="stat-col">
+              <text class="stat-val">~{{item.kcal}}</text>
+              <text class="stat-lbl">{{lbl_kcal_day}}</text>
+            </view>
+            <view class="stat-col" style="border-left-color:{{item.tintBorder}};" wx:if="{{item.proteinDay}}">
+              <text class="stat-val">{{item.proteinDay}}g+</text>
+              <text class="stat-lbl">{{lbl_protein_day}}</text>
+            </view>
           </view>
+
         </view>
-      </view>
 
-      <view class="hint-wrap">
-        <text class="hint-line"></text>
-        <text class="hint">{{lbl_tap_hint}}</text>
-        <text class="hint-line"></text>
-      </view>
+      </block>
 
-    </block>
-
+    </view>
   </scroll-view>
 
 </view>

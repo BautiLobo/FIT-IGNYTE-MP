@@ -64,6 +64,11 @@ module.exports = {
   tiers_plans_available: '个套餐可选',
   tiers_tap_hint: '点击目标查看套餐',
   tiers_brochure: '☰  查看完整菜单 PDF',
+  tiers_see_plans: '查看套餐',
+  tiers_kicker: '第 1 步 · 您的目标',
+  tiers_kcal_label: '千卡 / 餐',
+  tiers_protein_label: '蛋白质 / 餐',
+  tiers_menu_pdf: '查看完整菜单 PDF',
   tiers_best_for: '适合：',
   tiers_performance_1: '活跃生活方式',
   tiers_performance_2: '增肌训练',
@@ -76,7 +81,12 @@ module.exports = {
 
   // ── PLANS ──────────────────────────────────────────────────
   plans_title: '选择您的套餐',
-  plans_subtitle: '所有套餐均包含周一至周五配送',
+  plans_subtitle: '周一至周五配送',
+  plans_kicker: '第 2 步 · 您的套餐',
+  plans_kcal_day_label: '千卡 / 天',
+  plans_protein_day_label: '蛋白质 / 天',
+  plans_meal_per_day_1: '每天 %s 餐',
+  plans_meal_per_day_n: '每天 %s 餐',
   plans_most_popular: '最受欢迎',
   plans_meals_per_day: '餐 / 天',
   plans_hook_balance_1: '轻松吃得更健康，每一天',
@@ -185,8 +195,9 @@ module.exports = {
 
   // ── START-DATE（配送日历）───────────────────────────────────
   start_date_topbar: '配送日期',
+  start_date_kicker: '第 3 步 · 配送日期',
   start_date_heading: '选择您的配送日期',
-  start_date_subtitle: '选择 5 天 · 仅工作日，节假日不可选',
+  start_date_subtitle: '请选择 5 个工作日配送，周末和法定节假日不配送。',
   start_date_counter: '已选 %s/5 天',
   start_date_legend_selected: '已选',
   start_date_legend_available: '可选',

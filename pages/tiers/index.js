@@ -8,23 +8,24 @@ const TIER_COLORS_FALLBACK = {
   'Vegetarian':  '#34D399',
 };
 
-// Ícono simple por tier (mismo espíritu que la referencia: rayo / corredor)
-const TIER_ICON = {
-  'Performance': '⚡',
-  'Balance': '🏃',
-};
-
 // "Best for" — 3 bullets por tier, bilingüe vía i18n
 const TIER_BEST_FOR_KEYS = {
   'Performance': ['tiers_performance_1', 'tiers_performance_2', 'tiers_performance_3'],
   'Balance': ['tiers_balance_1', 'tiers_balance_2', 'tiers_balance_3'],
 };
 
-// Rango de kcal / proteína por comida, bilingüe vía i18n
-const TIER_KCAL_KEY = {
-  'Performance': 'tiers_performance_kcal',
-  'Balance': 'tiers_balance_kcal',
+// kcal y proteína por comida (valores numéricos, iguales en EN y ZH)
+const TIER_STATS = {
+  'Performance': { kcal: '700–900', protein: '55g+' },
+  'Balance':     { kcal: '450–650', protein: '35g+' },
 };
+
+// Color del tier con opacidad, para fondos y bordes suaves
+function tintOf(hex, alpha) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+  const n = m ? parseInt(m[1], 16) : 0xe8342a;
+  return 'rgba(' + (n >> 16) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + alpha + ')';
+}
 
 Page({
   data: {
@@ -38,6 +39,11 @@ Page({
     lbl_plans_available: '',
     lbl_contact_us: '',
     lbl_best_for: '',
+    lbl_see_plans: '',
+    lbl_kicker: '',
+    lbl_kcal: '',
+    lbl_protein: '',
+    lbl_menu_pdf: '',
   },
 
   async onLoad(options) {
@@ -51,7 +57,12 @@ Page({
       lbl_brochure: t('tiers_brochure'),
       lbl_plans_available: t('tiers_plans_available'),
       lbl_contact_us: t('how_contact_us'),
-      lbl_best_for: t('tiers_best_for'),
+      lbl_best_for: t('tiers_best_for').replace(/[:：]\s*$/, ''),
+      lbl_see_plans: t('tiers_see_plans'),
+      lbl_kicker: t('tiers_kicker'),
+      lbl_kcal: t('tiers_kcal_label'),
+      lbl_protein: t('tiers_protein_label'),
+      lbl_menu_pdf: t('tiers_menu_pdf'),
     });
     await this.loadTiers();
   },
@@ -75,16 +86,22 @@ Page({
         .map(tier => {
           const displayName = app.getMealName({ name: tier.name, name_zh: tier.name_zh });
           const bestForKeys = TIER_BEST_FOR_KEYS[tier.name] || [];
-          const kcalKey = TIER_KCAL_KEY[tier.name];
+          const stats = TIER_STATS[tier.name] || {};
+          const color = tier.color || TIER_COLORS_FALLBACK[tier.name] || '#e8342a';
           return {
             name: tier.name,
             displayName,
             tag: displayName,
             planCount: countMap[tier.name] || 0,
-            color: tier.color || TIER_COLORS_FALLBACK[tier.name] || '#e8342a',
-            icon: TIER_ICON[tier.name] || '🔥',
+            color,
+            tint: tintOf(color, 0.16),
+            tintBorder: tintOf(color, 0.45),
+            tintStrong: tintOf(color, 0.24),
+            cardBorder: tintOf(color, 0.65),
+            glow: tintOf(color, 0.35),
             bestFor: bestForKeys.map(key => t(key)),
-            kcalRange: kcalKey ? t(kcalKey) : '',
+            kcal: stats.kcal || '',
+            protein: stats.protein || '',
           };
         });
 

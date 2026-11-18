@@ -3,10 +3,10 @@
   <view class="topbar">
     <view class="back-btn" bindtap="goBack"><text class="back-arrow">‹</text></view>
     <text class="topbar-title">{{lbl_title}}</text>
-    <view style="width:60rpx;"></view>
+    <view style="width:64rpx;"></view>
   </view>
 
-  <scroll-view class="scroll" scroll-y>
+  <view class="body">
 
     <block wx:if="{{loading}}">
       <view class="loading-wrap"><view class="spinner"></view></view>
@@ -14,52 +14,62 @@
 
     <block wx:else>
 
-      <view class="list-header">
-        <text class="list-title">{{lbl_heading}}</text>
-        <text class="list-sub">{{lbl_subtitle}}</text>
+      <!-- HEADER — mismo patrón que how-it-works -->
+      <view class="header-block">
+        <view class="kicker-pill"><text class="kicker">{{lbl_kicker}}</text></view>
+        <text class="headline">{{lbl_heading}}</text>
         <view class="header-divider"></view>
+        <text class="intro">{{lbl_subtitle}}</text>
       </view>
 
-      <view wx:for="{{tiers}}" wx:key="name" class="tier-wrap">
-        <view class="tier-card" bindtap="selectTier" data-tier="{{item.name}}" data-tier-zh="{{item.displayName}}" data-tier-color="{{item.color}}" style="border-color:{{item.color}};">
+      <!-- TIER CARDS — se reparten el alto disponible, sin scroll -->
+      <view class="cards">
+        <view
+          wx:for="{{tiers}}"
+          wx:key="name"
+          class="tier-card"
+          hover-class="tier-card-hover"
+          bindtap="selectTier"
+          data-tier="{{item.name}}"
+          data-tier-zh="{{item.displayName}}"
+          data-tier-color="{{item.color}}"
+          style="border-color:{{item.cardBorder}}; background:linear-gradient(160deg, {{item.tintStrong}} 0%, #13131a 58%);">
 
-          <view class="tier-card-head">
-            <view class="tier-head-left">
-              <text class="tier-icon" style="color:{{item.color}};"></text>
-              <text class="tier-name" style="color:{{item.color}};">{{item.displayName}}</text>
-            </view>
-            <text class="tier-arrow" style="color:{{item.color}};">›</text>
+          <view class="tier-top">
+            <text class="tier-name" style="color:{{item.color}};">{{item.displayName}}</text>
+            <text class="tier-count" style="color:{{item.color}}; background:{{item.tint}}; border-color:{{item.tintBorder}};">{{item.planCount}} {{lbl_plans_available}}</text>
           </view>
 
-          <text class="tier-best-for">{{lbl_best_for}}</text>
+          <view class="tier-stats" wx:if="{{item.kcal}}">
+            <text class="stat-val" style="color:{{item.color}};">{{item.kcal}}</text>
+            <text class="stat-lbl">{{lbl_kcal}}</text>
+            <view class="stat-sep"></view>
+            <text class="stat-val" style="color:{{item.color}};">{{item.protein}}</text>
+            <text class="stat-lbl">{{lbl_protein}}</text>
+          </view>
 
-          <view class="tier-bullets">
-            <view wx:for="{{item.bestFor}}" wx:for-item="point" wx:key="*this" class="tier-bullet-row">
-              <view class="tier-bullet-check" style="border-color:{{item.color}}; color:{{item.color}};">
-                <text>✓</text>
-              </view>
-              <text class="tier-bullet-text">{{point}}</text>
+          <!-- Best for: 3 columnas iguales separadas por líneas finas -->
+          <view class="tier-best" wx:if="{{item.bestFor.length}}" style="background:{{item.tint}}; border-color:{{item.tintBorder}};">
+            <view wx:for="{{item.bestFor}}" wx:for-item="point" wx:key="*this" class="tier-best-col" style="border-left-color:{{item.tintBorder}};">
+              <text class="tier-best-txt">{{point}}</text>
             </view>
           </view>
 
-          <text class="tier-kcal" wx:if="{{item.kcalRange}}">{{item.kcalRange}}</text>
-          <text class="tier-sub">{{item.planCount}} {{lbl_plans_available}}</text>
+          <view class="tier-cta" style="background:{{item.color}}; box-shadow:0 8rpx 28rpx {{item.glow}};">
+            <text class="tier-cta-txt">{{lbl_see_plans}}</text>
+            <text class="tier-cta-arrow">›</text>
+          </view>
         </view>
       </view>
 
-      <view class="hint-wrap">
-        <text class="hint-line"></text>
-        <text class="hint">{{lbl_tap_hint}}</text>
-        <text class="hint-line"></text>
-      </view>
-
-      <view class="bottom-bar">
+      <!-- BOTONES -->
+      <view class="bottom-row">
         <button class="btn-contact" open-type="contact"><text>{{lbl_contact_us}}</text></button>
-        <button class="btn-pdf" bindtap="openBrochure" style="position: relative; left: 0rpx; top: 16rpx">{{lbl_brochure}}</button>
+        <button class="btn-pdf" bindtap="openBrochure">{{lbl_menu_pdf}}</button>
       </view>
 
     </block>
 
-  </scroll-view>
+  </view>
 
 </view>

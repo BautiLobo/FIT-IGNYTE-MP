@@ -1,9 +1,12 @@
 /* app.wxss — FIT IGNYTE global styles */
 
+@import "styles/montserrat.wxss";
+
 page {
   background-color: #0b0b0c;
   color: #f3f3f4;
-  font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif;
+  /* Montserrat para latín; el chino cae en PingFang / fuente del sistema */
+  font-family: 'Montserrat', -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   box-sizing: border-box;
   height: 100%;
@@ -11,6 +14,7 @@ page {
 
 view, text, input, textarea, button {
   box-sizing: border-box;
+  font-family: inherit;
 }
 
 button {

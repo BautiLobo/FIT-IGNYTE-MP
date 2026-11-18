@@ -3,7 +3,7 @@
   <view class="topbar">
     <view class="back-btn" bindtap="goBack"><text class="back-arrow">‹</text></view>
     <text class="topbar-title">{{lbl_topbar}}</text>
-    <view style="width:60rpx;"></view>
+    <view style="width:64rpx;"></view>
   </view>
 
   <view class="content">
@@ -14,37 +14,51 @@
 
     <view class="cal-wrap" wx:else>
 
-      <view class="heading-wrap">
-        <text class="heading">{{lbl_heading}}</text>
-        <text class="heading-sub">{{lbl_subtitle}}</text>
+      <!-- HEADER — mismo diseño que tiers / plans -->
+      <view class="header-block">
+        <view class="kicker-pill"><text class="kicker">{{lbl_kicker}}</text></view>
+        <text class="headline">{{lbl_heading}}</text>
+        <view class="header-divider"></view>
+        <text class="intro">{{lbl_subtitle}}</text>
       </view>
 
-      <view class="counter-pill {{canContinue ? 'counter-pill-done' : ''}}">{{lbl_counter}}</view>
+      <!-- PROGRESO: 5 segmentos + contador -->
+      <view class="progress">
+        <view class="progress-bar">
+          <view wx:for="{{progress}}" wx:key="index" class="progress-seg {{item ? 'progress-seg-on' : ''}} {{canContinue ? 'progress-seg-done' : ''}}"></view>
+        </view>
+        <text class="progress-txt {{canContinue ? 'progress-txt-done' : ''}}">{{lbl_counter}}</text>
+      </view>
 
-      <scroll-view scroll-y class="calendar-scroll">
-
+      <!-- CALENDARIO -->
+      <view class="cal-card">
         <view class="weekday-header">
-          <text wx:for="{{weekdayHeaders}}" wx:key="*this" class="weekday-cell">{{item}}</text>
+          <text wx:for="{{weekdayHeaders}}" wx:key="*this" class="weekday-cell {{index >= 5 ? 'weekday-cell-weekend' : ''}}">{{item}}</text>
         </view>
 
-        <view class="month-group" wx:for="{{monthGroups}}" wx:key="key" wx:for-item="group">
-          <text class="month-label">{{group.label}}</text>
-          <view class="week-row" wx:for="{{group.weeks}}" wx:key="key" wx:for-item="week">
-            <view
-              wx:for="{{week.cells}}"
-              wx:key="dateStr"
-              wx:for-item="cell"
-              class="day-cell day-cell-{{cell.state}}"
-              data-date="{{cell.dateStr}}"
-              data-state="{{cell.state}}"
-              bindtap="toggleDate"
-            >
-              <text>{{cell.dayNum}}</text>
+        <scroll-view scroll-y class="calendar-scroll">
+          <view class="month-group" wx:for="{{monthGroups}}" wx:key="key" wx:for-item="group">
+            <view class="month-row">
+              <text class="month-label">{{group.label}}</text>
+              <view class="month-line"></view>
+            </view>
+            <view class="week-row" wx:for="{{group.weeks}}" wx:key="key" wx:for-item="week">
+              <view
+                wx:for="{{week.cells}}"
+                wx:key="dateStr"
+                wx:for-item="cell"
+                class="day-cell day-cell-{{cell.state}}"
+                hover-class="{{cell.state === 'unavailable' ? 'none' : 'day-cell-hover'}}"
+                data-date="{{cell.dateStr}}"
+                data-state="{{cell.state}}"
+                bindtap="toggleDate"
+              >
+                <text class="day-num">{{cell.dayNum}}</text>
+              </view>
             </view>
           </view>
-        </view>
-
-      </scroll-view>
+        </scroll-view>
+      </view>
 
       <view class="legend">
         <view class="legend-item">
@@ -60,6 +74,8 @@
           <text>{{lbl_legend_unavailable}}</text>
         </view>
       </view>
+
+      <view class="spacer"></view>
 
       <button class="btn-primary {{!canContinue ? 'btn-disabled' : ''}}" bindtap="goNext">{{lbl_continue}}</button>
 

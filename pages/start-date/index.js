@@ -26,6 +26,11 @@ function monthLabel(date) {
   return `${MONTH_NAMES_EN[date.getMonth()]} ${date.getFullYear()}`;
 }
 
+// Segmentos de la barra de progreso (uno por día a elegir)
+function progressOf(count) {
+  return Array.from({ length: DELIVERY_DAYS_COUNT }, (_, i) => i < count);
+}
+
 Page({
   data: {
     loading: true,
@@ -44,6 +49,8 @@ Page({
     lbl_legend_available: '',
     lbl_legend_unavailable: '',
     lbl_continue: '',
+    lbl_kicker: '',
+    progress: [false, false, false, false, false],
   },
 
   // Fuera de `data`: no necesita re-render, solo lo usa toggleDate().
@@ -58,6 +65,7 @@ Page({
       lbl_legend_available: t('start_date_legend_available'),
       lbl_legend_unavailable: t('start_date_legend_unavailable'),
       lbl_continue: t('start_date_continue'),
+      lbl_kicker: t('start_date_kicker'),
     });
     const fromRenewal = options.from === 'renewal';
     this.setData({ fromRenewal });
@@ -106,6 +114,7 @@ Page({
       selectedCount: defaultSelected.length,
       canContinue: defaultSelected.length === DELIVERY_DAYS_COUNT,
       lbl_counter: t('start_date_counter', defaultSelected.length),
+      progress: progressOf(defaultSelected.length),
       monthGroups: this.buildMonthGroups(minStr, windowDates, defaultSelected),
     });
   },
@@ -195,6 +204,7 @@ Page({
       selectedCount: selectedDates.length,
       canContinue: selectedDates.length === DELIVERY_DAYS_COUNT,
       lbl_counter: t('start_date_counter', selectedDates.length),
+      progress: progressOf(selectedDates.length),
       monthGroups: this.buildMonthGroups(this.data.minDate, this.windowDates, selectedDates),
     });
   },

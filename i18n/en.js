@@ -64,6 +64,11 @@ module.exports = {
   tiers_plans_available: 'plans available',
   tiers_tap_hint: 'Tap a goal to see plans',
   tiers_brochure: '☰  View full menu PDF',
+  tiers_see_plans: 'See plans',
+  tiers_kicker: 'STEP 1 · YOUR GOAL',
+  tiers_kcal_label: 'kcal / meal',
+  tiers_protein_label: 'protein / meal',
+  tiers_menu_pdf: 'View full menu PDF',
   tiers_best_for: 'Best for:',
   tiers_performance_1: 'Active Lifestyles',
   tiers_performance_2: 'Building Muscle',
@@ -76,7 +81,12 @@ module.exports = {
 
   // ── PLANS ──────────────────────────────────────────────────
   plans_title: 'Choose your plan',
-  plans_subtitle: 'All include Mon-Fri delivery',
+  plans_subtitle: 'Delivered Mon–Fri',
+  plans_kicker: 'STEP 2 · YOUR PLAN',
+  plans_kcal_day_label: 'kcal / day',
+  plans_protein_day_label: 'protein / day',
+  plans_meal_per_day_1: '%s meal per day',
+  plans_meal_per_day_n: '%s meals per day',
   plans_most_popular: 'MOST POPULAR',
   plans_meals_per_day: 'meal(s) / day',
   plans_hook_balance_1: 'An easy way to eat better every day',
@@ -185,8 +195,9 @@ module.exports = {
 
   // ── START-DATE (delivery-days calendar) ─────────────────────
   start_date_topbar: 'Delivery days',
+  start_date_kicker: 'STEP 3 · DELIVERY DAYS',
   start_date_heading: 'Select your delivery days',
-  start_date_subtitle: 'Choose 5 days — weekdays only, no public holidays',
+  start_date_subtitle: 'Pick 5 weekdays for your deliveries. We don’t deliver on weekends or public holidays.',
   start_date_counter: '%s/5 days selected',
   start_date_legend_selected: 'Selected',
   start_date_legend_available: 'Available',

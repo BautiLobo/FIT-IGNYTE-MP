@@ -1,159 +1,70 @@
-/* pages/plans/index.wxss */
+/* pages/plans/index.wxss — "Choose your plan" (mismo lenguaje que pages/tiers) */
 
-.container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  background: #0b0b0c;
-  overflow: hidden;
+page { background:#0b0b0c; }
+
+.container { display:flex; flex-direction:column; height:100vh; background:#0b0b0c; overflow:hidden; }
+
+/* ── TOPBAR ── */
+.topbar { background:#0b0b0c; padding:80rpx 32rpx 24rpx; border-bottom:1rpx solid #1a1a22; display:flex; align-items:center; flex-shrink:0; }
+.back-btn { width:64rpx; height:64rpx; background:#1a1a22; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.back-arrow { font-size:40rpx; color:#f3f3f4; line-height:1; }
+.topbar-title { flex:1; text-align:center; font-size:34rpx; font-weight:800; color:#f3f3f4; }
+
+/* ── SCROLL (con 3 planes entra sin scrollear; sin tier se listan los 6) ── */
+.scroll { flex:1; min-height:0; box-sizing:border-box; overflow-x:hidden; }
+.scroll-inner { display:flex; flex-direction:column; padding:24rpx 32rpx; padding-bottom:calc(32rpx + env(safe-area-inset-bottom)); box-sizing:border-box; }
+
+.loading-wrap { display:flex; justify-content:center; padding:80rpx 0; }
+.spinner { width:48rpx; height:48rpx; border:4rpx solid #2a2a33; border-top-color:#e8342a; border-radius:50%; animation:spin 0.8s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* ── HEADER — igual que tiers ── */
+.header-block { display:flex; flex-direction:column; align-items:center; margin-bottom:28rpx; }
+.kicker-pill { background:rgba(232,52,42,0.12); border:1rpx solid rgba(232,52,42,0.35); border-radius:100rpx; padding:8rpx 20rpx; }
+.kicker { font-size:19rpx; color:#e8342a; font-weight:800; letter-spacing:4rpx; text-transform:uppercase; display:block; line-height:1.2; }
+.headline {
+  font-size:62rpx; font-weight:900; font-style:italic; letter-spacing:-2rpx; text-transform:uppercase;
+  color:#f3f3f4; line-height:1.05; display:block; text-align:center; margin-top:18rpx;
+  text-shadow:0 6rpx 28rpx rgba(232,52,42,0.18);
 }
+.header-divider { width:56rpx; height:6rpx; background:#e8342a; border-radius:6rpx; margin-top:16rpx; }
+.intro { font-size:25rpx; font-weight:500; color:#9a9aa3; line-height:1.45; letter-spacing:0.3rpx; display:block; text-align:center; margin-top:14rpx; max-width:540rpx; }
 
-.topbar {
-  background: #0b0b0c;
-  padding: 80rpx 28rpx 20rpx;
-  border-bottom: 1rpx solid #1a1a22;
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-.back-btn {
-  width: 60rpx;
-  height: 60rpx;
-  background: #1a1a22;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.back-arrow { font-size: 36rpx; color: #f3f3f4; font-weight: 300; }
-.topbar-title { flex: 1; text-align: center; font-size: 32rpx; font-weight: 800; color: #f3f3f4; }
-
-.scroll { flex: 1; padding: 20rpx 24rpx; box-sizing: border-box; overflow-x: hidden; }
-
-.loading-wrap { display: flex; justify-content: center; padding: 80rpx 0; }
-.spinner { width: 48rpx; height: 48rpx; border: 4rpx solid #2a2a33; border-top-color: #e8342a; border-radius: 50%; animation: spin 0.8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ── LIST HEADER — mismo estilo que how-it-works ── */
-.list-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10rpx;
-  margin-bottom: 28rpx;
-  padding: 16rpx 0 0;
-}
-
-.list-title {
-  font-size: 52rpx;
-  font-weight: 800;
-  font-style: italic;
-  color: #f3f3f4;
-  line-height: 1.2;
-  display: block;
-  text-align: center;
-  text-transform: uppercase;
-}
-
-.list-sub {
-  font-size: 26rpx;
-  color: #9a9aa3;
-  line-height: 1.45;
-  display: block;
-  text-align: center;
-  max-width: 580rpx;
-}
-
-.header-divider {
-  width: 64rpx;
-  height: 5rpx;
-  background: #e8342a;
-  border-radius: 4rpx;
-  margin-top: 10rpx;
-}
-
-/* ── PLAN CARDS ── */
-.plan-wrap { margin-bottom: 16rpx; }
-
-.popular-badge {
-  background: #1a0a2a;
-  color: #A78BFA;
-  font-size: 18rpx;
-  font-weight: 700;
-  letter-spacing: 2rpx;
-  padding: 6rpx 16rpx;
-  border-radius: 8rpx;
-  display: inline-block;
-  margin-bottom: 6rpx;
-}
-
+/* ── PLAN CARD ── */
 .plan-card {
-  background: #13131a;
-  border: 1rpx solid #2a2a33;
-  border-left: 4rpx solid;
-  border-radius: 20rpx;
-  padding: 28rpx 24rpx;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-sizing: border-box;
-  width: 100%;
+  background:#13131a;
+  border:2rpx solid #2a2a33;
+  border-radius:24rpx;
+  padding:30rpx 30rpx;
+  margin-bottom:22rpx;
+  display:flex;
+  flex-direction:column;
+  box-sizing:border-box;
+  width:100%;
+  transition:transform .12s, opacity .12s;
 }
+.plan-card-hover { transform:scale(0.985); opacity:0.9; }
 
-.plan-card-popular {
-  border-color: #A78BFA;
-  border-left-color: #A78BFA;
-}
+.plan-top { display:flex; align-items:flex-start; justify-content:space-between; gap:16rpx; }
+.plan-title-wrap { flex:1; min-width:0; display:flex; flex-direction:column; }
 
-/* Renovación: el plan que el cliente está corriendo hoy. Mismo peso visual
-   que "más popular" -- es una referencia, no una recomendación, y confirmarlo
-   tiene que costar lo mismo que elegir otro. */
-.current-badge {
-  background: #0a1f14;
-  color: #34D399;
-  font-size: 18rpx;
-  font-weight: 700;
-  letter-spacing: 2rpx;
-  padding: 6rpx 16rpx;
-  border-radius: 8rpx;
-  display: inline-block;
-  margin-bottom: 6rpx;
-}
+.plan-badges { display:flex; margin-bottom:8rpx; }
+.badge { font-size:20rpx; font-weight:800; letter-spacing:2rpx; text-transform:uppercase; padding:6rpx 14rpx; border-radius:100rpx; }
+.badge-current { color:#34D399; background:rgba(52,211,153,0.12); border:1rpx solid rgba(52,211,153,0.45); }
+.badge-popular { color:#A78BFA; background:rgba(167,139,250,0.12); border:1rpx solid rgba(167,139,250,0.45); }
 
-.plan-card-current {
-  border-color: #34D399;
-}
+.plan-name { font-size:50rpx; font-weight:800; font-style:italic; text-transform:uppercase; letter-spacing:-1rpx; line-height:1.1; }
+.plan-meals { font-size:24rpx; font-weight:800; letter-spacing:2rpx; text-transform:uppercase; color:#9a9aa3; margin-top:8rpx; }
 
-.plan-left { display: flex; flex-direction: column; gap: 4rpx; flex: 1; overflow: hidden; }
-.plan-category { font-size: 20rpx; font-weight: 700; letter-spacing: 2rpx; text-transform: uppercase; }
-.plan-name { font-size: 36rpx; font-weight: 800; color: #f3f3f4; }
-.plan-meals { font-size: 24rpx; color: #beb6b6; }
+.plan-price-wrap { flex-shrink:0; display:flex; align-items:baseline; }
+.plan-price { font-size:58rpx; font-weight:900; letter-spacing:-1rpx; line-height:1.1; }
+.plan-period { font-size:26rpx; font-weight:700; color:#9a9aa3; margin-left:4rpx; }
 
-.plan-right { display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; }
-.plan-price { font-size: 48rpx; font-weight: 800; }
-.plan-period { font-size: 22rpx; color: #beb6b6; }
+.plan-hook { display:block; font-size:28rpx; font-weight:500; color:#9a9aa3; line-height:1.4; margin-top:16rpx; }
 
-/* ── HINT ── */
-.hint-wrap {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
-  padding: 32rpx 4rpx 60rpx;
-}
-
-.hint-line {
-  flex: 1;
-  height: 1rpx;
-  background: #beb6b6;
-  display: block;
-}
-
-.hint {
-  font-size: 22rpx;
-  color: #beb6b6;
-  white-space: nowrap;
-}
-
-.plan-kcal { font-size: 20rpx; color:#beb6b6; display: block; margin-top: 2rpx; }
+/* kcal / proteína por día — misma grilla resaltada que el "Best for" de tiers */
+.plan-stats { display:flex; align-items:stretch; margin-top:20rpx; padding:18rpx 0; border:1rpx solid; border-radius:16rpx; }
+.stat-col { flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4rpx; border-left:1rpx solid; }
+.stat-col:first-child { border-left:none !important; }
+.stat-val { font-size:38rpx; font-weight:800; color:#f3f3f4; line-height:1.15; }
+.stat-lbl { font-size:21rpx; font-weight:700; letter-spacing:1rpx; text-transform:uppercase; color:#9a9aa3; }
