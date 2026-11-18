@@ -47,8 +47,15 @@
             <text class="step-tag">{{lbl_step2_tag}}</text>
           </view>
           <text class="step-desc">{{lbl_step2_desc}}</text>
-          <view class="meal-strip" wx:if="{{photos.length}}">
-            <image wx:for="{{photos}}" wx:key="*this" class="meal-strip-img" src="{{item}}" mode="aspectFill" />
+          <!-- Carrusel de platos: se desliza solo en loop -->
+          <view class="carousel" wx:if="{{photos.length}}">
+            <view class="carousel-track">
+              <view wx:for="{{photos}}" wx:key="key" class="bubble">
+                <image class="bubble-img" src="{{item.url}}" mode="aspectFill" />
+              </view>
+            </view>
+            <view class="carousel-fade carousel-fade-l"></view>
+            <view class="carousel-fade carousel-fade-r"></view>
           </view>
         </view>
       </view>

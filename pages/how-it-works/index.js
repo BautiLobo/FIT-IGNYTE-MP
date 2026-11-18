@@ -33,8 +33,9 @@ Page({
     this.loadPhotos();
   },
 
-  // 4 fotos al azar de platos (no snacks) para mostrar la comida real en el
-  // paso 2. Si falla o no hay fotos, la tira no se muestra.
+  // Fotos de platos (no snacks) para el carrusel del paso 2. La lista va
+  // duplicada para que la animación (-50%) haga el loop sin salto.
+  // Si falla o no hay fotos, el carrusel no se muestra.
   async loadPhotos() {
     try {
       const rows = await app.supabase('GET', 'meal_library', null, 'select=photo_url&is_snack=eq.false&photo_url=neq.&limit=60');
@@ -43,11 +44,15 @@ Page({
         const j = Math.floor(Math.random() * (i + 1));
         [urls[i], urls[j]] = [urls[j], urls[i]];
       }
-      this.setData({ photos: urls.slice(0, 4) });
+      const pick = urls.slice(0, 8);
+      if (pick.length < 3) return;
+      const photos = pick.concat(pick).map((url, i) => ({ url, key: i }));
+      this.setData({ photos });
     } catch (err) {
       console.error('[how-it-works] photos error:', err);
     }
   },
+
 
   goBack() {
     wx.navigateBack();
