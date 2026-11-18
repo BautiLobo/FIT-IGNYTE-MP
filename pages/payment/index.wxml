@@ -98,7 +98,10 @@
 
     <text class="pay-hint">{{lbl_renewal_note}}</text>
 
-    <button class="btn-secondary" open-type="contact">{{lbl_contact_btn}}</button>
+    <view class="contact-link-row btn-mb">
+      <text class="contact-link-q">{{lbl_any_doubt}}</text>
+      <button class="contact-link" hover-class="contact-link-hover" open-type="contact">{{lbl_contact_btn}}</button>
+    </view>
 
     <!-- Start over: solo en alta nueva, no en renovación -->
     <button class="btn-secondary" wx:if="{{!fromRenewal}}" bindtap="startOver">{{lbl_start_over_btn}}</button>

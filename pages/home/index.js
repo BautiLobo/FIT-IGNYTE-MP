@@ -53,6 +53,7 @@ Page({
       lbl_fat: t('meal_select_fat'),
       lbl_contact: t('home_contact'),
       lbl_view_menu: t('home_view_menu'),
+      lbl_any_doubt: t('how_any_doubt'),
       lbl_renewal_title: t('home_renewal_title'),
       lbl_renewal_btn: t('home_renewal_btn'),
       lbl_renewal_pending_title: t('home_renewal_pending_title'),

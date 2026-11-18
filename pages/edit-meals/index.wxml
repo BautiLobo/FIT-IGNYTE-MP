@@ -98,17 +98,16 @@
         <!-- Horario + notas + guardar: cuando el día está completo -->
         <block wx:if="{{dayConfirmed}}">
 
+          <!-- Horario + notas en una sola tarjeta compacta -->
           <view class="section-card">
-            <text class="section-label">{{lbl_delivery_time}}</text>
             <picker mode="time" value="{{selectedTime}}" start="10:15" end="19:30" bindchange="onTimeChange">
-              <view class="time-display">
+              <view class="time-row">
+                <text class="section-label section-label-inline">{{lbl_delivery_time}}</text>
                 <text class="time-value">{{selectedTime}}</text>
                 <view class="time-change"><text>{{lbl_tap_to_change}}</text></view>
               </view>
             </picker>
-          </view>
-
-          <view class="section-card">
+            <view class="section-sep"></view>
             <text class="section-label">{{lbl_notes}}</text>
             <textarea class="notes-input" placeholder="{{lbl_notes_placeholder}}" placeholder-class="notes-ph" value="{{currentNotes}}" bindinput="onNotesInput" auto-height />
           </view>

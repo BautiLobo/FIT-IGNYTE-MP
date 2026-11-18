@@ -49,7 +49,9 @@
   </scroll-view>
 
   <view class="footer">
-    <button class="btn-secondary" open-type="contact">{{lbl_feedback}}</button>
+    <view class="contact-link-row">
+      <button class="contact-link" hover-class="contact-link-hover" open-type="contact">{{lbl_feedback}}</button>
+    </view>
   </view>
 
 </view>

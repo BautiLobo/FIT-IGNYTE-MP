@@ -208,6 +208,7 @@ Page({
       lbl_discount_row: t('payment_discount_row'),
       lbl_discount_applied: t('payment_discount_applied'),
       lbl_contact_btn: t('payment_contact_btn'),
+      lbl_any_doubt: t('how_any_doubt'),
       lbl_start_over_btn: t('payment_start_over_btn'),
       lbl_start_over_title: t('payment_start_over_title'),
       lbl_start_over_body: t('payment_start_over_body'),

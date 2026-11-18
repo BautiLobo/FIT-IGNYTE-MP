@@ -52,7 +52,9 @@
   </scroll-view>
 
   <view class="bottom-bar">
-    <button class="btn-outline" open-type="contact">{{lbl_contact}}</button>
+    <view class="contact-link-row">
+      <button class="contact-link" hover-class="contact-link-hover" open-type="contact">{{lbl_contact}}</button>
+    </view>
     <text class="hint">{{lbl_eta}}</text>
   </view>
 

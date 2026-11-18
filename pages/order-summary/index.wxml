@@ -40,7 +40,11 @@
     </view>
 
     <!-- Menú completo en PDF (mismo botón que tiers) -->
-    <button class="btn-pdf" bindtap="openBrochure">{{lbl_brochure}}</button>
+    <view class="menu-btn btn-mb" hover-class="menu-btn-hover" bindtap="openBrochure">
+      <view class="menu-btn-icon"><view class="doc"><view class="doc-line"></view><view class="doc-line"></view><view class="doc-line doc-line-short"></view></view></view>
+      <view class="sbtn-body"><text class="sbtn-title">{{lbl_brochure}}</text></view>
+      <text class="sbtn-arrow menu-btn-arrow">›</text>
+    </view>
 
     <!-- Dirección: no se muestra en renovación (ya validada en el alta) -->
     <view class="card address-card" wx:if="{{!fromRenewal}}">

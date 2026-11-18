@@ -79,11 +79,6 @@ page { background:#0b0b0c; height:100%; overflow:hidden; }
   letter-spacing:-1rpx;
   line-height:1.1;
 }
-.tier-count {
-  flex-shrink:0;
-  font-size:20rpx; font-weight:800; letter-spacing:1rpx; text-transform:uppercase;
-  padding:6rpx 16rpx; border-radius:100rpx; border:1rpx solid;
-}
 
 /* kcal / proteína en una línea */
 .tier-stats { display:flex; align-items:baseline; flex-wrap:wrap; margin-top:12rpx; }
@@ -127,33 +122,4 @@ page { background:#0b0b0c; height:100%; overflow:hidden; }
 .tier-cta-arrow { font-size:38rpx; font-weight:700; color:#0b0b0c; line-height:1; margin-top:-4rpx; }
 
 /* ── BOTONES ── */
-.bottom-row { display:flex; gap:16rpx; margin-top:20rpx; flex-shrink:0; }
-button { margin:0 !important; padding:0 !important; background:transparent; border:none; }
-.btn-contact {
-  flex:1;
-  background:#13131a !important;
-  border:1rpx solid #2a2a33 !important;
-  border-radius:20rpx !important;
-  height:84rpx;
-  line-height:84rpx;
-  text-align:center;
-  box-sizing:border-box;
-  display:block;
-}
-.btn-contact::after { border:none; }
-.btn-contact text { font-size:26rpx; font-weight:700; color:#f3f3f4; }
-/* mismos colores que el botón PDF de home y order-summary */
-.btn-pdf {
-  flex:1;
-  background:rgba(167,139,250,0.12) !important;
-  border:2rpx solid #e8342a !important;
-  border-radius:20rpx !important;
-  height:84rpx;
-  line-height:80rpx;
-  color:#e8342a !important;
-  font-size:26rpx !important;
-  font-weight:800 !important;
-  text-align:center;
-  box-sizing:border-box;
-  display:block;
-}
+.bottom-row { margin-top:20rpx; flex-shrink:0; }

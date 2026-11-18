@@ -95,9 +95,9 @@
       <button class="btn-start" bindtap="getStarted">{{lbl_get_started}}</button>
     </view>
 
-    <view class="contact-row">
-      <text class="contact-q">{{lbl_any_doubt}}</text>
-      <button class="contact-link" open-type="contact">{{lbl_contact_us}}</button>
+    <view class="contact-link-row btn-mt">
+      <text class="contact-link-q">{{lbl_any_doubt}}</text>
+      <button class="contact-link" hover-class="contact-link-hover" open-type="contact">{{lbl_contact_us}}</button>
     </view>
 
    </view>

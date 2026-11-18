@@ -85,9 +85,3 @@ button { margin:0 !important; padding:0 !important; background:transparent; bord
 .carousel-fade { position:absolute; top:0; bottom:0; width:48rpx; z-index:2; }
 .carousel-fade-l { left:0; background:linear-gradient(90deg, #15141b, rgba(21,20,27,0)); }
 .carousel-fade-r { right:0; background:linear-gradient(270deg, #13131a, rgba(19,19,26,0)); }
-
-/* ── CONTACTO ── */
-.contact-row { display:flex; justify-content:center; align-items:center; gap:10rpx; margin-top:18rpx; }
-.contact-q { font-size:24rpx; font-weight:600; color:#9a9aa3; }
-.contact-link { display:inline-block !important; width:auto !important; font-size:24rpx !important; font-weight:800 !important; color:#e8342a !important; line-height:1.4 !important; text-decoration:underline; }
-.contact-link::after { border:none; }

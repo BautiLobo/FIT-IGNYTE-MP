@@ -100,8 +100,15 @@
       </view>
 
       <view class="btn-wrap">
-        <button class="btn-pdf" bindtap="viewMenu">{{lbl_view_menu}}</button>
-        <button class="btn-secondary" open-type="contact">{{lbl_contact}}</button>
+        <view class="menu-btn" hover-class="menu-btn-hover" bindtap="viewMenu">
+          <view class="menu-btn-icon"><view class="doc"><view class="doc-line"></view><view class="doc-line"></view><view class="doc-line doc-line-short"></view></view></view>
+          <view class="sbtn-body"><text class="sbtn-title">{{lbl_view_menu}}</text></view>
+          <text class="sbtn-arrow menu-btn-arrow">›</text>
+        </view>
+        <view class="contact-link-row btn-mt">
+          <text class="contact-link-q">{{lbl_any_doubt}}</text>
+          <button class="contact-link" hover-class="contact-link-hover" open-type="contact">{{lbl_contact}}</button>
+        </view>
       </view>
 
     </block>

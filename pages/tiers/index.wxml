@@ -37,7 +37,6 @@
 
           <view class="tier-top">
             <text class="tier-name" style="color:{{item.color}};">{{item.displayName}}</text>
-            <text class="tier-count" style="color:{{item.color}}; background:{{item.tint}}; border-color:{{item.tintBorder}};">{{item.planCount}} {{lbl_plans_available}}</text>
           </view>
 
           <view class="tier-stats" wx:if="{{item.kcal}}">
@@ -64,8 +63,11 @@
 
       <!-- BOTONES -->
       <view class="bottom-row">
-        <button class="btn-contact" open-type="contact"><text>{{lbl_contact_us}}</text></button>
-        <button class="btn-pdf" bindtap="openBrochure">{{lbl_menu_pdf}}</button>
+        <view class="menu-btn" hover-class="menu-btn-hover" bindtap="openBrochure">
+          <view class="menu-btn-icon"><view class="doc"><view class="doc-line"></view><view class="doc-line"></view><view class="doc-line doc-line-short"></view></view></view>
+          <view class="sbtn-body"><text class="sbtn-title">{{lbl_menu_pdf}}</text></view>
+          <text class="sbtn-arrow menu-btn-arrow">›</text>
+        </view>
       </view>
 
     </block>
