@@ -12,6 +12,7 @@ Page({
     lbl_get_started: '',
     lbl_any_doubt: '',
     lbl_contact_us: '',
+    photos: [],
   },
 
   onLoad() {
@@ -29,6 +30,23 @@ Page({
       lbl_any_doubt: t('how_any_doubt'),
       lbl_contact_us: t('how_contact_us'),
     });
+    this.loadPhotos();
+  },
+
+  // 4 fotos al azar de platos (no snacks) para mostrar la comida real en el
+  // paso 2. Si falla o no hay fotos, la tira no se muestra.
+  async loadPhotos() {
+    try {
+      const rows = await app.supabase('GET', 'meal_library', null, 'select=photo_url&is_snack=eq.false&photo_url=neq.&limit=60');
+      const urls = (rows || []).map(r => r.photo_url).filter(Boolean);
+      for (let i = urls.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [urls[i], urls[j]] = [urls[j], urls[i]];
+      }
+      this.setData({ photos: urls.slice(0, 4) });
+    } catch (err) {
+      console.error('[how-it-works] photos error:', err);
+    }
   },
 
   goBack() {

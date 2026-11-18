@@ -1,85 +1,123 @@
-/* pages/home/index.wxss */
+/* pages/home/index.wxss — mismo lenguaje que tiers / plans / meal-select */
+
+page { background:#0b0b0c; }
 
 .container { display:flex; flex-direction:column; height:100vh; background:#0b0b0c; overflow:hidden; }
 
 /* ── TOPBAR ── */
-.topbar { background:#0b0b0c; padding:80rpx 28rpx 20rpx; border-bottom:1rpx solid #1a1a22; flex-shrink:0; display:flex; justify-content:space-between; align-items:center; box-sizing:border-box; width:100%; }
-.topbar-logo { width:200rpx; height:52rpx; }
-.profile-btn { width:60rpx; height:60rpx; background:#1a1a22; border:1rpx solid #2a2a33; border-radius:50%; display:flex; align-items:center; justify-content:center; }
-.profile-icon { font-size:28rpx; }
+.topbar { background:#0b0b0c; padding:80rpx 32rpx 20rpx; border-bottom:1rpx solid #1a1a22; flex-shrink:0; display:flex; justify-content:space-between; align-items:center; box-sizing:border-box; width:100%; }
+.topbar-logo { width:56rpx; height:72rpx; }
+.profile-btn { width:64rpx; height:64rpx; background:#1a1a22; border:1rpx solid #2a2a33; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.profile-icon { font-size:26rpx; font-weight:900; font-style:italic; color:#f3f3f4; }
 
 /* ── SCROLL ── */
-.scroll { flex:1; padding:24rpx 28rpx; box-sizing:border-box; overflow-x:hidden; }
+.scroll { flex:1; min-height:0; box-sizing:border-box; overflow-x:hidden; }
+.scroll-inner { padding:28rpx 32rpx; padding-bottom:calc(40rpx + env(safe-area-inset-bottom)); box-sizing:border-box; }
 .loading-wrap { display:flex; justify-content:center; padding:80rpx 0; }
 .spinner { width:48rpx; height:48rpx; border:4rpx solid #2a2a33; border-top-color:#e8342a; border-radius:50%; animation:spin 0.8s linear infinite; }
 @keyframes spin { to { transform:rotate(360deg); } }
 
-/* ── NOTIFICATION BANNER ── */
-.notif-banner { background:linear-gradient(135deg, #2a1416, #1a1014); border:1rpx solid #e8342a; border-left:6rpx solid #e8342a; border-radius:20rpx; padding:24rpx 22rpx; display:flex; align-items:flex-start; gap:18rpx; margin-bottom:18rpx; box-shadow:0 4rpx 20rpx rgba(232,52,42,0.25); }
-.notif-banner-icon { font-size:36rpx; flex-shrink:0; line-height:1; margin-top:2rpx; }
-.notif-banner-body { flex:1; }
-.notif-banner-title { font-size:30rpx; font-weight:900; color:#ffffff; display:block; }
-.notif-banner-message { font-size:26rpx; color:#beb6b6; display:block; margin-top:8rpx; line-height:1.5; }
-.notif-banner-close { font-size:28rpx; color:#beb6b6; flex-shrink:0; padding:0 4rpx; }
+/* ── NOTIFICACIONES ── */
+.notif-banner {
+  background:linear-gradient(160deg, rgba(232,52,42,0.20) 0%, #13131a 65%);
+  border:2rpx solid rgba(232,52,42,0.55); border-radius:22rpx;
+  padding:22rpx 24rpx; display:flex; align-items:flex-start; gap:18rpx; margin-bottom:18rpx;
+  box-shadow:0 6rpx 24rpx rgba(232,52,42,0.2);
+}
+.notif-banner-body { flex:1; min-width:0; }
+.notif-banner-title { font-size:28rpx; font-weight:900; font-style:italic; text-transform:uppercase; letter-spacing:-0.3rpx; color:#fff; display:block; }
+.notif-banner-message { font-size:25rpx; color:#9a9aa3; display:block; margin-top:8rpx; line-height:1.5; }
+.notif-banner-close { font-size:26rpx; color:#9a9aa3; flex-shrink:0; padding:0 4rpx; }
 
-/* ── GREETING ── */
-.greeting-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:24rpx; overflow:hidden; }
-.greeting-name { font-size:52rpx; font-weight:900; font-style:italic; color:#f3f3f4; display:block; }
-.greeting-sub { font-size:22rpx; color:#beb6b6; display:block; margin-top:6rpx; letter-spacing:2rpx; }
-.plan-color { color:#e8342a; font-weight:700; }
+/* ── SALUDO ── */
+.greeting-row { display:flex; justify-content:space-between; align-items:center; gap:16rpx; margin-bottom:26rpx; }
+.greeting-info { flex:1; min-width:0; }
+.greeting-name {
+  font-size:56rpx; font-weight:900; font-style:italic; letter-spacing:-1.5rpx; text-transform:uppercase;
+  color:#f3f3f4; line-height:1.08; display:block;
+  text-shadow:0 6rpx 28rpx rgba(232,52,42,0.18);
+}
+.greeting-plan { font-size:21rpx; font-weight:800; letter-spacing:2rpx; text-transform:uppercase; color:#e8342a; display:block; margin-top:8rpx; }
 
-.status-badge { background:#052e16; border:1rpx solid #166534; border-radius:100rpx; padding:10rpx 16rpx; display:flex; align-items:center; gap:6rpx; flex-shrink:0; }
-.status-badge-upcoming { background:#2a1a05; border-color:#92660a; }
+.status-badge { flex-shrink:0; display:flex; align-items:center; gap:10rpx; background:rgba(52,211,153,0.10); border:1rpx solid rgba(52,211,153,0.45); border-radius:100rpx; padding:10rpx 18rpx; }
+.status-dot { width:12rpx; height:12rpx; border-radius:50%; background:#34D399; box-shadow:0 0 10rpx rgba(52,211,153,0.8); }
+.status-text { font-size:19rpx; font-weight:800; letter-spacing:2rpx; text-transform:uppercase; color:#34D399; }
+.status-badge-upcoming { background:rgba(234,179,8,0.10); border-color:rgba(234,179,8,0.45); }
+.status-badge-upcoming .status-dot { background:#eab308; box-shadow:0 0 10rpx rgba(234,179,8,0.8); }
 .status-badge-upcoming .status-text { color:#eab308; }
-.delivery-banner-upcoming { background:#2a1a05; border-color:#92660a; }
-.delivery-banner-upcoming .delivery-banner-title { color:#eab308; }
-.delivery-banner-upcoming .delivery-banner-sub { color:#a08030; }
-.status-check { font-size:20rpx; color:#4ade80; }
-.status-text { font-size:20rpx; font-weight:800; color:#4ade80; letter-spacing:2rpx; }
 
-/* ── DELIVERY BANNER ── */
-.delivery-banner { background:#052e16; border:1rpx solid #166534; border-radius:20rpx; padding:24rpx; display:flex; gap:20rpx; align-items:center; margin-bottom:20rpx; }
-.delivery-banner-icon-wrap { width:64rpx; height:64rpx; background:rgba(74,222,128,0.15); border-radius:16rpx; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-.delivery-banner-icon { font-size:32rpx; }
-.delivery-banner-title { font-size:30rpx; font-weight:800; color:#4ade80; display:block; }
-.delivery-banner-sub { font-size:24rpx; color:#5d7a5d; display:block; margin-top:4rpx; }
+/* ── BANNERS ── */
+.banner { border:2rpx solid; border-radius:22rpx; padding:22rpx 24rpx; margin-bottom:18rpx; }
+.banner-title { font-size:28rpx; font-weight:900; font-style:italic; text-transform:uppercase; letter-spacing:-0.3rpx; display:block; }
+.banner-sub { font-size:24rpx; font-weight:500; color:#9a9aa3; display:block; margin-top:6rpx; line-height:1.45; }
+.banner-green { background:linear-gradient(160deg, rgba(52,211,153,0.14) 0%, #13131a 65%); border-color:rgba(52,211,153,0.45); }
+.banner-green .banner-title { color:#34D399; }
+.banner-amber { background:linear-gradient(160deg, rgba(234,179,8,0.14) 0%, #13131a 65%); border-color:rgba(234,179,8,0.45); }
+.banner-amber .banner-title { color:#eab308; }
 
-/* ── MEALS CARD ── */
-.meals-card { background:#13131a; border:1rpx solid #1a1a22; border-radius:20rpx; overflow:hidden; margin-bottom:20rpx; }
+/* ── RENOVACIÓN ── */
+.renewal-card {
+  background:linear-gradient(160deg, rgba(232,52,42,0.16) 0%, #13131a 60%);
+  border:2rpx solid rgba(232,52,42,0.5); border-radius:22rpx;
+  padding:22rpx 24rpx; display:flex; align-items:center; justify-content:space-between; gap:16rpx; margin-bottom:18rpx;
+  transition:transform .12s;
+}
+.card-hover { transform:scale(0.985); }
+.renewal-body { flex:1; min-width:0; }
+.renewal-title { font-size:28rpx; font-weight:900; font-style:italic; text-transform:uppercase; letter-spacing:-0.3rpx; color:#f3f3f4; display:block; }
+.renewal-sub { font-size:23rpx; color:#9a9aa3; display:block; margin-top:6rpx; line-height:1.4; }
+.renewal-btn { flex-shrink:0; background:#e8342a; border-radius:100rpx; padding:14rpx 26rpx; box-shadow:0 6rpx 20rpx rgba(232,52,42,0.4); }
+.renewal-btn-text { font-size:23rpx; font-weight:800; color:#fff; }
+
+/* ── COMIDAS DE LA SEMANA ── */
+.meals-card { background:#13131a; border:2rpx solid #2a2a33; border-radius:22rpx; overflow:hidden; margin-bottom:24rpx; }
 .meals-card-header { padding:20rpx 24rpx; border-bottom:1rpx solid #1a1a22; display:flex; justify-content:space-between; align-items:center; }
-.meals-card-label { font-size:20rpx; color:#beb6b6; letter-spacing:3rpx; font-weight:700; }
-.meals-card-view { display:flex; align-items:center; }
-.meals-card-view-text { font-size:26rpx; color:#e8342a; font-weight:700; }
-.meals-card-view-arrow { font-size:32rpx; color:#e8342a; font-weight:300; }
+.meals-card-label { font-size:20rpx; font-weight:800; letter-spacing:3rpx; text-transform:uppercase; color:#9a9aa3; }
+.meals-card-edit { background:rgba(232,52,42,0.12); border:1rpx solid rgba(232,52,42,0.35); border-radius:100rpx; padding:8rpx 22rpx; }
+.meals-card-edit text { font-size:21rpx; font-weight:800; color:#e8342a; }
 
-.week-row { display:flex; align-items:flex-start; gap:16rpx; padding:22rpx 24rpx; border-bottom:1rpx solid #6d6d72; }
+.week-row { display:flex; align-items:flex-start; gap:16rpx; padding:20rpx 24rpx; border-bottom:1rpx solid #1a1a22; }
 .week-row-last { border-bottom:none; }
-.week-day { font-size:24rpx; font-weight:700; color:#beb6b6; width:72rpx; flex-shrink:0; letter-spacing:1rpx; padding-top:4rpx; }
-.week-row-today { background:rgba(232,52,42,0.08); border-radius:16rpx; }
+.week-row-today { background:linear-gradient(90deg, rgba(232,52,42,0.14) 0%, transparent 85%); }
+.week-day { width:76rpx; flex-shrink:0; font-size:23rpx; font-weight:900; font-style:italic; letter-spacing:0.5rpx; text-transform:uppercase; color:#9a9aa3; padding-top:4rpx; }
 .week-day-today { color:#e8342a; }
-.week-meal-photo { display:none; }
-.week-meal-names { flex:1; display:flex; flex-direction:column; gap:4rpx; }
-.week-meal-row { display:flex; flex-direction:column; gap:4rpx; }
-.week-meal-name { font-size:28rpx; color:#f3f3f4; font-weight:600; line-height:1.4; display:block; }
-.week-sauce-row { display:flex; align-items:center; gap:8rpx; margin-top:2rpx; }
-.week-sauce-label { color:#beb6b6; font-weight:700; font-size:22rpx; letter-spacing:0.5rpx; }
-.week-sauce-name { color:#d8ab18; font-weight:600; font-size:25rpx; }
-.week-snack-row { display:flex; align-items:center; gap:8rpx; margin-top:2rpx; }
-.week-snack-label { color:#beb6b6; font-weight:700; font-size:22rpx; letter-spacing:0.5rpx; }
-.week-snack-name { color:#559112; font-weight:600; font-size:25rpx; }
-.week-time { font-size:28rpx; color:#beb6b6; font-weight:700; flex-shrink:0; margin-left:12rpx; padding-top:4rpx; }
-.week-time-today { color:#e8342a; }
+.week-meal-names { flex:1; min-width:0; display:flex; flex-direction:column; gap:6rpx; }
+.week-meal-row { display:flex; flex-direction:column; }
+.week-meal-name { font-size:27rpx; font-weight:600; color:#f3f3f4; line-height:1.4; display:block; }
+.week-time { flex-shrink:0; margin-left:8rpx; font-size:22rpx; font-weight:800; color:#9a9aa3; background:#1a1a22; border-radius:100rpx; padding:4rpx 14rpx; }
+.week-time-today { color:#fff; background:#e8342a; }
 
-/* ── RENEWAL CARD ── */
-.renewal-card { background:#13131a; border:1rpx solid #2a2a33; border-radius:20rpx; padding:24rpx; display:flex; align-items:center; justify-content:space-between; margin-bottom:20rpx; }
-.renewal-body { flex:1; }
-.renewal-title { font-size:28rpx; color:#f3f3f4; font-weight:800; display:block; }
-.renewal-sub { font-size:22rpx; color:#beb6b6; display:block; margin-top:6rpx; }
-.renewal-btn { background:transparent; border:2rpx solid #e8342a; border-radius:100rpx; padding:14rpx 28rpx; flex-shrink:0; }
-.renewal-btn-text { font-size:24rpx; font-weight:700; color:#e8342a; }
+/* ── BOTONES ── */
+/* ── PRÓXIMA ENTREGA ── */
+.next-card { background:linear-gradient(160deg, rgba(232,52,42,0.16) 0%, #13131a 60%); border:2rpx solid rgba(232,52,42,0.45); border-radius:22rpx; padding:22rpx 24rpx 8rpx; margin-bottom:24rpx; }
+.next-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:18rpx; }
+.next-kicker { font-size:20rpx; font-weight:800; letter-spacing:3rpx; text-transform:uppercase; color:#9a9aa3; }
+.next-when { background:#e8342a; border-radius:100rpx; padding:8rpx 22rpx; box-shadow:0 4rpx 16rpx rgba(232,52,42,0.4); }
+.next-when text { font-size:22rpx; font-weight:900; color:#fff; }
+.next-meal { display:flex; align-items:center; gap:20rpx; padding:14rpx 0 18rpx; border-top:1rpx solid #1a1a22; }
+.next-thumb { width:120rpx; height:120rpx; border-radius:18rpx; flex-shrink:0; }
+.next-thumb-ph { background:#1a1a22; }
+.next-info { flex:1; min-width:0; display:flex; flex-direction:column; gap:12rpx; }
+.next-name { font-size:28rpx; font-weight:800; color:#f3f3f4; line-height:1.25; }
 
-/* ── CONTACT / MENU ── */
-.btn-wrap { width:100%; box-sizing:border-box; margin-bottom:60rpx; }
+/* chips de macros: mismos colores que la elección de comidas */
+.macros { display:flex; flex-wrap:nowrap; gap:8rpx; }
+.macro { flex:1 1 auto; text-align:center; white-space:nowrap; font-size:22rpx; font-weight:700; padding:6rpx 6rpx; border-radius:10rpx; }
+.macro-kcal { color:#ff6b5e; background:rgba(232,52,42,0.14); }
+.macro-p { color:#34D399; background:rgba(52,211,153,0.12); }
+.macro-c { color:#eab308; background:rgba(234,179,8,0.12); }
+.macro-f { color:#A78BFA; background:rgba(167,139,250,0.12); }
+
+.btn-wrap { width:100%; box-sizing:border-box; }
 button { margin:0 !important; padding:0 !important; background:transparent; border:none; }
-.btn-contact { background:#13131a !important; border:1rpx solid #1a1a22 !important; color:#beb6b6 !important; border-radius:20rpx !important; height:88rpx; line-height:88rpx; font-size:28rpx !important; font-weight:600 !important; width:100% !important; text-align:center; box-sizing:border-box; display:block; }
-.btn-pdf { background:rgba(167,139,250,0.12) !important; border:2rpx solid #e8342a !important; border-radius:24rpx !important; height:92rpx; line-height:92rpx; color:#e8342a !important; font-size:30rpx !important; font-weight:800 !important; width:100% !important; text-align:center; box-sizing:border-box; display:block; margin-bottom:16rpx !important; }
+.btn-pdf {
+  background:rgba(167,139,250,0.12) !important; border:2rpx solid #e8342a !important; border-radius:24rpx !important;
+  height:92rpx; line-height:92rpx; color:#e8342a !important; font-size:30rpx !important; font-weight:800 !important;
+  width:100% !important; text-align:center; box-sizing:border-box; display:block; margin-bottom:16rpx !important;
+}
+.btn-secondary {
+  background:#13131a !important; border:2rpx solid #2a2a33 !important; border-radius:24rpx !important;
+  height:88rpx; line-height:88rpx; color:#f3f3f4 !important; font-size:28rpx !important; font-weight:700 !important;
+  width:100% !important; text-align:center; box-sizing:border-box; display:block;
+}
+.btn-secondary::after { border:none; }

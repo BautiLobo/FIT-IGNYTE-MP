@@ -1,29 +1,23 @@
 <view class="container">
 
   <view class="topbar">
-    <image style="position: relative; left: 0rpx; top: -51rpx; width: 300rpx; height: 520rpx; display: block; box-sizing: border-box" class="topbar-logo" src="/images/logo.png" mode="aspectFit" />
+    <image class="topbar-logo" src="/images/mark.png" mode="aspectFit" />
   </view>
 
-  <view class="content" style="position: relative; left: 0rpx; top: -372rpx">
+  <view class="content">
 
-    <view class="circle-wrap">
-      <view class="hero-circle">
-        <text class="hero-check">✓</text>
+    <view class="hero">
+      <view class="status-ring">
+        <text class="status-check">✓</text>
       </view>
+      <text class="headline">{{lbl_title}}</text>
+      <view class="header-divider"></view>
+      <text class="intro">{{lbl_welcome}}</text>
     </view>
 
-    <view class="title-wrap">
-      <text class="hero-title">{{lbl_title}}</text>
-    </view>
+    <view class="spacer"></view>
 
-    <view class="sub-wrap">
-      <text class="hero-sub">{{lbl_welcome}}</text>
-    </view>
-
-
-    <view class="btn-wrap">
-      <button class="btn-primary" bindtap="goToPayment">{{lbl_payment_btn}}</button>
-    </view>
+    <button class="btn-primary" bindtap="goToPayment">{{lbl_payment_btn}}</button>
 
   </view>
 

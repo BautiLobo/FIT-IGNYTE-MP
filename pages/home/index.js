@@ -24,6 +24,12 @@ Page({
     lbl_first_delivery: '',
     lbl_this_weeks_meals: '',
     lbl_edit: '',
+    lbl_next_delivery: '',
+    lbl_kcal: '',
+    lbl_protein: '',
+    lbl_carbs: '',
+    lbl_fat: '',
+    nextDelivery: null,
     lbl_contact: '',
     lbl_view_menu: '',
     lbl_renewal_title: '',
@@ -40,6 +46,11 @@ Page({
       lbl_plan_starts_soon: t('home_plan_starts_soon'),
       lbl_this_weeks_meals: t('home_this_weeks_meals'),
       lbl_edit: t('home_edit'),
+      lbl_next_delivery: t('home_next_delivery'),
+      lbl_kcal: t('meal_select_kcal'),
+      lbl_protein: t('meal_select_protein'),
+      lbl_carbs: t('meal_select_carbs'),
+      lbl_fat: t('meal_select_fat'),
       lbl_contact: t('home_contact'),
       lbl_view_menu: t('home_view_menu'),
       lbl_renewal_title: t('home_renewal_title'),
@@ -182,6 +193,7 @@ Page({
 
       const weekMeals = await this.buildWeekMeals(selections);
       const todayDelivery = this.getTodayDelivery(weekMeals);
+      const nextDelivery = this.getNextDelivery(weekMeals);
 
       // effectiveStartDate ya es siempre una fecha real de entrega elegida
       // en el calendario (ver pages/start-date) -- nunca cae en fin de
@@ -225,6 +237,7 @@ Page({
         firstName,
         weekMeals,
         todayDelivery,
+        nextDelivery,
         showRenewal,
         hasPendingRenewal,
         daysLeft,
@@ -274,7 +287,12 @@ Page({
       // nombre solo no alcanza como wx:key único en el wxml.
       const mealNames = mealIds.map((id, i) => {
         if (!mealMap[id]) return null;
-        return { name: app.getMealName(mealMap[id]), key: `${id}_${i}` };
+        const m = mealMap[id];
+        return {
+          name: app.getMealName(m), key: `${id}_${i}`,
+          photo: m.photo_url || '',
+          kcal: m.kcal || 0, protein: m.protein || 0, carbs: m.carbs || 0, fat: m.fat || 0,
+        };
       }).filter(Boolean);
       const photo = mealIds.length > 0 && mealMap[mealIds[0]] ? mealMap[mealIds[0]].photo_url || '' : '';
       return {
@@ -289,6 +307,19 @@ Page({
         photo,
       };
     });
+  },
+
+  // Próxima entrega con comidas: hoy (si hay) o la primera fecha futura.
+  getNextDelivery(weekMeals) {
+    const todayStr = toDateString(new Date());
+    const next = weekMeals.find(m => m.day >= todayStr && m.mealNames && m.mealNames.length > 0);
+    if (!next) return null;
+    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+    let when;
+    if (next.day === todayStr) when = t('home_today');
+    else if (next.day === toDateString(tomorrow)) when = t('home_tomorrow');
+    else when = next.dayShort;
+    return { when, time: next.time, meals: next.mealNames };
   },
 
   getTodayDelivery(weekMeals) {

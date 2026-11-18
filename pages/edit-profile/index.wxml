@@ -9,13 +9,14 @@
   </view>
 
   <scroll-view class="scroll" scroll-y>
+   <view class="scroll-inner">
 
     <view class="pending-banner" wx:if="{{pendingAddressChange}}">
       <text class="pending-banner-text">Your address change is pending review. Delivery will keep using your current address until it's approved.</text>
     </view>
 
     <view class="result-banner result-banner-approved" wx:if="{{addressChangeStatus === 'approved'}}">
-      <text class="result-banner-text">Your address change was approved ✓</text>
+      <text class="result-banner-text">Your address change was approved</text>
       <text class="result-banner-close" bindtap="dismissAddressChangeNotice">✕</text>
     </view>
 
@@ -26,37 +27,37 @@
 
     <view class="field">
       <text class="field-label">{{lbl_name_label}}</text>
-      <input class="field-input" placeholder="{{lbl_name_ph}}" value="{{form.name}}" bindinput="onInput" data-field="name" />
+      <input class="field-input" placeholder-class="field-ph" placeholder="{{lbl_name_ph}}" value="{{form.name}}" bindinput="onInput" data-field="name" />
     </view>
 
     <view class="field">
       <text class="field-label">{{lbl_phone_label}}</text>
-      <input class="field-input" placeholder="{{lbl_phone_ph}}" value="{{form.phone}}" bindinput="onInput" data-field="phone" type="text" />
+      <input class="field-input" placeholder-class="field-ph" placeholder="{{lbl_phone_ph}}" value="{{form.phone}}" bindinput="onInput" data-field="phone" type="text" />
     </view>
 
     <view class="field">
       <text class="field-label">{{lbl_district_label}}</text>
-      <input class="field-input" placeholder="{{lbl_district_ph}}" value="{{form.district}}" bindinput="onInput" data-field="district" />
+      <input class="field-input" placeholder-class="field-ph" placeholder="{{lbl_district_ph}}" value="{{form.district}}" bindinput="onInput" data-field="district" />
     </view>
 
     <view class="field">
       <text class="field-label">{{lbl_address_label}}</text>
-      <textarea class="field-textarea" placeholder="{{lbl_address_ph}}" value="{{form.address}}" bindinput="onInput" data-field="address" auto-height />
+      <textarea class="field-textarea" placeholder-class="field-ph" placeholder="{{lbl_address_ph}}" value="{{form.address}}" bindinput="onInput" data-field="address" auto-height />
     </view>
 
     <view class="field">
       <text class="field-label">{{lbl_access_label}}</text>
-      <input class="field-input" placeholder="{{lbl_access_ph}}" value="{{form.access}}" bindinput="onInput" data-field="access" />
+      <input class="field-input" placeholder-class="field-ph" placeholder="{{lbl_access_ph}}" value="{{form.access}}" bindinput="onInput" data-field="access" />
     </view>
 
     <view class="field">
       <text class="field-label">{{lbl_allergies_label}}</text>
-      <input class="field-input field-input-warning" placeholder="{{lbl_allergies_ph}}" value="{{form.allergies}}" bindinput="onInput" data-field="allergies" />
+      <input class="field-input field-input-warning" placeholder-class="field-ph" placeholder="{{lbl_allergies_ph}}" value="{{form.allergies}}" bindinput="onInput" data-field="allergies" />
     </view>
 
     <view class="field">
       <text class="field-label">{{lbl_goal_label}}</text>
-      <input class="field-input" placeholder="{{lbl_goal_ph}}" value="{{form.goal}}" bindinput="onInput" data-field="goal" />
+      <input class="field-input" placeholder-class="field-ph" placeholder="{{lbl_goal_ph}}" value="{{form.goal}}" bindinput="onInput" data-field="goal" />
     </view>
 
     <view class="btn-wrap">
@@ -65,6 +66,7 @@
       </button>
     </view>
 
+   </view>
   </scroll-view>
 
 </view>

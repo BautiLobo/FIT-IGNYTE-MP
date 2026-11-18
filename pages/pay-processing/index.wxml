@@ -1,21 +1,19 @@
 <view class="container">
 
-  
-
   <view class="content">
 
-    <!-- Animated circle -->
-    <view class="circle-wrap">
-      <view class="circle-outer"></view>
-      <view class="circle-inner">
-        <text class="circle-icon">{{done ? '✓' : '💳'}}</text>
+    <!-- Anillo: gira mientras procesa, verde con ✓ cuando termina -->
+    <view class="ring-wrap">
+      <view class="ring-spin" wx:if="{{!done}}"></view>
+      <view class="ring-core {{done ? 'ring-core-done' : ''}}">
+        <text class="ring-check" wx:if="{{done}}">✓</text>
       </view>
     </view>
 
-    <text class="title">{{done ? lbl_title_done : lbl_title_processing}}</text>
-    <text class="sub">{{done ? lbl_sub_done : lbl_sub_processing}}</text>
+    <text class="headline">{{done ? lbl_title_done : lbl_title_processing}}</text>
+    <view class="header-divider {{done ? 'header-divider-done' : ''}}"></view>
+    <text class="intro">{{done ? lbl_sub_done : lbl_sub_processing}}</text>
 
-    <!-- Animated dots -->
     <view class="dots" wx:if="{{!done}}">
       <view class="dot dot-1"></view>
       <view class="dot dot-2"></view>

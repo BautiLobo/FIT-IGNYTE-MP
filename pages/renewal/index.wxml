@@ -7,9 +7,9 @@
   </view>
 
   <scroll-view class="scroll" scroll-y>
+   <view class="scroll-inner">
 
     <view wx:for="{{notifications}}" wx:key="id" class="notif-banner">
-      <view class="notif-banner-icon">🔔</view>
       <view class="notif-banner-body">
         <text class="notif-banner-title">{{item.title}}</text>
         <text class="notif-banner-message">{{item.message}}</text>
@@ -17,9 +17,10 @@
       <text class="notif-banner-close" bindtap="dismissNotification" data-id="{{item.id}}">✕</text>
     </view>
 
+    <!-- Estado: días que quedan / vencido -->
     <view class="status-hero {{expired ? 'status-hero-expired' : 'status-hero-due'}}">
       <view class="status-hero-stat">
-        <text class="status-hero-num {{expired ? 'status-hero-num-dash' : ''}}">{{expired ? '—' : daysLeft}}</text>
+        <text class="status-hero-num">{{expired ? '—' : daysLeft}}</text>
         <text class="status-hero-tag">{{expired ? lbl_expired_tag : lbl_days_left_tag}}</text>
       </view>
       <view class="status-hero-body">
@@ -42,14 +43,13 @@
       </view>
     </view>
 
-    <view class="buttons">
-      <view class="btn-primary" bindtap="startRenewal"><text>{{lbl_renew_btn}}</text></view>
-    </view>
+    <view class="btn-primary" hover-class="btn-hover" bindtap="startRenewal"><text>{{lbl_renew_btn}}</text></view>
 
+   </view>
   </scroll-view>
 
   <view class="footer">
-    <button class="btn-feedback" open-type="contact">{{lbl_feedback}}</button>
+    <button class="btn-secondary" open-type="contact">{{lbl_feedback}}</button>
   </view>
 
 </view>

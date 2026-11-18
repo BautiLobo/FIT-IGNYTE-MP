@@ -12,12 +12,11 @@
    <view class="scroll-inner">
 
     <view class="header-block">
-    <text class="kicker">{{lbl_kicker}}</text>
+    <view class="kicker-pill"><text class="kicker">{{lbl_kicker}}</text></view>
     <view class="headline-wrap">
       <text class="headline">{{lbl_headline1}}</text>
       <text class="headline">{{lbl_headline2}}</text>
     </view>
-    <text class="intro">{{lbl_intro}}</text>
     <view class="header-divider"></view>
     </view>
 
@@ -48,6 +47,9 @@
             <text class="step-tag">{{lbl_step2_tag}}</text>
           </view>
           <text class="step-desc">{{lbl_step2_desc}}</text>
+          <view class="meal-strip" wx:if="{{photos.length}}">
+            <image wx:for="{{photos}}" wx:key="*this" class="meal-strip-img" src="{{item}}" mode="aspectFill" />
+          </view>
         </view>
       </view>
 
@@ -80,8 +82,15 @@
 
     </view>
 
+    <view class="spacer"></view>
+
     <view class="btn-wrap">
       <button class="btn-start" bindtap="getStarted">{{lbl_get_started}}</button>
+    </view>
+
+    <view class="contact-row">
+      <text class="contact-q">{{lbl_any_doubt}}</text>
+      <button class="contact-link" open-type="contact">{{lbl_contact_us}}</button>
     </view>
 
    </view>

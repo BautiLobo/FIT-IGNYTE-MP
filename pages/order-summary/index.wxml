@@ -3,30 +3,31 @@
   <view class="topbar">
     <view class="back-btn" bindtap="goBack"><text class="back-arrow">‹</text></view>
     <text class="topbar-title">{{lbl_title}}</text>
-    <view style="width:60rpx;"></view>
+    <view style="width:64rpx;"></view>
   </view>
 
   <scroll-view class="scroll" scroll-y>
+   <view class="scroll-inner">
 
     <!-- Plan -->
-    <view class="card">
+    <view class="plan-card">
       <text class="card-label">{{lbl_your_plan}}</text>
       <view class="plan-row">
-        <view>
-          <text class="plan-name">{{selectedPlan.displayName}}</text>
+        <view class="plan-info">
+          <text class="plan-name" style="color:{{selectedPlan.color || '#f3f3f4'}};">{{selectedPlan.displayName}}</text>
           <text class="plan-sub">{{selectedPlan.meals}} {{lbl_meals_day}}</text>
         </view>
-        <text class="plan-price" style="color:#A78BFA;">¥{{selectedPlan.price}}</text>
+        <text class="plan-price">¥{{selectedPlan.price}}</text>
       </view>
     </view>
 
-    <!-- Meals -->
+    <!-- Comidas -->
     <view class="card">
       <view class="card-header-row">
         <text class="card-label">{{lbl_chosen_meals}}</text>
         <view class="btn-edit" bindtap="editMeals"><text>{{lbl_edit}}</text></view>
       </view>
-      <view wx:for="{{mealSummary}}" wx:key="day">
+      <view wx:for="{{mealSummary}}" wx:key="day" class="day-block {{index === mealSummary.length - 1 ? 'day-block-last' : ''}}">
         <view class="day-header">
           <text class="day-label">{{item.dayLabel}}</text>
           <text class="day-time">{{item.time}}</text>
@@ -38,14 +39,11 @@
       </view>
     </view>
 
-    <!-- Menu completo en PDF: el mismo botón que la pantalla de tiers, acá
-         también, para poder chequear el menú sin salir del resumen. -->
+    <!-- Menú completo en PDF (mismo botón que tiers) -->
     <button class="btn-pdf" bindtap="openBrochure">{{lbl_brochure}}</button>
 
-    <!-- Address: no se muestra en renovación (la dirección ya está validada
-         del alta original; este flujo no la revalida ni la puede editar) -->
+    <!-- Dirección: no se muestra en renovación (ya validada en el alta) -->
     <view class="card address-card" wx:if="{{!fromRenewal}}">
-      <view class="address-icon">📍</view>
       <view class="address-info">
         <text class="card-label">{{lbl_address}}</text>
         <text class="address-text">{{order.address}}{{order.district ? ' · ' + order.district : ''}}</text>
@@ -53,22 +51,22 @@
       <view class="btn-edit" bindtap="editAddress"><text>{{lbl_edit}}</text></view>
     </view>
 
-    <!-- Price -->
-    <view class="price-card">
+    <!-- Precio -->
+    <view class="card price-card">
       <view class="price-row price-row-border">
         <text class="price-label">{{lbl_plan}}</text>
         <text class="price-val {{discount > 0 ? 'price-val-strike' : ''}}">¥{{selectedPlan.price}}</text>
       </view>
       <view class="price-row price-row-border" wx:if="{{discount > 0}}">
-        <text class="price-label" style="color:#e8342a;">{{lbl_discount}}</text>
-        <text class="price-val" style="color:#e8342a;">-¥{{discount}}</text>
+        <text class="price-label price-green">{{lbl_discount}}</text>
+        <text class="price-val price-green">-¥{{discount}}</text>
       </view>
       <view class="price-row price-row-border">
         <text class="price-label">{{lbl_delivery}}</text>
         <text class="price-val" wx:if="{{deliveryFee !== null}}">¥{{deliveryFee}}</text>
         <text class="price-val price-val-tbc" wx:else>{{lbl_delivery_tbc}}</text>
       </view>
-      <view class="price-row">
+      <view class="price-row price-row-total">
         <text class="price-total-label">{{lbl_total}}</text>
         <text class="price-total-val">¥{{total}}</text>
       </view>
@@ -79,6 +77,7 @@
     </button>
     <text class="hint">{{fromRenewal ? lbl_renewal_note : (repay ? lbl_repay_note : lbl_review_note)}}</text>
 
+   </view>
   </scroll-view>
 
 </view>

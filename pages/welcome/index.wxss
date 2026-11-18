@@ -1,117 +1,38 @@
-/* pages/welcome/index.wxss */
+/* pages/welcome/index.wxss — mismo lenguaje que tiers / plans / calendario */
 
-page { background: #0b0b0c; }
+page { background:#0b0b0c; }
 
-.container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  background: #0b0b0c;
-  overflow: hidden;
-}
+.container { display:flex; flex-direction:column; height:100vh; background:#0b0b0c; overflow:hidden; }
 
-/* ── HERO BG ── */
-.hero-bg {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 50vh;
-  background: radial-gradient(ellipse at 50% 75%, #3a0808 0%, #0b0b0c 50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-top:200rpx;
-}
-.hero-logo { width: 120rpx; height: 420rpx; opacity: 0.9; }
-
-/* ── CONTENT ── */
 .content {
-  position: relative;
-  z-index: 1;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 0 28rpx 64rpx;
-  padding-top: 5vh;
-  box-sizing: border-box;
-  width: 100%;
-  gap: 24rpx;
+  flex:1; min-height:0;
+  display:flex; flex-direction:column;
+  padding:0 32rpx; padding-bottom:calc(48rpx + env(safe-area-inset-bottom));
+  box-sizing:border-box;
+  background:radial-gradient(ellipse at 50% 38%, rgba(232,52,42,0.18) 0%, transparent 55%);
 }
 
-/* ── TEXT ── */
-.text-block { text-align: center; display:flex; flex-direction:column; gap:16rpx; width:100%; }
+/* ── HERO ── */
+.hero { flex-shrink:0; display:flex; flex-direction:column; align-items:center; text-align:center; }
+.hero-logo { width:120rpx; height:240rpx; margin-bottom:40rpx; filter:drop-shadow(0 8rpx 30rpx rgba(232,52,42,0.35)); }
 
-.hero-title {
-  font-size: 52rpx;
-  font-weight: 900;
-  font-style: italic;
-  color: #f3f3f4;
-  display: block;
+.headline {
+  font-size:60rpx; font-weight:900; font-style:italic; letter-spacing:-2rpx; text-transform:uppercase;
+  color:#f3f3f4; line-height:1.08; display:block;
+  text-shadow:0 6rpx 28rpx rgba(232,52,42,0.25);
 }
+.header-divider { width:56rpx; height:6rpx; background:#e8342a; border-radius:6rpx; margin-top:18rpx; }
 
-.hero-sub {
-  font-size: 26rpx;
-  color: #6b6b75;
-  line-height: 1.7;
-  display: block;
-}
+.spacer { flex:1; min-height:40rpx; }
+.spacer-bottom { flex:1.4; }
+.btn-wrap { margin-top:80rpx !important; }
 
-.hero-sub-red { color: #e8342a; font-weight: 700; }
-
-/* ── DELIVERY CARD ── */
-.delivery-card {
-  width: 100%;
-  background: #13131a;
-  border: 1rpx solid #1a1a22;
-  border-radius: 24rpx;
-  padding: 28rpx;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  gap: 20rpx;
-}
-
-.delivery-label { font-size: 20rpx; color: #5d5d65; font-weight: 700; letter-spacing: 3rpx; display: block; }
-
-.delivery-top-row { display: flex; align-items: center; gap: 20rpx; }
-
-.delivery-icon-wrap {
-  width: 68rpx; height: 68rpx;
-  background: #2a0808;
-  border-radius: 16rpx;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.delivery-icon { font-size: 30rpx; }
-
-.delivery-info { flex: 1; }
-.delivery-day { font-size: 32rpx; font-weight: 800; color: #f3f3f4; display: block; }
-
-.delivery-time-badge { background: #e8342a; border-radius: 100rpx; padding: 10rpx 22rpx; flex-shrink: 0; }
-.delivery-time-text { font-size: 24rpx; font-weight: 700; color: #fff; }
-
-.delivery-divider { height: 1rpx; background: #1a1a22; }
-
-.meals-row { display: flex; align-items: center; gap: 16rpx; }
-.meals-icon { font-size: 28rpx; flex-shrink: 0; }
-.meals-text { font-size: 26rpx; color: #a0a0aa; flex: 1; line-height: 1.5; }
-
-/* ── BUTTON ── */
-.btn-wrap { width: 100%; box-sizing: border-box; }
-
-button { margin: 0 !important; padding: 0 !important; background: transparent; border: none; }
-
+/* ── BOTÓN ── */
+button { margin:0 !important; padding:0 !important; background:transparent; border:none; }
 .btn-primary {
-  background: #e8342a !important;
-  border-radius: 24rpx !important;
-  height: 100rpx;
-  line-height: 100rpx;
-  font-size: 44rpx !important;
-  font-weight: 800 !important;
-  color: #fff !important;
-  width: 100% !important;
-  text-align: center;
-  box-sizing: border-box;
-  display: block;
+  background:#e8342a !important; border-radius:24rpx !important;
+  height:96rpx; line-height:96rpx;
+  font-size:32rpx !important; font-weight:800 !important; letter-spacing:1rpx; color:#fff !important;
+  width:100% !important; text-align:center; box-sizing:border-box; display:block; flex-shrink:0;
+  box-shadow:0 8rpx 30rpx rgba(232,52,42,0.35);
 }

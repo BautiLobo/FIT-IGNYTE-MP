@@ -4,119 +4,124 @@
   <view class="topbar">
     <view class="back-btn" bindtap="goBack"><text class="back-arrow">‹</text></view>
     <text class="topbar-title">{{lbl_title}}</text>
-    <view style="width:60rpx;"></view>
+    <view style="width:64rpx;"></view>
   </view>
 
-  <!-- Day Tabs -->
+  <!-- Day Tabs (tamaños de fuente calculados en JS según la cantidad de tabs) -->
   <view class="day-tabs">
     <view
       wx:for="{{days}}"
       wx:key="key"
-      class="day-tab {{currentDay === item.key ? 'day-tab-active' : ''}}"
+      class="day-tab {{currentDay === item.key ? 'day-tab-active' : ''}} {{item.done ? 'day-tab-done' : ''}}"
       bindtap="switchDay"
       data-day="{{item.key}}"
     >
-      <text class="day-tab-date" style="font-size:{{dayTabDateSize}}rpx;">{{item.shortDate}}</text>
       <text class="day-tab-weekday" style="font-size:{{dayTabWeekdaySize}}rpx;">{{item.shortWeekday}}</text>
+      <text class="day-tab-date" style="font-size:{{dayTabDateSize + 6}}rpx;">{{item.shortDate}}</text>
       <text class="day-tab-slot" style="font-size:{{dayTabSlotSize}}rpx;" wx:if="{{item.slotLabel}}">{{item.slotLabel}}</text>
-      <text class="day-tab-check" style="font-size:{{dayTabCheckSize}}rpx;" wx:if="{{item.done}}">✓</text>
+      <view class="day-tab-dot"></view>
     </view>
   </view>
 
-  <view class="next-plan-row" wx:if="{{nextPlanLabel && !deferToPending}}" bindtap="openNextPlan">
-    <text class="next-plan-text">{{nextPlanLabel}}</text>
-    <text class="next-plan-arrow">›</text>
-  </view>
-
-  <view class="change-date-row" wx:if="{{!loading}}">
-    <text class="change-date-link" bindtap="openChangeDates">{{lbl_change_date}}</text>
-  </view>
-
   <scroll-view class="scroll" scroll-y>
+    <view class="scroll-inner">
 
-    <block wx:if="{{loading}}">
-      <view class="loading-wrap"><view class="spinner"></view></view>
-    </block>
+      <block wx:if="{{loading}}">
+        <view class="loading-wrap"><view class="spinner"></view></view>
+      </block>
 
-    <block wx:else>
+      <block wx:else>
 
-      <!-- Plan Badge -->
-      <view class="plan-badge">
-        <text class="plan-badge-text">{{plan.displayName}} — {{plan.meals}} {{lbl_meals_day}}</text>
-      </view>
-
-
-
-      <!-- Photo preview -->
-      <view wx:if="{{lastSelectedPhoto}}" class="photo-preview-wrap">
-        <image class="photo-preview-img" src="{{lastSelectedPhoto}}" mode="aspectFill" />
-        <view class="photo-preview-overlay">
-          <text class="photo-preview-name">{{lastSelectedName}}</text>
+        <!-- Plan + cambiar fechas -->
+        <view class="plan-bar">
+          <view class="plan-bar-info">
+            <text class="plan-bar-name">{{plan.displayName}}</text>
+            <text class="plan-bar-meals">{{plan.meals}} {{lbl_meals_day}}</text>
+          </view>
+          <view class="plan-bar-change" bindtap="openChangeDates"><text>{{lbl_change_date}}</text></view>
         </view>
-      </view>
 
-      <!-- Meal List -->
-      <view class="meal-list">
-        <view
-          wx:for="{{menuMeals}}"
-          wx:key="id"
-          class="meal-row {{item.qty > 0 ? 'meal-row-selected' : ''}}"
-          bindtap="previewMeal"
-          data-meal="{{item}}"
-        >
-          <view class="meal-row-top">
+        <!-- Próximo plan ya pago (renovación anticipada) -->
+        <view class="next-plan-row" wx:if="{{nextPlanLabel && !deferToPending}}" hover-class="row-hover" bindtap="openNextPlan">
+          <text class="next-plan-text">{{nextPlanLabel}}</text>
+          <text class="next-plan-arrow">›</text>
+        </view>
+
+        <!-- Foto grande de la última comida tocada -->
+        <view wx:if="{{lastSelectedPhoto}}" class="photo-preview-wrap">
+          <image class="photo-preview-img" src="{{lastSelectedPhoto}}" mode="aspectFill" />
+          <view class="photo-preview-overlay">
+            <text class="photo-preview-name">{{lastSelectedName}}</text>
+          </view>
+        </view>
+
+        <!-- Comidas -->
+        <view class="meal-list">
+          <view
+            wx:for="{{menuMeals}}"
+            wx:key="id"
+            class="meal-card {{item.qty > 0 ? 'meal-card-selected' : ''}}"
+            hover-class="meal-card-hover"
+            bindtap="previewMeal"
+            data-meal="{{item}}"
+          >
             <view class="meal-thumb-wrap">
               <image wx:if="{{item.photo_url}}" class="meal-thumb" src="{{item.photo_url}}" mode="aspectFill" />
               <view wx:else class="meal-thumb-placeholder">
-                <text class="meal-thumb-label">{{item.displayName.substring(0,2).toUpperCase()}}</text>
+                <text class="meal-thumb-label">{{item.displayName.substring(0,4).toUpperCase()}}</text>
               </view>
+              <view class="meal-qty-badge" wx:if="{{item.qty > 0}}"><text>{{item.qty}}</text></view>
             </view>
+
             <view class="meal-info">
-              <text class="meal-name {{item.qty > 0 ? 'meal-name-active' : ''}}">{{item.displayName}}</text>
-              <view class="meal-desc-row">
-                <text class="meal-desc">{{item.kcal}} {{lbl_kcal}} · P {{item.protein}}g · C {{item.carbs}}g · F {{item.fat}}g</text>
+              <text class="meal-name">{{item.displayName}}</text>
+              <view class="macros">
+                <text class="macro macro-kcal">{{item.kcal}} {{lbl_kcal}}</text>
+                <text class="macro macro-p">P {{item.protein}}g</text>
+                <text class="macro macro-c">C {{item.carbs}}g</text>
+                <text class="macro macro-f">F {{item.fat}}g</text>
               </view>
             </view>
+
             <view class="meal-stepper">
               <view class="stepper-btn stepper-btn-minus {{item.qty === 0 ? 'stepper-btn-disabled' : ''}}" catchtap="decrementMeal" data-meal="{{item}}">
                 <text class="stepper-btn-text">−</text>
               </view>
-              <text class="stepper-qty">{{item.qty}}</text>
-              <view class="stepper-btn stepper-btn-plus" catchtap="incrementMeal" data-meal="{{item}}">
+              <text class="stepper-qty {{item.qty > 0 ? 'stepper-qty-on' : ''}}">{{item.qty}}</text>
+              <view class="stepper-btn stepper-btn-plus {{dayConfirmed ? 'stepper-btn-disabled' : ''}}" catchtap="incrementMeal" data-meal="{{item}}">
                 <text class="stepper-btn-text">+</text>
               </view>
             </view>
           </view>
         </view>
-      </view>
 
-      <!-- Time + Notes — show when meals selected -->
-      <block wx:if="{{dayConfirmed}}">
+        <!-- Horario + notas + guardar: cuando el día está completo -->
+        <block wx:if="{{dayConfirmed}}">
 
-        <view class="time-picker">
-          <text class="time-picker-label">{{lbl_delivery_time}}</text>
-          <picker mode="time" value="{{selectedTime}}" start="10:15" end="19:30" bindchange="onTimeChange">
-            <view class="time-picker-display">
-              <text class="time-picker-value">{{selectedTime}}</text>
-              <text class="time-picker-tap">{{lbl_tap_to_change}}</text>
-            </view>
-          </picker>
-        </view>
+          <view class="section-card">
+            <text class="section-label">{{lbl_delivery_time}}</text>
+            <picker mode="time" value="{{selectedTime}}" start="10:15" end="19:30" bindchange="onTimeChange">
+              <view class="time-display">
+                <text class="time-value">{{selectedTime}}</text>
+                <view class="time-change"><text>{{lbl_tap_to_change}}</text></view>
+              </view>
+            </picker>
+          </view>
 
-        <view class="notes-wrap">
-          <text class="notes-label">{{lbl_notes}}</text>
-          <textarea class="notes-input" placeholder="{{lbl_notes_placeholder}}" value="{{currentNotes}}" bindinput="onNotesInput" auto-height />
-        </view>
+          <view class="section-card">
+            <text class="section-label">{{lbl_notes}}</text>
+            <textarea class="notes-input" placeholder="{{lbl_notes_placeholder}}" placeholder-class="notes-ph" value="{{currentNotes}}" bindinput="onNotesInput" auto-height />
+          </view>
 
-        <button class="btn-save-next" bindtap="saveAndNext">
-          {{isLastDay ? lbl_save : lbl_save_next}}
-        </button>
+          <button class="btn-save-next" bindtap="saveAndNext">
+            {{isLastDay ? lbl_save : lbl_save_next}}
+          </button>
+
+        </block>
 
       </block>
 
-    </block>
-
+    </view>
   </scroll-view>
-
 
 </view>

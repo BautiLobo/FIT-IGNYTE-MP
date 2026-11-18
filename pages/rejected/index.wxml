@@ -6,26 +6,24 @@
 
   <view class="content">
 
-    <!-- Hero -->
     <view class="hero">
-      <view class="hero-circle">
-        <text class="hero-glyph">📍</text>
+      <view class="status-ring">
+        <text class="status-x">✕</text>
       </view>
-      <text class="hero-title">{{lbl_title}}</text>
-      <text class="hero-sub">{{lbl_body}}</text>
+      <text class="headline">{{lbl_title}}</text>
+      <view class="header-divider"></view>
+      <text class="intro">{{lbl_body}}</text>
     </view>
 
-    <!-- Outside radius info -->
+    <!-- Motivo: fuera del radio de entrega -->
     <view class="info-card">
-      <text class="info-icon">⚠</text>
       <text class="info-text">{{lbl_reason}}</text>
     </view>
 
-    <!-- Contact (primary) -->
-    <button class="btn-primary" open-type="contact">  {{lbl_contact}}</button>
+    <view class="spacer"></view>
 
-    <!-- Start over (secondary) -->
-    <button class="btn-secondary" bindtap="startOver">  {{lbl_start_over_btn}}</button>
+    <button class="btn-primary" open-type="contact">{{lbl_contact}}</button>
+    <button class="btn-secondary" bindtap="startOver">{{lbl_start_over_btn}}</button>
 
   </view>
 

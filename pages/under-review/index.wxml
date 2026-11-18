@@ -1,22 +1,24 @@
 <view class="container">
 
-  <!-- Logo topbar -->
   <view class="topbar">
     <image class="topbar-logo" src="/images/mark.png" mode="aspectFit" />
   </view>
 
   <scroll-view class="scroll" scroll-y>
+   <view class="scroll-inner">
 
-    <!-- Hero icon -->
+    <!-- Hero: anillo ámbar que late = "esperando" -->
     <view class="hero">
-      <view class="hero-circle">
-        <text class="hero-clock">◷</text>
+      <view class="status-ring">
+        <view class="status-ring-pulse"></view>
+        <view class="status-ring-core"></view>
       </view>
-      <text class="hero-title">{{lbl_title}}</text>
-      <text class="hero-sub">{{lbl_body}}</text>
+      <text class="headline">{{lbl_title}}</text>
+      <view class="header-divider"></view>
+      <text class="intro">{{lbl_body}}</text>
     </view>
 
-    <!-- Order summary -->
+    <!-- Resumen del pedido -->
     <view class="card">
       <view class="summary-row summary-border">
         <text class="summary-key">{{lbl_plan}}</text>
@@ -28,33 +30,29 @@
       </view>
     </view>
 
-    <!-- Status steps -->
+    <!-- Pasos -->
     <view class="card">
       <view class="step-row">
-        <view class="step-dot step-done-dot">
-          <text class="step-check">✓</text>
-        </view>
-        <text class="step-label step-done">{{lbl_step1}}</text>
+        <view class="step-dot step-dot-done"><text class="step-check">✓</text></view>
+        <text class="step-label step-label-done">{{lbl_step1}}</text>
       </view>
-      <view class="step-divider"></view>
+      <view class="step-line step-line-done"></view>
       <view class="step-row">
-        <view class="step-dot step-active-dot">
-          <view class="step-inner-dot"></view>
-        </view>
-        <text class="step-label step-active">{{lbl_step2}}</text>
+        <view class="step-dot step-dot-active"><view class="step-inner-dot"></view></view>
+        <text class="step-label step-label-active">{{lbl_step2}}</text>
       </view>
-      <view class="step-divider"></view>
+      <view class="step-line"></view>
       <view class="step-row">
-        <view class="step-dot step-idle-dot"></view>
-        <text class="step-label step-idle">{{lbl_step3}}</text>
+        <view class="step-dot step-dot-idle"></view>
+        <text class="step-label step-label-idle">{{lbl_step3}}</text>
       </view>
     </view>
 
+   </view>
   </scroll-view>
 
-  <!-- Fixed bottom -->
   <view class="bottom-bar">
-    <button class="btn-contact" open-type="contact">{{lbl_contact}}</button>
+    <button class="btn-outline" open-type="contact">{{lbl_contact}}</button>
     <text class="hint">{{lbl_eta}}</text>
   </view>
 

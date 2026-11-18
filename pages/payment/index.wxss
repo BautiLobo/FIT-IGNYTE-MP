@@ -1,162 +1,74 @@
-/* pages/payment/index.wxss */
+/* pages/payment/index.wxss — mismo lenguaje que tiers / plans / order-summary */
+
+page { background:#0b0b0c; }
 
 .container { display:flex; flex-direction:column; height:100vh; background:#0b0b0c; overflow:hidden; }
 
 /* ── TOPBAR ── */
-.topbar { background:#0b0b0c; padding:80rpx 28rpx 20rpx; border-bottom:1rpx solid #1a1a22; flex-shrink:0; display:flex; align-items:center; }
-.back-btn { width:56rpx; height:56rpx; background:#1a1a22; border-radius:50%; display:flex; align-items:center; justify-content:center; }
-.back-arrow { font-size:32rpx; color:#f3f3f4; }
-.topbar-title { flex:1; text-align:center; font-size:32rpx; font-weight:800; color:#f3f3f4; }
-.topbar-lock { font-size:28rpx; width:56rpx; text-align:right; }
+.topbar { background:#0b0b0c; padding:80rpx 32rpx 24rpx; border-bottom:1rpx solid #1a1a22; flex-shrink:0; display:flex; align-items:center; }
+.back-btn { width:64rpx; height:64rpx; background:#1a1a22; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.back-arrow { font-size:40rpx; color:#f3f3f4; line-height:1; }
+.topbar-title { flex:1; text-align:center; font-size:34rpx; font-weight:800; color:#f3f3f4; }
 
 /* ── SCROLL ── */
-.scroll { flex:1; padding:28rpx 24rpx; box-sizing:border-box; overflow-x:hidden; width:100%; }
+.scroll { flex:1; min-height:0; box-sizing:border-box; overflow-x:hidden; width:100%; }
+.scroll-inner { padding:24rpx 32rpx; padding-bottom:calc(40rpx + env(safe-area-inset-bottom)); box-sizing:border-box; }
 
 /* ── CARD ── */
-.card {
-  background: #13131a;
-  border: 1rpx solid #1a1a22;
-  border-radius: 20rpx;
-  padding: 24rpx;
-  margin-bottom: 24rpx;
-  box-sizing: border-box;
-  width: 100%;
-}
+.card { background:#13131a; border:2rpx solid #2a2a33; border-radius:22rpx; padding:24rpx; margin-bottom:16rpx; box-sizing:border-box; width:100%; }
+.card-label { display:block; font-size:20rpx; font-weight:800; letter-spacing:3rpx; text-transform:uppercase; color:#9a9aa3; margin-bottom:14rpx; }
 
-.card-label {
-  font-size: 20rpx;
-  color: #beb6b6;
-  font-weight: 700;
-  letter-spacing: 3rpx;
-  display: block;
-  margin-bottom: 20rpx;
-}
+.plan-line { padding-bottom:16rpx; border-bottom:1rpx solid #1a1a22; }
+.plan-name { display:block; font-size:36rpx; font-weight:900; font-style:italic; text-transform:uppercase; letter-spacing:-1rpx; color:#f3f3f4; line-height:1.1; }
+.plan-sub { display:block; font-size:21rpx; font-weight:800; letter-spacing:2rpx; text-transform:uppercase; color:#9a9aa3; margin-top:6rpx; }
 
-/* ── ROWS ── */
+/* ── FILAS ── */
 .row { display:flex; justify-content:space-between; align-items:center; padding:14rpx 0; width:100%; box-sizing:border-box; }
 .row-border { border-bottom:1rpx solid #1a1a22; }
-.row-key { font-size:26rpx; color:#beb6b6; flex:1; }
-.row-key-green { font-size:26rpx; color:#4ade80; font-weight:600; }
-.row-val { font-size:26rpx; color:#f3f3f4; font-weight:600; flex-shrink:0; }
-.row-val-strike { text-decoration:line-through; color:#beb6b6; }
-.row-val-green { font-size:26rpx; color:#4ade80; font-weight:700; }
-.row-total-key { font-size:32rpx; font-weight:800; color:#f3f3f4; }
-.row-total-val { font-size:52rpx; font-weight:900; color:#e8342a; }
+.row-key { flex:1; font-size:26rpx; font-weight:600; color:#9a9aa3; }
+.row-val { flex-shrink:0; font-size:26rpx; font-weight:700; color:#f3f3f4; }
+.row-val-strike { text-decoration:line-through; color:#5d5d65; }
+.row-green { color:#34D399 !important; font-weight:700; }
+.row-total { padding-top:20rpx; }
+.row-total-key { font-size:30rpx; font-weight:900; font-style:italic; text-transform:uppercase; color:#f3f3f4; }
+.row-total-val { font-size:56rpx; font-weight:900; letter-spacing:-1rpx; color:#e8342a; text-shadow:0 6rpx 24rpx rgba(232,52,42,0.3); }
 
-/* ── REFERRAL CODE ── */
-.referral-row { display:flex; align-items:center; gap:12rpx; width:100%; }
-.referral-input {
-  flex: 1;
-  background: #0b0b0c;
-  border: 1rpx solid #2a2a33;
-  border-radius: 14rpx;
-  height: 72rpx;
-  padding: 0 20rpx;
-  font-size: 26rpx;
-  color: #f3f3f4;
-  box-sizing: border-box;
-}
-.referral-btn {
-  background: #e8342a;
-  border-radius: 14rpx;
-  height: 72rpx;
-  padding: 0 28rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.referral-btn text { font-size: 24rpx; font-weight: 700; color: #fff; }
-.referral-btn-disabled { opacity: 0.5; }
+/* ── CÓDIGOS (referido / descuento) ── */
+.code-row { display:flex; align-items:center; gap:12rpx; width:100%; }
+.code-input { flex:1; background:#0b0b0c; border:2rpx solid #2a2a33; border-radius:16rpx; height:80rpx; padding:0 22rpx; font-size:26rpx; font-weight:700; letter-spacing:1rpx; color:#f3f3f4; box-sizing:border-box; }
+.code-ph { color:#5d5d65; font-weight:500; letter-spacing:0; }
+.code-btn { flex-shrink:0; background:#e8342a; border-radius:16rpx; height:80rpx; padding:0 30rpx; display:flex; align-items:center; justify-content:center; box-shadow:0 6rpx 20rpx rgba(232,52,42,0.35); }
+.code-btn text { font-size:24rpx; font-weight:800; color:#fff; }
+.code-btn-disabled { opacity:0.4; box-shadow:none; }
 
-.referral-applied-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: rgba(74,222,128,0.10);
-  border: 1rpx solid rgba(74,222,128,0.35);
-  border-radius: 14rpx;
-  padding: 18rpx 20rpx;
-  box-sizing: border-box;
-}
-.referral-applied-code { font-size: 26rpx; font-weight: 800; color: #f3f3f4; text-transform: uppercase; }
-.referral-applied-check { font-size: 24rpx; font-weight: 700; color: #4ade80; }
+.code-applied { display:flex; align-items:center; justify-content:space-between; background:rgba(52,211,153,0.10); border:2rpx solid rgba(52,211,153,0.4); border-radius:16rpx; padding:18rpx 22rpx; box-sizing:border-box; }
+.code-applied-code { font-size:26rpx; font-weight:900; letter-spacing:1rpx; color:#f3f3f4; text-transform:uppercase; }
+.code-applied-check { font-size:23rpx; font-weight:800; color:#34D399; }
 
-/* ── SECTION LABEL ── */
-.section-label {
-  font-size: 20rpx;
-  color: #beb6b6;
-  font-weight: 700;
-  letter-spacing: 3rpx;
-  display: block;
-  margin-bottom: 16rpx;
-}
+/* ── MÉTODO ── */
+.section-label { display:block; font-size:20rpx; font-weight:800; letter-spacing:3rpx; text-transform:uppercase; color:#9a9aa3; margin:12rpx 0 14rpx; }
 
-/* ── WECHAT PAY ── */
 .wechat-pay-btn {
-  background: #07C160;
-  border-radius: 24rpx;
-  padding: 28rpx 24rpx;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20rpx;
-  box-sizing: border-box;
-  width: 100%;
+  background:#07C160; border-radius:24rpx; padding:30rpx 28rpx;
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:18rpx; box-sizing:border-box; width:100%;
+  box-shadow:0 8rpx 30rpx rgba(7,193,96,0.35);
+  transition:transform .12s;
 }
+.wechat-pay-hover { transform:scale(0.985); }
+.wechat-pay-btn-disabled { opacity:0.5; box-shadow:none; }
+.wechat-pay-left { display:flex; flex-direction:column; gap:4rpx; }
+.wechat-pay-title { font-size:34rpx; font-weight:900; font-style:italic; text-transform:uppercase; letter-spacing:-0.5rpx; color:#fff; display:block; }
+.wechat-pay-sub { font-size:22rpx; font-weight:600; color:rgba(255,255,255,0.8); display:block; }
+.wechat-pay-amount { font-size:48rpx; font-weight:900; letter-spacing:-1rpx; color:#fff; }
 
-.wechat-pay-btn-disabled { opacity: 0.55; }
+.pay-hint { font-size:22rpx; font-weight:500; color:#9a9aa3; text-align:center; display:block; line-height:1.45; margin-bottom:24rpx; }
 
-.wechat-pay-left { display:flex; align-items:center; gap:20rpx; }
-
-.wechat-icon-wrap {
-  width: 72rpx;
-  height: 72rpx;
-  background: rgba(255,255,255,0.2);
-  border-radius: 16rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* ── BOTONES SECUNDARIOS ── */
+button { margin:0 !important; padding:0 !important; background:transparent; border:none; }
+.btn-secondary {
+  background:#13131a !important; border:2rpx solid #2a2a33 !important; border-radius:24rpx !important;
+  height:88rpx; line-height:88rpx; color:#f3f3f4 !important; font-size:28rpx !important; font-weight:700 !important;
+  width:100% !important; text-align:center; box-sizing:border-box; display:block; margin-bottom:14rpx !important;
 }
-.wechat-icon { font-size: 36rpx; }
-
-.wechat-pay-title { font-size: 32rpx; font-weight: 800; color: #fff; display:block; }
-.wechat-pay-sub { font-size: 22rpx; color: rgba(255,255,255,0.75); display:block; margin-top:4rpx; }
-.wechat-pay-amount { font-size: 44rpx; font-weight: 900; color: #fff; }
-
-/* ── HINT ── */
-.pay-hint { font-size:22rpx; color:#beb6b6; text-align:center; display:block; }
-
-/* ── CONTACT (mismo estilo que home/tiers) ── */
-.btn-contact {
-  background: #13131a !important;
-  border: 1rpx solid #1a1a22 !important;
-  color: #beb6b6 !important;
-  border-radius: 20rpx !important;
-  height: 88rpx;
-  line-height: 88rpx;
-  font-size: 28rpx !important;
-  font-weight: 600 !important;
-  width: 100% !important;
-  text-align: center;
-  box-sizing: border-box;
-  display: block;
-  margin-top: 20rpx;
-}
-
-/* ── START OVER (solo alta nueva) ── */
-.btn-start-over {
-  background: #13131a !important;
-  border: 1rpx solid #1a1a22 !important;
-  border-radius: 20rpx !important;
-  height: 88rpx;
-  line-height: 88rpx;
-  color: #9f9fa8 !important;
-  font-size: 28rpx !important;
-  font-weight: 600 !important;
-  width: 100% !important;
-  text-align: center;
-  box-sizing: border-box;
-  display: block;
-  margin-top: 16rpx;
-}
+.btn-secondary::after { border:none; }

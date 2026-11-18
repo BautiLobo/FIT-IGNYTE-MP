@@ -12,6 +12,18 @@ function weekdayLabelForDate(dateStr) {
   return WEEKDAY_LABELS[new Date(dateStr + 'T00:00:00').getDay()];
 }
 
+// Barra de progreso del día: un segmento por comida del plan
+function slotsOf(count, max) {
+  return Array.from({ length: max }, (_, i) => i < count);
+}
+
+// Color con opacidad (igual que tiers / plans)
+function tintOf(hex, alpha) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+  const n = m ? parseInt(m[1], 16) : 0xe8342a;
+  return 'rgba(' + (n >> 16) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + alpha + ')';
+}
+
 Page({
   data: {
     loading: true,
@@ -60,6 +72,14 @@ Page({
     lbl_protein: '',
     lbl_carbs: '',
     lbl_fat: '',
+    lbl_plan_meals: '',
+    lbl_day_progress: '',
+    planTitle: '',
+    planColor: '#e8342a',
+    planTint: '',
+    planTintBorder: '',
+    currentDayShort: '',
+    mealSlots: [],
   },
 
   async onLoad(options) {
@@ -133,6 +153,18 @@ Page({
       if (d.key !== firstDayKey && allSelections[d.key] && allSelections[d.key].time && allSelections[d.key].time !== defaultTime) {
         timeOverridden[d.key] = true;
       }
+    });
+
+    // Cabecera del plan: nombre sin el "x N MEALS" + "N meals per day"
+    const planColor = selectedPlan.color || '#e8342a';
+    const planTitle = String(selectedPlan.displayName || '').split(/\s+[xX×\-–]\s+/)[0];
+    const planMeals = Math.max(selectedPlan.meals || 1, 1);
+    this.setData({
+      planTitle,
+      planColor,
+      planTint: tintOf(planColor, 0.12),
+      planTintBorder: tintOf(planColor, 0.45),
+      lbl_plan_meals: t(planMeals === 1 ? 'plans_meal_per_day_1' : 'plans_meal_per_day_n', planMeals),
     });
 
     this.setData({ fromRenewal, fromOrderSummary, selectedPlan, days, allSelections, defaultTime, timeOverridden });
@@ -215,6 +247,9 @@ Page({
         dayConfirmed,
         canGoNext: dayConfirmed,
         days: updatedDays,
+        currentDayShort: (days[dayIndex] && days[dayIndex].short) || '',
+        mealSlots: slotsOf(existingMealIds.length, maxMeals),
+        lbl_day_progress: t('meal_select_day_progress', existingMealIds.length, maxMeals),
       });
 
     } catch (err) {
@@ -339,7 +374,13 @@ Page({
     const dayDone = selectedMealIds.length >= maxMeals;
     const updatedDays = days.map(d => d.key === currentDay ? Object.assign({}, d, { done: dayDone }) : d);
 
-    this.setData({ allSelections: updatedSelections, days: updatedDays, canGoNext: dayDone });
+    this.setData({
+      allSelections: updatedSelections,
+      days: updatedDays,
+      canGoNext: dayDone,
+      mealSlots: slotsOf(selectedMealIds.length, maxMeals),
+      lbl_day_progress: t('meal_select_day_progress', selectedMealIds.length, maxMeals),
+    });
   },
 
   saveAndNext() {

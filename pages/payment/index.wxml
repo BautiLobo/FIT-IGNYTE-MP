@@ -3,18 +3,19 @@
   <view class="topbar">
     <view class="back-btn" bindtap="goBack"><text class="back-arrow">‹</text></view>
     <text class="topbar-title">{{lbl_title}}</text>
-    <text class="topbar-lock"></text>
+    <view style="width:64rpx;"></view>
   </view>
 
   <scroll-view class="scroll" scroll-y>
+   <view class="scroll-inner">
 
-    <!-- Order Summary -->
+    <!-- Resumen -->
     <view class="card">
       <text class="card-label">{{lbl_order_summary}}</text>
 
-      <view class="row row-border">
-        <text class="row-key">{{lbl_plan}}</text>
-        <text class="row-val">{{selectedPlan.displayName}} · {{selectedPlan.meals}} {{lbl_meals_day}}</text>
+      <view class="plan-line">
+        <text class="plan-name">{{selectedPlan.displayName}}</text>
+        <text class="plan-sub">{{selectedPlan.meals}} {{lbl_meals_day}}</text>
       </view>
 
       <view class="row row-border">
@@ -23,8 +24,8 @@
       </view>
 
       <view class="row row-border" wx:if="{{discount > 0}}">
-        <text class="row-key row-key-green">{{lbl_first_week}}</text>
-        <text class="row-val row-val-green">−¥{{discount}}</text>
+        <text class="row-key row-green">{{lbl_first_week}}</text>
+        <text class="row-val row-green">−¥{{discount}}</text>
       </view>
 
       <view class="row row-border">
@@ -33,41 +34,36 @@
       </view>
 
       <view class="row row-border" wx:if="{{discountApplied}}">
-        <text class="row-key row-key-green">{{lbl_discount_row}}</text>
-        <text class="row-val row-val-green">−¥{{discountAmount}}</text>
+        <text class="row-key row-green">{{lbl_discount_row}}</text>
+        <text class="row-val row-green">−¥{{discountAmount}}</text>
       </view>
 
       <view class="row row-border" wx:if="{{referralApplied}}">
-        <text class="row-key row-key-green">{{lbl_referral_row}}</text>
-        <text class="row-val row-val-green">−¥{{referralDiscount}}</text>
+        <text class="row-key row-green">{{lbl_referral_row}}</text>
+        <text class="row-val row-green">−¥{{referralDiscount}}</text>
       </view>
 
-      <view class="row">
+      <view class="row row-total">
         <text class="row-total-key">{{lbl_total}}</text>
         <text class="row-total-val">¥{{total}}</text>
       </view>
     </view>
 
-    <!-- Referral code: solo en alta nueva, no en renovación (create-payment
+    <!-- Código de referido: solo en alta nueva, no en renovación (create-payment
          lo ignora igual del lado del servidor si viene de una renovación) -->
     <view class="card" wx:if="{{!referralAlreadyUsed && !fromRenewal}}">
       <text class="card-label">{{lbl_referral_label}}</text>
 
-      <view class="referral-row" wx:if="{{!referralApplied}}">
-        <input
-          class="referral-input"
-          placeholder="{{lbl_referral_placeholder}}"
-          value="{{referralInput}}"
-          bindinput="onReferralInput"
-        />
-        <view class="referral-btn {{referralChecking ? 'referral-btn-disabled' : ''}}" bindtap="applyReferral">
+      <view class="code-row" wx:if="{{!referralApplied}}">
+        <input class="code-input" placeholder-class="code-ph" placeholder="{{lbl_referral_placeholder}}" value="{{referralInput}}" bindinput="onReferralInput" />
+        <view class="code-btn {{referralChecking ? 'code-btn-disabled' : ''}}" bindtap="applyReferral">
           <text>{{lbl_referral_apply}}</text>
         </view>
       </view>
 
-      <view class="referral-applied-row" wx:else>
-        <text class="referral-applied-code">{{referralCode}}</text>
-        <text class="referral-applied-check">✓ {{lbl_referral_applied}}</text>
+      <view class="code-applied" wx:else>
+        <text class="code-applied-code">{{referralCode}}</text>
+        <text class="code-applied-check">✓ {{lbl_referral_applied}}</text>
       </view>
     </view>
 
@@ -76,48 +72,38 @@
     <view class="card" wx:if="{{fromRenewal}}">
       <text class="card-label">{{lbl_discount_label}}</text>
 
-      <view class="referral-row" wx:if="{{!discountApplied}}">
-        <input
-          class="referral-input"
-          placeholder="{{lbl_discount_placeholder}}"
-          value="{{discountInput}}"
-          bindinput="onDiscountInput"
-        />
-        <view class="referral-btn {{discountChecking ? 'referral-btn-disabled' : ''}}" bindtap="applyDiscountCode">
+      <view class="code-row" wx:if="{{!discountApplied}}">
+        <input class="code-input" placeholder-class="code-ph" placeholder="{{lbl_discount_placeholder}}" value="{{discountInput}}" bindinput="onDiscountInput" />
+        <view class="code-btn {{discountChecking ? 'code-btn-disabled' : ''}}" bindtap="applyDiscountCode">
           <text>{{lbl_referral_apply}}</text>
         </view>
       </view>
 
-      <view class="referral-applied-row" wx:else>
-        <text class="referral-applied-code">{{discountCode}}</text>
-        <text class="referral-applied-check">✓ {{lbl_discount_applied}}</text>
+      <view class="code-applied" wx:else>
+        <text class="code-applied-code">{{discountCode}}</text>
+        <text class="code-applied-check">✓ {{lbl_discount_applied}}</text>
       </view>
     </view>
 
-    <!-- Payment method label -->
+    <!-- Método de pago -->
     <text class="section-label">{{lbl_method}}</text>
 
-    <!-- WeChat Pay -->
-    <view class="wechat-pay-btn {{submitting ? 'wechat-pay-btn-disabled' : ''}}" bindtap="payNow">
+    <view class="wechat-pay-btn {{submitting ? 'wechat-pay-btn-disabled' : ''}}" hover-class="wechat-pay-hover" bindtap="payNow">
       <view class="wechat-pay-left">
-        <view class="wechat-icon-wrap">
-          <text class="wechat-icon">💬</text>
-        </view>
-        <view>
-          <text class="wechat-pay-title">{{lbl_wechat_pay}}</text>
-          <text class="wechat-pay-sub">{{lbl_tap_to_pay}}</text>
-        </view>
+        <text class="wechat-pay-title">{{lbl_wechat_pay}}</text>
+        <text class="wechat-pay-sub">{{lbl_tap_to_pay}}</text>
       </view>
       <text class="wechat-pay-amount">¥{{total}}</text>
     </view>
 
-    <text class="pay-hint">  {{lbl_renewal_note}}</text>
+    <text class="pay-hint">{{lbl_renewal_note}}</text>
 
-    <button class="btn-contact" open-type="contact">{{lbl_contact_btn}}</button>
+    <button class="btn-secondary" open-type="contact">{{lbl_contact_btn}}</button>
 
     <!-- Start over: solo en alta nueva, no en renovación -->
-    <button class="btn-start-over" wx:if="{{!fromRenewal}}" bindtap="startOver">{{lbl_start_over_btn}}</button>
+    <button class="btn-secondary" wx:if="{{!fromRenewal}}" bindtap="startOver">{{lbl_start_over_btn}}</button>
 
+   </view>
   </scroll-view>
 
 </view>

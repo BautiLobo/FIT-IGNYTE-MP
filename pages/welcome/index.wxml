@@ -1,19 +1,18 @@
 <view class="container">
 
-  <view class="hero-bg">
-    <image class="hero-logo" src="/images/mark.png" mode="aspectFit" />
-  </view>
-
   <view class="content">
 
-    <view class="text-block">
-      <text class="hero-title">{{lbl_title}}</text>
-      <text class="hero-sub"></text>
+    <view class="spacer"></view>
+
+    <view class="hero">
+      <image class="hero-logo" src="/images/mark.png" mode="aspectFit" />
+      <text class="headline">{{lbl_title}}</text>
+      <view class="header-divider"></view>
     </view>
 
-    <view class="btn-wrap">
-      <button class="btn-primary" bindtap="goToHome">{{lbl_go_home}}</button>
-    </view>
+    <button class="btn-primary btn-wrap" bindtap="goToHome">{{lbl_go_home}}</button>
+
+    <view class="spacer spacer-bottom"></view>
 
   </view>
 
