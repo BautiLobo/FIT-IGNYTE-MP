@@ -27,6 +27,12 @@ page { background:#0b0b0c; }
 }
 .status-x { font-size:72rpx; font-weight:900; color:#e8342a; line-height:1; }
 
+/* Lista de espera: ámbar en vez de rojo, tres puntos en vez de la X */
+.status-ring.is-wait { background:rgba(245,158,11,0.12); border-color:#f59e0b; box-shadow:0 0 60rpx rgba(245,158,11,0.28); }
+.wait-dots { display:flex; gap:14rpx; }
+.wait-dots .d { width:20rpx; height:20rpx; border-radius:50%; background:#f59e0b; }
+.info-card.is-wait { background:linear-gradient(160deg, rgba(245,158,11,0.16) 0%, #13131a 60%); border-color:rgba(245,158,11,0.45); }
+
 .headline {
   font-size:50rpx; font-weight:900; font-style:italic; letter-spacing:-1.5rpx; text-transform:uppercase;
   color:#f3f3f4; line-height:1.1; display:block;

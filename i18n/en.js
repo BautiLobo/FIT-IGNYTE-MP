@@ -315,6 +315,11 @@ module.exports = {
   rejected_start_over_body: "This will remove your current application. You can apply again anytime.",
   rejected_start_over_confirm: 'Yes',
   rejected_start_over_cancel: 'No',
+  // Lista de espera (cupo lleno). El msg tiene que ser igual al de
+  // REJECT_TYPES.waitlist.msg del admin (si el admin no lo cambia, se ve este).
+  rejected_waitlist_title: "You're on our waitlist",
+  rejected_waitlist_body: "We're fully booked right now",
+  rejected_waitlist_msg: "We're currently at full capacity, so we've added you to our waitlist. We'll contact you as soon as a spot opens up.",
 
   // ── WELCOME ────────────────────────────────────────────────
   welcome_title: 'Welcome, %s!',

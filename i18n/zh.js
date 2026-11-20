@@ -315,6 +315,9 @@ module.exports = {
   rejected_start_over_body: '这将删除您当前的申请，您可以随时重新申请。',
   rejected_start_over_confirm: '重新开始',
   rejected_start_over_cancel: '取消',
+  rejected_waitlist_title: '您已加入候补名单',
+  rejected_waitlist_body: '我们目前名额已满',
+  rejected_waitlist_msg: '我们目前名额已满，已将您加入候补名单。一有空位，我们会第一时间联系您。',
 
   // ── WELCOME ────────────────────────────────────────────────
   welcome_title: '欢迎，%s！',

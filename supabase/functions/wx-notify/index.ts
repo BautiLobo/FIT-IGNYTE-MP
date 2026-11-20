@@ -5,6 +5,8 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 // SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY los inyecta el runtime de Edge Functions.
 //
 // Body esperado: { client_id: number, template_id: string, data: { <key>: { value: string }, ... }, page?: string }
+// En vez de client_id puede venir order_id: pedido que todavía no tiene fila
+// en `clients` (rechazo a lista de espera) -- el openid sale de new_orders.
 // Las keys de `data` deben coincidir EXACTO con las que muestra WeChat en el
 // detalle del template (ej. thing1, thing8, time4) — no son configurables acá,
 // las define WeChat por template.
@@ -34,9 +36,9 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { client_id, template_id, data, page } = await req.json();
-    if (!client_id || !template_id || !data) {
-      return new Response(JSON.stringify({ error: 'Missing client_id, template_id or data' }), {
+    const { client_id, order_id, template_id, data, page } = await req.json();
+    if ((!client_id && !order_id) || !template_id || !data) {
+      return new Response(JSON.stringify({ error: 'Missing client_id/order_id, template_id or data' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -47,9 +49,12 @@ Deno.serve(async (req: Request) => {
     const appid = Deno.env.get('WECHAT_APPID');
     const secret = Deno.env.get('WECHAT_APPSECRET');
 
-    // Buscar el openid guardado para este cliente
+    // Buscar el openid guardado para este cliente (o pedido)
+    const lookup = client_id
+      ? `clients?id=eq.${encodeURIComponent(client_id)}`
+      : `new_orders?id=eq.${encodeURIComponent(order_id)}`;
     const clientRes = await fetch(
-      `${supabaseUrl}/rest/v1/clients?id=eq.${client_id}&select=wechat_openid`,
+      `${supabaseUrl}/rest/v1/${lookup}&select=wechat_openid`,
       { headers: { apikey: serviceKey!, Authorization: `Bearer ${serviceKey}` } }
     );
     const clientRows = await clientRes.json();

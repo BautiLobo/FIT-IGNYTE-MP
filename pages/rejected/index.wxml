@@ -7,16 +7,17 @@
   <view class="content">
 
     <view class="hero">
-      <view class="status-ring">
-        <text class="status-x">✕</text>
+      <view class="status-ring {{rejectType === 'waitlist' ? 'is-wait' : ''}}">
+        <text class="status-x" wx:if="{{rejectType !== 'waitlist'}}">✕</text>
+        <view class="wait-dots" wx:else><view class="d"></view><view class="d"></view><view class="d"></view></view>
       </view>
       <text class="headline">{{lbl_title}}</text>
       <view class="header-divider"></view>
       <text class="intro">{{lbl_body}}</text>
     </view>
 
-    <!-- Motivo: fuera del radio de entrega -->
-    <view class="info-card">
+    <!-- Motivo: fuera de zona o lista de espera (mensaje del admin) -->
+    <view class="info-card {{rejectType === 'waitlist' ? 'is-wait' : ''}}">
       <text class="info-text">{{lbl_reason}}</text>
     </view>
 
